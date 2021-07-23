@@ -22,4 +22,4 @@ if __name__ == "__main__":
                 print(datetime.now())
                 print(grouped_logs)
                 break
-        time.sleep(5 * 60)
+        time.sleep(2)
