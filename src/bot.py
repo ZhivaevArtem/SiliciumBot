@@ -2,6 +2,7 @@ import asyncio
 from asyncio import tasks
 import json
 import discord
+import datetime
 import time
 from discord.enums import ChannelType, Status
 from os import path, stat, environ
@@ -10,8 +11,8 @@ from shikilogsparser import retrieve_new_logs_by_usernames
 
 client = discord.Client()
 
+# region helper things
 class Config(object):
-    global client
     def __init__(self):
         self._usernames = []
         self._message_channel = None
@@ -54,7 +55,10 @@ class Config(object):
 
     @long_pooling_interval.setter
     def long_pooling_interval(self, value):
-        self._long_pooling_interval = value
+        if value < 2:
+            self._long_pooling_interval = 2
+        else:
+            self._long_pooling_interval = value
         self.store()
 
     @property
@@ -77,6 +81,7 @@ class Config(object):
         }, indent=4)
 
     def fromJSON(self, jsonstr):
+        global client
         d = json.loads(jsonstr)
         if d['usernames']:
             self._usernames = d['usernames']
@@ -108,28 +113,53 @@ class Config(object):
         return self.toJSON()
 
 CFG = Config()
-shiki_watcher_task = None
-is_shiki_watcher_running = False
 
+class ShikiWatcherTask(object):
+    def __init__(self):
+        self._is_running = False
+        self._task = None
 
-async def start_shiki_watcher_async():
-    global CFG
-    global is_shiki_watcher_running
-    if is_shiki_watcher_running: return
-    is_shiki_watcher_running = True
-    while is_shiki_watcher_running:
-        print('while')
-        grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
-        for username, user_logs in grouped_logs.items():
-            if user_logs:
-                print(grouped_logs)
-                if message_channel:
-                    await message_channel.send(str(grouped_logs))
-                break
-        await asyncio.sleep(5)
+    async def _run(self):
+        global CFG
+        while self._is_running:
+            print('while: ' + str(datetime.datetime.now()))
+            grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
+            notification_message = parse_shiki_logs(grouped_logs)
+            if notification_message:
+                await CFG.message_channel.send(notification_message)
+            for i in range(CFG.long_pooling_interval // 2):
+                if not self._is_running:
+                    return
+                await asyncio.sleep(2)
 
-def stop_shiki_watcher():
-    is_shiki_watcher_running = False
+    def is_running(self):
+        return self._task is not None and not self._task.done()
+
+    def start(self):
+        global client
+        if self.is_running():
+            return
+        self._is_running = True
+        self._task = client.loop.create_task(self._run())
+
+    def stop(self):
+        self._is_running = False
+
+    def restart(self):
+        if self.is_running():
+            self._task.add_done_callback(lambda e: self.start())
+            self.stop()
+
+SHIKI_WATCHER_TASK = ShikiWatcherTask()
+
+def parse_shiki_logs(grouped_logs):
+    result = ""
+    for username, user_logs in grouped_logs.items():
+        if user_logs:
+            result += f"{username}: {user_logs}"
+    return result
+# endregion helper things
+
 
 @client.event
 async def on_ready():
@@ -144,7 +174,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     global CFG
-    global shiki_watcher_task
+    global SHIKI_WATCHER_TASK
     if message.content.startswith(CFG.prefix):
         args = message.content[len(CFG.prefix):].strip().split()
 
@@ -158,11 +188,24 @@ async def on_message(message):
         elif not CFG.message_channel:
             return
 
+        elif args[0] == 'watcher':
+            if len(args) == 1:
+                await CFG.message_channel.send(
+                    'running' if SHIKI_WATCHER_TASK.is_running() else 'stopped'
+                )
+            elif len(args) == 2:
+                if args[1] == 'start':
+                    SHIKI_WATCHER_TASK.start()
+                elif args[1] == 'stop':
+                    SHIKI_WATCHER_TASK.stop()
+
         elif args[0] == 'config':
             if len(args) == 1:
                 await CFG.message_channel.send(str(CFG))
             if len(args) > 1:
-                if args[1] == 'usernames' and len(args) > 2:
+                if args[1] == 'users' and len(args) == 2:
+                    await CFG.message_channel.send(', '.join(CFG.usernames))
+                elif args[1] == 'users' and len(args) > 2:
                     if args[2] == 'add':
                         for i in range(3, len(args)):
                             if args[i] not in CFG.usernames:
@@ -186,6 +229,7 @@ async def on_message(message):
                     try:
                         interval = int(args[2])
                         CFG.long_pooling_interval = int(interval)
+                        SHIKI_WATCHER_TASK.restart()
                     except:
                         pass
                 elif args[1] == 'prefix' and len(args) == 3:
