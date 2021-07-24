@@ -179,11 +179,11 @@ async def on_message(message):
         args = message.content[len(CFG.prefix):].strip().split()
 
         if args[0] == 'isalive':
-            await message.channel.send('im okay')
-
+            await message.channel.send("I'm alive")
         elif args[0] == 'usechannel':
             CFG.message_channel = message.channel
-            await message.channel.send('I will be using this channel')
+        elif args[0] == 'anime':
+            await message.channel.send('С головой все хорошо?', reference=message)
 
         elif not CFG.message_channel:
             return
@@ -191,7 +191,7 @@ async def on_message(message):
         elif args[0] == 'watcher':
             if len(args) == 1:
                 await CFG.message_channel.send(
-                    'running' if SHIKI_WATCHER_TASK.is_running() else 'stopped'
+                    'Running' if SHIKI_WATCHER_TASK.is_running() else 'Stopped'
                 )
             elif len(args) == 2:
                 if args[1] == 'start':
