@@ -175,6 +175,8 @@ async def on_ready():
 async def on_message(message):
     global CFG
     global SHIKI_WATCHER_TASK
+    if message.author == client.user:
+        return
     if message.content.startswith(CFG.prefix):
         args = message.content[len(CFG.prefix):].strip().split()
 
