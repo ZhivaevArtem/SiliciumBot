@@ -1,5 +1,6 @@
 resources/fetched_ids.json
 resources/usernames.txt
+resources/cfg.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
