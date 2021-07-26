@@ -7,6 +7,8 @@ import time
 from discord.enums import ChannelType, Status
 from os import path, stat, environ
 from shikilogsparser import retrieve_new_logs_by_usernames
+import sys
+import dotenv
 
 
 client = discord.Client()
@@ -123,10 +125,13 @@ class ShikiWatcherTask(object):
         global CFG
         while self._is_running:
             print('while: ' + str(datetime.datetime.now()))
-            grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
-            notification_message = parse_shiki_logs(grouped_logs)
-            if notification_message:
-                await CFG.message_channel.send(notification_message)
+            try:
+                grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
+                notification_message = parse_shiki_logs(grouped_logs)
+                if notification_message:
+                    await CFG.message_channel.send(notification_message)
+            except Exception as e:
+                print(e)
             for i in range(CFG.long_pooling_interval // 2):
                 if not self._is_running:
                     return
@@ -169,7 +174,7 @@ async def on_ready():
     config_path = path.join(resources_path, 'cfg.json')
     CFG.load(config_path)
     await client.change_presence(status=CFG.status)
-    print('ready')
+    print('bot ready')
 
 @client.event
 async def on_message(message):
@@ -186,6 +191,9 @@ async def on_message(message):
             CFG.message_channel = message.channel
         elif args[0] == 'anime':
             await message.channel.send('С головой все хорошо?', reference=message)
+        elif args[0] == 'dosuicide':
+            await client.change_presence(status=Status.invisible)
+            sys.exit(0)
 
         elif not CFG.message_channel:
             return
@@ -237,6 +245,7 @@ async def on_message(message):
                 elif args[1] == 'prefix' and len(args) == 3:
                     CFG.prefix = args[2]
 
+dotenv.load_dotenv()
 TOKEN = environ.get('discord_bot_token')
 print(f"TOKEN = '{TOKEN}'")
 client.run(TOKEN)

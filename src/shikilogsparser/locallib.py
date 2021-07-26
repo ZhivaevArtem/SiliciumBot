@@ -34,7 +34,8 @@ def _load_fetched_ids():
     try:
         with open(file_path, 'r') as f:
             return json.load(f)
-    except:
+    except Exception as e:
+        print(e)
         return {}
 
 def _store_fetched_ids(grouped_logs):
@@ -49,15 +50,16 @@ def _store_fetched_ids(grouped_logs):
                 for user_log in user_logs:
                     if (user_log['id'] not in fetched[username]):
                         fetched[username].append(user_log['id'])
-    except:
+    except Exception as e:
+        print(e)
         fetched = {}
         for username, user_logs in grouped_logs.items():
             fetched[username] = [i['id'] for i in user_logs]
     try:
         with open(file_path, 'w') as f:
             json.dump(fetched, f, indent=4)
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 def _retrieve_logs_by_usernames(usernames):
     grouped_logs = {}
@@ -66,8 +68,8 @@ def _retrieve_logs_by_usernames(usernames):
             html = _retrieve_html(f"https://shikimori.one/{username}/history/logs")
             logs = _parse_shiki_logs(html)
             grouped_logs[username] = logs
-        except:
-            pass
+        except Exception as e:
+            print(e)
     return grouped_logs
 
 def retrieve_new_logs_by_usernames(usernames):
