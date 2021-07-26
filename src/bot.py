@@ -123,19 +123,25 @@ class ShikiWatcherTask(object):
 
     async def _run(self):
         global CFG
-        while self._is_running:
-            print('while: ' + str(datetime.datetime.now()))
-            try:
-                grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
-                notification_message = parse_shiki_logs(grouped_logs)
-                if notification_message:
-                    await CFG.message_channel.send(notification_message)
-            except Exception as e:
-                print(e)
-            for i in range(CFG.long_pooling_interval // 2):
-                if not self._is_running:
-                    return
-                await asyncio.sleep(2)
+        print('Watcher started!')
+        try:
+            while self._is_running:
+                print('while: ' + str(datetime.datetime.now()))
+                try:
+                    grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
+                    notification_message = parse_shiki_logs(grouped_logs)
+                    if notification_message:
+                        await CFG.message_channel.send(notification_message)
+                except Exception as e:
+                    print(e)
+                for i in range(CFG.long_pooling_interval // 2):
+                    if not self._is_running:
+                        return
+                    await asyncio.sleep(2)
+        except Exception as e:
+            print(e)
+            print('Restarting watcher')
+            self.restart()
 
     def is_running(self):
         return self._task is not None and not self._task.done()
@@ -148,10 +154,14 @@ class ShikiWatcherTask(object):
         self._task = client.loop.create_task(self._run())
 
     def stop(self):
-        self._is_running = False
+        if self.is_running():
+            print('Watcher stopping...')
+            self._task.add_done_callback(lambda e: print('Watcher stopped!'))
+            self._is_running = False
 
     def restart(self):
         if self.is_running():
+            print('Watcher restarting...')
             self._task.add_done_callback(lambda e: self.start())
             self.stop()
 
