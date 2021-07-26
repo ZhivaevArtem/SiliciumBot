@@ -1,14 +1,13 @@
 import asyncio
-from asyncio import tasks
 import json
 import discord
 import datetime
-import time
-from discord.enums import ChannelType, Status
-from os import path, stat, environ
+from discord.enums import Status
+from os import path, environ
 from shikilogsparser import retrieve_new_logs_by_usernames
 import sys
 import dotenv
+import psycopg2
 
 
 client = discord.Client()
@@ -97,6 +96,7 @@ class Config(object):
             self._prefix = d['prefix']
 
     def load(self, path):
+        # TODO: migrate to postgres
         self._path = path
         try:
             with open(path, 'r') as f:
@@ -105,6 +105,7 @@ class Config(object):
             pass
 
     def store(self):
+        # TODO: migrate to postgres
         try:
             with open(self._path, 'w') as f:
                 f.write(self.toJSON())
@@ -150,6 +151,7 @@ class ShikiWatcherTask(object):
         global client
         if self.is_running():
             return
+        print('Watcher starting...')
         self._is_running = True
         self._task = client.loop.create_task(self._run())
 
@@ -257,6 +259,9 @@ async def on_message(message):
                     CFG.prefix = args[2]
 
 dotenv.load_dotenv()
-TOKEN = environ.get('discord_bot_token')
-print(f"TOKEN = '{TOKEN}'")
+TOKEN = environ.get('DISCORD_BOT_TOKEN')
+DB_URL = environ.get('DATABASE_URL')
+print(f"TOKEN  = '{TOKEN}'")
+print(f"DB_URL = '{DB_URL}'")
+DB_CONN = psycopg2.connect(DB_URL, sslmode='require')
 client.run(TOKEN)
