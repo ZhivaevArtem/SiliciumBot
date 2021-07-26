@@ -184,6 +184,7 @@ async def on_ready():
     config_path = path.join(resources_path, 'cfg.json')
     CFG.load(config_path)
     await client.change_presence(status=CFG.status)
+    print(CFG)
     print('bot ready')
 
 @client.event
