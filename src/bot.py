@@ -173,7 +173,8 @@ def parse_shiki_logs(grouped_logs):
     result = ""
     for username, user_logs in grouped_logs.items():
         if user_logs:
-            result += f"{username}: {user_logs}"
+            for log in user_logs:
+                result += f"{username}: {log['description']}: {log['target']['name']} / {log['target']['russian']}\n"
     return result
 # endregion helper things
 

@@ -2,11 +2,14 @@ import json
 import requests
 from os import path
 from bs4 import BeautifulSoup
+from requests.api import head
+from requests.models import HTTPError
 
 
 def _retrieve_html(url):
     headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     return requests.get(url, headers=headers).content.decode('utf-8')
+
 
 def _parse_shiki_logs(html):
     soup = BeautifulSoup(html, features="lxml")
@@ -22,12 +25,14 @@ def _parse_shiki_logs(html):
         result.append(d)
     return result
 
+
 def get_resource_path():
     resources_path = path.dirname(__file__)
     resources_path = path.dirname(resources_path)
     resources_path = path.dirname(resources_path)
     resources_path = path.join(resources_path, 'resources')
     return resources_path
+
 
 def _load_fetched_ids():
     file_path = path.join(get_resource_path(), 'fetched_ids.json')
@@ -38,6 +43,7 @@ def _load_fetched_ids():
         print(e)
         return {}
 
+
 def _store_fetched_ids(grouped_logs):
     file_path = path.join(get_resource_path(), 'fetched_ids.json')
     fetched = {}
@@ -45,10 +51,10 @@ def _store_fetched_ids(grouped_logs):
         with open(file_path, 'r') as f:
             fetched = json.load(f)
             for username, user_logs in grouped_logs.items():
-                if (not fetched[username]):
+                if not fetched[username]:
                     fetched[username] = []
                 for user_log in user_logs:
-                    if (user_log['id'] not in fetched[username]):
+                    if user_log['id'] not in fetched[username]:
                         fetched[username].append(user_log['id'])
     except Exception as e:
         print(e)
@@ -61,16 +67,32 @@ def _store_fetched_ids(grouped_logs):
     except Exception as e:
         print(e)
 
+
+def _get_id_by_username(username):
+    html = _retrieve_html(f"https://shikimori.one/{username}")
+    soup = BeautifulSoup(html, features="lxml")
+    div = soup.select('div.profile-head')[0]
+    return div.get('data-user-id')
+
+
 def _retrieve_logs_by_usernames(usernames):
     grouped_logs = {}
     for username in usernames:
         try:
-            html = _retrieve_html(f"https://shikimori.one/{username}/history/logs")
-            logs = _parse_shiki_logs(html)
-            grouped_logs[username] = logs
-        except Exception as e:
+            id = _get_id_by_username(username)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64' +
+                ') AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.' +
+                '164 Safari/537.36'
+            }
+            url = f"https://shikimori.one/api/users/{id}/history?limit=10"
+            r = requests.get(url=url, headers=headers)
+            data = r.json()
+            grouped_logs[username] = data
+        except HTTPError as e:
             print(e)
     return grouped_logs
+
 
 def retrieve_new_logs_by_usernames(usernames):
     fetched_ids = _load_fetched_ids()
