@@ -87,5 +87,3 @@ class DatabaseAdapter(object):
         return [str(d[0]) for d in data]
 
     # endregion public
-    def insert_distinct(self, param, param1, data):
-        pass

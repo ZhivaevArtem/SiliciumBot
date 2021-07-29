@@ -1,4 +1,5 @@
 import json
+from os import name
 
 import discord
 
@@ -24,8 +25,7 @@ class Config(object):
         self._status = discord.Status.online
         self._long_pooling_interval = 600
         self._prefix = ';'
-        self._activity_type = discord.ActivityType.unknown
-        self._activity_text = ''
+        self._activity = discord.Activity()
 
     # region public
 
@@ -56,8 +56,9 @@ class Config(object):
     @status.setter
     def status(self, value: str):
         self._status = value
-        data = ['status', value]
-        self._db_adapter.insert_distinct('config_', ['key_', 'str_val_'], data)
+        data = [['status', str(value)]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'str_val_'], data)
 
     @property
     def long_pooling_interval(self) -> int:
@@ -66,8 +67,9 @@ class Config(object):
     @long_pooling_interval.setter
     def long_pooling_interval(self, value: int):
         self._long_pooling_interval = value
-        data = ['long_pooling_interval', value]
-        self._db_adapter.insert_distinct('config_', ['key_', 'int_val_'], data)
+        data = [['long_pooling_interval', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_'], data)
 
     @property
     def prefix(self) -> str:
@@ -76,28 +78,26 @@ class Config(object):
     @prefix.setter
     def prefix(self, value: str):
         self._prefix = value
-        data = ['prefix', value]
-        self._db_adapter.insert_distinct('config_', ['key_', 'str_val_'], data)
+        data = [['prefix', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'str_val_'], data)
 
     @property
-    def activity_type(self) -> discord.ActivityType:
-        return self._activity_type
+    def activity(self) -> discord.Activity:
+        return self._activity
 
-    @activity_type.setter
-    def activity_type(self, value: discord.ActivityType):
-        self._activity_type = value
-        data = ['activity_type', value]
-        self._db_adapter.insert_distinct('config_', ['key_', 'int_val_'], data)
-
-    @property
-    def activity_text(self) -> str:
-        return self._activity_text
-
-    @activity_text.setter
-    def activity_text(self, value: str):
-        self._activity_text = value
-        data = ['activity_text', value]
-        self._db_adapter.insert_distinct('config_', ['key_', 'str_val_'], data)
+    @activity.setter
+    def activity(self, value: discord.Activity):
+        self._activity = value
+        activity_type = int(value.type)
+        activity_text = value.name
+        if activity_type == discord.ActivityType.unknown:
+            activity_text = ''
+        data = [['activity_text', None, activity_text],
+                ['activity_type', int(activity_type), None]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_', 'str_val_'],
+                                              data)
 
     # endregion properties
 
@@ -151,17 +151,19 @@ class Config(object):
     # region private
 
     def __str__(self) -> str:
-        return json.dumps(self._to_dict(), indent=4)
+        d = self._to_dict()
+        s = json.dumps(d, indent=4)
+        return s
 
     def _to_dict(self) -> dict:
         return {
             'usernames': self._usernames,
-            'message_channel_id': self._message_channel.id,
+            'message_channel_id': int(self._message_channel.id),
             'status': str(self._status),
-            'long_pooling_interval': self._long_pooling_interval,
+            'long_pooling_interval': int(self._long_pooling_interval),
             'prefix': self._prefix,
-            'activity_type': int(self._activity_type),
-            'activity_text': self._activity_text
+            'activity_type': int(self._activity.type),
+            'activity_text': self._activity.name
         }
 
     def _from_dict(self, obj):
@@ -169,22 +171,29 @@ class Config(object):
             self._usernames = obj['usernames'][:]
         if 'message_channel_id' in obj and \
            obj['message_channel_id'] is not None:
-            mcid = obj['message_channel_id']
+            mcid = int(obj['message_channel_id'])
             if mcid == 0:
                 self._message_channel = TextChannelStub()
             else:
-                self._message_channel = self._client.get_channel(
-                    obj['message_channel_id'])
+                self._message_channel = self._client.get_channel(mcid)
+            if self._message_channel is None:
+                self._message_channel = TextChannelStub()
         if 'status' in obj and obj['status'] is not None:
             self._status = discord.Status(obj['status'])
         if 'long_pooling_interval' in obj \
            and obj['long_pooling_interval'] is not None:
-            self._long_pooling_interval = obj['long_pooling_interval']
+            self._long_pooling_interval = int(obj['long_pooling_interval'])
         if 'prefix' in obj and obj['prefix'] is not None:
             self._prefix = obj['prefix']
-        if 'activity_type' in obj and obj['activity_type'] is not None:
-            self._activity_type = obj['activity_type']
-        if 'activity_text' in obj and obj['activity_text'] is not None:
-            self._activity_text = obj['activity_text']
+        if 'activity_type' in obj and obj['activity_type'] is not None and \
+           'activity_text' in obj and obj['activity_text'] is not None:
+            activity_type = int(obj['activity_type'])
+            activity_text = obj['activity_text']
+            try:
+                activity_type = discord.ActivityType(activity_type)
+                self._activity = discord.Activity(name=activity_text,
+                                                  type=activity_type)
+            except ValueError as e:
+                self._activity = discord.Activity()
 
     # endregion private
