@@ -1,3 +1,3 @@
 from .config import Config
-from .postgres_adapter import PostgresAdapter
+from .datbase_adapter import DatabaseAdapter
 from .shiki_client import ShikiClient
