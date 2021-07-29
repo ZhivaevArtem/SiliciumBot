@@ -1,16 +1,15 @@
-import psycopg2
 import os
 
+import psycopg2
 
-class PostgresAdapter(object):
+
+class DatabaseAdapter(object):
     def __init__(self):
-        super().__init__()
-        self._pg_connection: psycopg2.connection
+        self._pg_connection = None
 
     # region private
 
     def _execute_sql(self, sql: str):
-        cursor = None
         with self._pg_connection.cursor() as cursor:
             print(f'Executing SQL:\n{sql}')
             cursor.execute(sql)
@@ -29,16 +28,16 @@ class PostgresAdapter(object):
         self._pg_connection = psycopg2.connect(url, sslmode="require")
         return self
 
-    def insert_data_distinct(self, table: str, columns: list,
-                             data: list) -> None:
+    def insert_data_distinct(self, table: str, columns: list[str],
+                             data: list[list]) -> None:
         if not data:
             return
         sql = f"INSERT INTO {table}({', '.join(columns)}) VALUES\n"
         values_sets = []
-        for d in data:
+        for row in data:
             values_set = "("
             values = []
-            for val in d:
+            for val in row:
                 if val is None:
                     values.append('NULL')
                 elif type(val) == int:
@@ -61,22 +60,23 @@ class PostgresAdapter(object):
         sql += "\n;\n"
         self._execute_sql(sql)
 
-    def fetch_data(self, table: str, columns: list) -> tuple:
+    def fetch_data(self, table: str, columns: list[str]) -> list[list]:
         sql = f"SELECT {', '.join(columns)}\nFROM {table};\n"
         data = self._execute_sql(sql)
         return data
 
-    def remove_data_by_ids(self, table: str, id_column: str, ids: list):
+    def remove_data_by_ids(self, table: str, id_column: str, ids: list[str]):
         sql = f"DELETE FROM {table}\n"
         ids_form = [f"'{s}'" for s in ids]
         sql += f"WHERE {id_column} IN ({', '.join(ids_form)});\n"
         self._execute_sql(sql)
 
-    def update_table(self, table: str, columns: list[str], data: list[list]):
-        self.truncate_tables([table])
+    def update_table(self, table: str, columns: list[str],
+                     data: list[list]) -> None:
+        self.truncate_table(table)
         self.insert_data_distinct(table, columns, data)
 
-    def truncate_table(self, table):
+    def truncate_table(self, table: str):
         sql = f"TRUNCATE TABLE {table};\n"
         self._execute_sql(sql)
 
@@ -84,6 +84,8 @@ class PostgresAdapter(object):
         sql = "SELECT table_name FROM information_schema.tables\n"
         sql += "WHERE table_schema = 'public';\n"
         data = self._execute_sql(sql)
-        return [d[0] for d in data]
+        return [str(d[0]) for d in data]
 
     # endregion public
+    def insert_distinct(self, param, param1, data):
+        pass

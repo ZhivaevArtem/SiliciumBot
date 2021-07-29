@@ -1,8 +1,8 @@
-import datetime
-from bs4 import BeautifulSoup
-import requests
+import re
 from enum import Enum
-from locallib import PostgresAdapter
+
+import requests
+from bs4 import BeautifulSoup
 
 
 class ActionType(Enum):
@@ -27,69 +27,55 @@ class TitleType(Enum):
 
 
 class ShikiLog(object):
-    def __init__(self, data):
+    def __init__(self, data: dict, username: str):
         super().__init__()
-        self.id = 0
-        self.action_type: ActionType
-        self.collection_type: CollectionType
-        self.title_type: TitleType
-        self.title = ""
-        self.scores = (None, None)
-        self.description = ""
+        self.id: int = data['id']
+        self.username = username
+        self.data = data
+        self.description: str = re.sub('</?\\w+>', '', data['description'])
+        self.title: str = data['target']['name']
+        self.russian_title: str = data['target']['russian']
+
+    def get_message(self):
+        return f"{self.username}: {self.description}"
 
 
 class ShikiClient(object):
-    def __init__(self, db_adapter: PostgresAdapter):
+    def __init__(self):
         super().__init__()
-        self._db_adapter = db_adapter
-        self._fetched_ids = None
+        self._fetched_ids: dict[int, list[int]] = {}
+        self._cached_ids: dict[int, list[int]] = {}
         self._headers = {
-            'User-Agent': 'SiliciumBotChan/' +
-            '0.1.0 Discord bot for me and my friends'
+            'User-Agent': 'SiliciumBotChan/0.1.0 Discord' +
+                          ' bot for me and my friends'
         }
 
-    def _fetch_fetched_ids(self):
-        data = self._db_adapter.fetch_data('fetched_ids_',
-                                           ['user_id_', 'log_id_'])
-        fetched_ids: dict[str, list] = {}
-        for row in data:
-            user_id = int(row[0])
-            log_id = int(row[1])
-            if user_id not in fetched_ids:
-                fetched_ids[user_id] = []
-            fetched_ids[user_id].append(log_id)
-        return fetched_ids
+    # region public
 
-    def _store_fetched_ids(self, fetched_ids: dict):
-        if len(fetched_ids) == 0:
-            return
-        data = []
-        for user_id, user_logs in fetched_ids.items():
-            data.append([user_id, user_logs['id']])
-            if user_id not in self._fetched_ids:
-                self._fetched_ids = []
-            for log in user_logs:
-                if log['id'] not in self._fetched_ids[user_id]:
-                    self._fetched_ids[user_id].append(log['id'])
-        self._db_adapter.insert_data_distinct('fetched_ids_',
-                                              ['user_id_', 'log_id_'], data)
+    def userid_to_username(self, user_id: int) -> str:
+        url = f"https://shikimori.one/api/users/{user_id}"
+        data = requests.get(url, headers=self._headers).json()
+        return data['nickname']
 
-    def username_to_userid(self, username) -> int:
+    def username_to_userid(self, username: str) -> int:
         url = f"https://shikimori.one/{username}"
         html = requests.get(url, headers=self._headers).content.decode('utf-8')
         soup = BeautifulSoup(html, features="lxml")
-        id = soup.select('div.profile-head')[0].get('data-user-id')
-        return id
+        user_id = soup.select('div.profile-head')[0].get('data-user-id')
+        return user_id
 
     def retrieve_user_logs(self, user_id: int) -> list[ShikiLog]:
-        if self._fetched_ids is None:
-            self._fetched_ids = self._fetch_fetched_ids()
         url = f"https://shikimori.one/api/users/{user_id}/history?limit=5"
         res = requests.get(url=url, headers=self._headers)
-        data = {d['id']: d for d in res.json()}
-        if user_id in self._fetched_ids:
-            for id in self._fetched_ids[user_id]:
-                if id in data:
-                    del data[id]
-        self._store_fetched_ids(data)
-        return data
+        logs = {d['id']: ShikiLog(d, self.userid_to_username(user_id))
+                for d in res.json()}
+        if user_id in self._cached_ids:
+            for cached_id in self._cached_ids[user_id]:
+                if cached_id in logs:
+                    del logs[cached_id]
+        else:
+            self._cached_ids[user_id] = []
+        self._cached_ids[user_id] += logs.keys()
+        return [log for log_id, log in logs.items()]
+
+    # endregion public
