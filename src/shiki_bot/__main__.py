@@ -48,6 +48,7 @@ async def on_message(message: discord.Message):
             await message.channel.send('?', reference=message)
         # endregion jokes
         if message.content.startswith(CFG.prefix):
+            print(message.author, message.content)
             args = message.content[len(CFG.prefix):].split()
             if args[0] == 'help':
                 await command_help(message)
