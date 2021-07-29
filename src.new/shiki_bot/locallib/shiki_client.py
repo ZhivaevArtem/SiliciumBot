@@ -2,7 +2,6 @@ import re
 from enum import Enum
 
 import requests
-from bs4 import BeautifulSoup
 
 
 class ActionType(Enum):
@@ -43,8 +42,7 @@ class ShikiLog(object):
 class ShikiClient(object):
     def __init__(self):
         super().__init__()
-        self._fetched_ids: dict[int, list[int]] = {}
-        self._cached_ids: dict[int, list[int]] = {}
+        self._cached_ids: dict[str, list[int]] = {}
         self._headers = {
             'User-Agent': 'SiliciumBotChan/0.1.0 Discord' +
                           ' bot for me and my friends'
@@ -52,30 +50,17 @@ class ShikiClient(object):
 
     # region public
 
-    def userid_to_username(self, user_id: int) -> str:
-        url = f"https://shikimori.one/api/users/{user_id}"
-        data = requests.get(url, headers=self._headers).json()
-        return data['nickname']
-
-    def username_to_userid(self, username: str) -> int:
-        url = f"https://shikimori.one/{username}"
-        html = requests.get(url, headers=self._headers).content.decode('utf-8')
-        soup = BeautifulSoup(html, features="lxml")
-        user_id = soup.select('div.profile-head')[0].get('data-user-id')
-        return user_id
-
-    def retrieve_user_logs(self, user_id: int) -> list[ShikiLog]:
-        url = f"https://shikimori.one/api/users/{user_id}/history?limit=5"
+    def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
+        url = f"https://shikimori.one/api/users/{username}/history?limit=5"
         res = requests.get(url=url, headers=self._headers)
-        logs = {d['id']: ShikiLog(d, self.userid_to_username(user_id))
-                for d in res.json()}
-        if user_id in self._cached_ids:
-            for cached_id in self._cached_ids[user_id]:
+        logs = {d['id']: ShikiLog(d, username) for d in res.json()}
+        if username in self._cached_ids:
+            for cached_id in self._cached_ids[username]:
                 if cached_id in logs:
                     del logs[cached_id]
         else:
-            self._cached_ids[user_id] = []
-        self._cached_ids[user_id] += logs.keys()
+            self._cached_ids[username] = []
+        self._cached_ids[username] += logs.keys()
         return [log for log_id, log in logs.items()]
 
     # endregion public
