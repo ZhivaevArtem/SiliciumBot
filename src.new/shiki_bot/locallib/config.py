@@ -2,7 +2,7 @@ import json
 
 import discord
 
-from datbase_adapter import DatabaseAdapter
+from .datbase_adapter import DatabaseAdapter
 
 
 class TextChannelStub(discord.channel.TextChannel):
@@ -44,9 +44,9 @@ class Config(object):
     @message_channel.setter
     def message_channel(self, value: discord.TextChannel):
         self._message_channel = value
-        data = ['message_channel_id', str(value.id)]
+        data = ['message_channel_id', value.id]
         self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'str_val_'],
+                                              ['key_', 'int_val_'],
                                               [data])
 
     @property
@@ -124,16 +124,13 @@ class Config(object):
 
     # endregion config methods
 
-    def load(self, db_adapter=None):
-        if db_adapter is not None:
-            self._db_adapter = db_adapter
+    def load(self):
         obj = {}
-        tables = [t for t in self._db_adapter.fetch_table_names()
-                  if t.endswith('config_')]
+        tables = self._db_adapter.fetch_table_names()
         for table in tables:
             if table == 'config_':
                 columns = ['key_', 'int_val_', 'str_val_', 'bool_val_']
-                data = self._db_adapter.fetch_data(columns)
+                data = self._db_adapter.fetch_data(table, columns)
                 for d in data:
                     if d[1] is not None:
                         obj[d[0]] = d[1]
@@ -141,12 +138,13 @@ class Config(object):
                         obj[d[0]] = d[2]
                     elif d[3] is not None:
                         obj[d[0]] = d[3]
-            if table.startswith('arr_'):
+            elif table.startswith('arr_'):
                 column = table[len('arr_'): len(table) - len('_config_')]
-                data = self._db_adapter.fetch_data(table, [column])
+                data = self._db_adapter.fetch_data(table, [f"{column}_"])
                 data_arr = [d[0] for d in data]
                 obj[column] = data_arr[:]
         self._from_dict(obj)
+        return self
 
     # endregion public
 
@@ -158,8 +156,7 @@ class Config(object):
     def _to_dict(self) -> dict:
         return {
             'usernames': self._usernames,
-            'message_channel_id': str(self._message_channel.id)
-            if self._message_channel else None,
+            'message_channel_id': self._message_channel.id,
             'status': str(self._status),
             'long_pooling_interval': self._long_pooling_interval,
             'prefix': self._prefix,
@@ -168,24 +165,26 @@ class Config(object):
         }
 
     def _from_dict(self, obj):
-        if obj['usernames'] is not None:
+        if 'usernames' in obj and obj['usernames'] is not None:
             self._usernames = obj['usernames'][:]
-        if obj['message_channel_id'] is not None:
+        if 'message_channel_id' in obj and \
+           obj['message_channel_id'] is not None:
             mcid = obj['message_channel_id']
             if mcid == 0:
                 self._message_channel = TextChannelStub()
             else:
                 self._message_channel = self._client.get_channel(
-                    int(obj['message_channel_id']))
-        if obj['status'] is not None:
+                    obj['message_channel_id'])
+        if 'status' in obj and obj['status'] is not None:
             self._status = discord.Status(obj['status'])
-        if obj['long_pooling_interval'] is not None:
+        if 'long_pooling_interval' in obj \
+           and obj['long_pooling_interval'] is not None:
             self._long_pooling_interval = obj['long_pooling_interval']
-        if obj['prefix'] is not None:
+        if 'prefix' in obj and obj['prefix'] is not None:
             self._prefix = obj['prefix']
-        if obj['activity_type'] is not None:
+        if 'activity_type' in obj and obj['activity_type'] is not None:
             self._activity_type = obj['activity_type']
-        if obj['activity_text'] is not None:
+        if 'activity_text' in obj and obj['activity_text'] is not None:
             self._activity_text = obj['activity_text']
 
     # endregion private

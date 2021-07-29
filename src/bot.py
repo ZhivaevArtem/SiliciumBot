@@ -132,7 +132,7 @@ class ShikiWatcherTask(object):
                     grouped_logs = retrieve_new_logs_by_usernames(CFG.usernames)
                     notification_message = parse_shiki_logs(grouped_logs)
                     if notification_message:
-                        await CFG.message_channel.send(notification_message)
+                        await CFG.message_channel.send(notification_message, )
                 except Exception as e:
                     print(e)
                 for i in range(CFG.long_pooling_interval // 2):
@@ -199,11 +199,11 @@ async def on_message(message):
         args = message.content[len(CFG.prefix):].strip().split()
 
         if args[0] == 'isalive':
-            await message.channel.send("I'm alive")
+            await message.channel.send("I'm alive", )
         elif args[0] == 'usechannel':
             CFG.message_channel = message.channel
         elif args[0] == 'anime':
-            await message.channel.send('С головой все хорошо?', reference=message)
+            await message.channel.send('С головой все хорошо?', )
         elif args[0] == 'dosuicide':
             await client.change_presence(status=Status.invisible)
             sys.exit(0)
@@ -213,9 +213,7 @@ async def on_message(message):
 
         elif args[0] == 'watcher':
             if len(args) == 1:
-                await CFG.message_channel.send(
-                    'Running' if SHIKI_WATCHER_TASK.is_running() else 'Stopped'
-                )
+                await CFG.message_channel.send('Running' if SHIKI_WATCHER_TASK.is_running() else 'Stopped', )
             elif len(args) == 2:
                 if args[1] == 'start':
                     SHIKI_WATCHER_TASK.start()
@@ -224,10 +222,10 @@ async def on_message(message):
 
         elif args[0] == 'config':
             if len(args) == 1:
-                await CFG.message_channel.send(str(CFG))
+                await CFG.message_channel.send(str(CFG), )
             if len(args) > 1:
                 if args[1] == 'users' and len(args) == 2:
-                    await CFG.message_channel.send(', '.join(CFG.usernames))
+                    await CFG.message_channel.send(', '.join(CFG.usernames), )
                 elif args[1] == 'users' and len(args) > 2:
                     if args[2] == 'add':
                         for i in range(3, len(args)):

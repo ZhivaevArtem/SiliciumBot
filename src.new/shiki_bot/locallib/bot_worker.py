@@ -3,8 +3,8 @@ from asyncio.tasks import Task
 
 import discord
 
-from config import Config
-from shiki_client import ShikiClient
+from .config import Config
+from .shiki_client import ShikiClient
 
 
 class BotWorkerTask(object):
