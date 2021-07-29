@@ -5,6 +5,14 @@ import discord
 from datbase_adapter import DatabaseAdapter
 
 
+class TextChannelStub(discord.channel.TextChannel):
+    def __init__(self):
+        self.id = 0
+
+    async def send(self, *args, **kwargs):
+        pass
+
+
 class Config(object):
     def __init__(self, db_adapter: DatabaseAdapter, client: discord.Client):
         super().__init__()
@@ -12,7 +20,7 @@ class Config(object):
         self._db_adapter = db_adapter
         # config itself
         self._usernames = []
-        self._message_channel: discord.TextChannel or None = None
+        self._message_channel: discord.TextChannel = TextChannelStub()
         self._status = discord.Status.online
         self._long_pooling_interval = 600
         self._prefix = ';'
@@ -30,13 +38,13 @@ class Config(object):
         return self._usernames
 
     @property
-    def message_channel(self) -> None or discord.TextChannel:
+    def message_channel(self) -> discord.TextChannel:
         return self._message_channel
 
     @message_channel.setter
-    def message_channel(self, value: None or discord.TextChannel):
+    def message_channel(self, value: discord.TextChannel):
         self._message_channel = value
-        data = ['message_channel_id', str(value.id) if value else None]
+        data = ['message_channel_id', str(value.id)]
         self._db_adapter.insert_data_distinct('config_',
                                               ['key_', 'str_val_'],
                                               [data])
@@ -144,26 +152,6 @@ class Config(object):
 
     # region private
 
-    def _store(self):
-        obj = self._to_dict()
-        data = []
-        for key, val in obj.items():
-            if type(val) == list or type(val) == tuple:
-                self._db_adapter.truncate_tables([f"arr_{key}_config_"])
-                self._db_adapter.insert_data_distinct(f"arr_{key}_config_",
-                                                      [f"{key}_"],
-                                                      [[str(v)] for v in val])
-            elif val is None:
-                data.append([key, None, None, None])
-            elif type(val) == int:
-                data.append([key, val, None, None])
-            elif type(val) == str:
-                data.append([key, None, val, None])
-            elif type(val) == bool:
-                data.append([key, None, None, val])
-        columns = ["key_", "int_val_", "str_val_", "bool_val_"]
-        self._db_adapter.insert_data_distinct("config_", columns, data)
-
     def __str__(self) -> str:
         return json.dumps(self._to_dict(), indent=4)
 
@@ -183,8 +171,12 @@ class Config(object):
         if obj['usernames'] is not None:
             self._usernames = obj['usernames'][:]
         if obj['message_channel_id'] is not None:
-            self._message_channel = self._client.get_channel(
-                int(obj['message_channel_id']))
+            mcid = obj['message_channel_id']
+            if mcid == 0:
+                self._message_channel = TextChannelStub()
+            else:
+                self._message_channel = self._client.get_channel(
+                    int(obj['message_channel_id']))
         if obj['status'] is not None:
             self._status = discord.Status(obj['status'])
         if obj['long_pooling_interval'] is not None:
