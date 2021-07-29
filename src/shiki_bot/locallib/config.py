@@ -66,6 +66,10 @@ class Config(object):
 
     @long_pooling_interval.setter
     def long_pooling_interval(self, value: int):
+        if value < 2:
+            value = 2
+        if value > 60 * 60 * 24:
+            value = 60 * 60 * 24
         self._long_pooling_interval = value
         data = [['long_pooling_interval', value]]
         self._db_adapter.insert_data_distinct('config_',

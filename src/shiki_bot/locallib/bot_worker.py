@@ -53,6 +53,8 @@ class BotWorkerTask(object):
                 if response:
                     await self._config.message_channel.send(response)
                 for i in range(self._config.long_pooling_interval // 2):
+                    if not self._is_running:
+                        return
                     await asyncio.sleep(2)
         except Exception as e:
             print(e)
