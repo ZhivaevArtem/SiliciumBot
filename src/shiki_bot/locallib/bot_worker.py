@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from asyncio.tasks import Task
 
 import discord
@@ -19,11 +20,14 @@ class BotWorkerTask(object):
 
     def start(self):
         if not self.is_running():
+            self._is_running = True
             self._task = self._discord_client.loop.create_task(self._run())
+            print('Worker started')
 
     def stop(self):
         if self.is_running():
             self._is_running = False
+            print('Worker stopped')
 
     def restart(self):
         if self.is_running():
@@ -36,12 +40,20 @@ class BotWorkerTask(object):
         return self._task is not None and not self._task.done()
 
     async def _run(self):
-        while self._is_running:
-            for username in self._config.usernames:
-                logs = self._shiki_client.retrieve_user_logs(username)
-                for log in logs:
-                    message = log.get_message()
-                    print(message)
-                    await self._config.message_channel.send(message)
-            for i in range(self._config.long_pooling_interval // 2):
-                await asyncio.sleep(2)
+        try:
+            while self._is_running:
+                print(f'Worker: {datetime.datetime.now()}')
+                response = ""
+                for username in self._config.usernames:
+                    logs = self._shiki_client.retrieve_user_logs(username)
+                    for log in logs:
+                        message = log.get_message() + "\n"
+                        response += message
+                        print(message)
+                if response:
+                    await self._config.message_channel.send(response)
+                for i in range(self._config.long_pooling_interval // 2):
+                    await asyncio.sleep(2)
+        except Exception as e:
+            print(e)
+            self.restart()

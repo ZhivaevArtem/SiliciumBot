@@ -52,7 +52,7 @@ class DatabaseAdapter(object):
         sql += f"\nON CONFLICT ({columns[0]}) DO UPDATE\n"
         sql += f"SET\n"
         set_evals = []
-        for i in range(1, len(columns)):
+        for i in range(0, len(columns)):
             column = columns[i]
             set_eval = f"{column} = excluded.{column}"
             set_evals.append(set_eval)

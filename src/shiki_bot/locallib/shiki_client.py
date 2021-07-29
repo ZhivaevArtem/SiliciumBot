@@ -36,7 +36,9 @@ class ShikiLog(object):
         self.russian_title: str = data['target']['russian']
 
     def get_message(self):
-        return f"{self.username}: {self.description}"
+        message = f"{self.username}: {self.description}:"
+        message += f" {self.russian_title} / {self.title}"
+        return message
 
 
 class ShikiClient(object):

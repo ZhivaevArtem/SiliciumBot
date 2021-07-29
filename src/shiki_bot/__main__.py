@@ -3,10 +3,10 @@ import os
 import discord
 import dotenv
 
-from .locallib import BotWorkerTask
-from .locallib import Config
-from .locallib import DatabaseAdapter
-from .locallib import ShikiClient
+from locallib import BotWorkerTask
+from locallib import Config
+from locallib import DatabaseAdapter
+from locallib import ShikiClient
 
 dotenv.load_dotenv()
 client = discord.Client()
@@ -25,6 +25,10 @@ async def on_ready():
     try:
         DB_ADAPTER.connect()
         CFG.load()
+        if CFG.status != discord.Status.online:
+            await client.change_presence(status=discord.Status.online)
+        if CFG.activity.type != discord.ActivityType.unknown:
+            await client.change_presence(activity=CFG.activity)
     except Exception as e:
         print('Error during initialization')
         print(e)
@@ -36,37 +40,60 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     global CFG
-    if message.author == client.user:
-        return
-    # region jokes
-    if message.content == '1000-7':
-        await message.channel.send('?', reference=message)
-    # endregion jokes
-    if message.content.startswith(CFG.prefix):
-        args = message.content[len(CFG.prefix):].split()
-        if args[0] == 'help':
-            await command_help(message)
-        elif args[0] == 'config':
-            await command_config(message, args)
-        elif args[0] == 'usechannel':
-            await command_usechannel(message)
-        elif args[0] == 'worker':
-            await command_worker(message, args)
+    try:
+        if message.author == client.user:
+            return
+        # region jokes
+        if message.content == '1000-7':
+            await message.channel.send('?', reference=message)
+        # endregion jokes
+        if message.content.startswith(CFG.prefix):
+            args = message.content[len(CFG.prefix):].split()
+            if args[0] == 'help':
+                await command_help(message)
+            elif args[0] == 'config':
+                await command_config(message, args)
+            elif args[0] == 'usechannel':
+                await command_usechannel(message)
+            elif args[0] == 'worker':
+                await command_worker(message, args)
+    except Exception as e:
+        print(e)
 
 
 # region commands
 
 async def command_worker(message: discord.Message, args: list[str]):
-    # TODO: set up commands to control worker
-    message.channel.send('Worker stopped', reference=message)
+    global BOT_WORKER
+    if len(args) > 1:
+        if args[1] == 'start':
+            BOT_WORKER.start()
+        elif args[1] == 'stop':
+            BOT_WORKER.stop()
+    await message.channel.send("Worker running" if BOT_WORKER.is_running()
+                               else "Worker stopped", reference=message)
 
 
 async def command_help(message: discord.Message):
-    await message.channel.send('Сам себе помоги', reference=message)
+    response = """
+**config**: show config
+**config users <add/remove> <usernames>**: add or remove users
+**config users clear**: truncate users
+**config interval <time in seconds>**: interval between requests
+**config prefix <prefix>**: command prefix
+**config status <online/invisible/idle/dnd>**: set bot status
+**config activity <playing/streaming/listening/watching> <text>**: set bot activity
+**config activity clear**: remove bot activity
+**usechannel**: use this channel for notifications
+**worker**: get worker status
+**worker <start/stop>**: start/stop worker
+    """
+    await message.channel.send(response, reference=message)
 
 
 async def command_config(message: discord.Message, args: list[str]):
     global CFG
+    global BOT_WORKER
     if len(args) > 1:
         if args[1] == 'users' and len(args) > 2:
             if args[2] == 'add':
@@ -78,6 +105,8 @@ async def command_config(message: discord.Message, args: list[str]):
         elif args[1] == 'status' and len(args) == 3:
             try:
                 status = discord.Status(args[2])
+                if status != discord.Status.online:
+                    CFG.activity = discord.Activity()
                 await client.change_presence(status=status)
                 CFG.status = status
             except ValueError as e:
@@ -85,6 +114,7 @@ async def command_config(message: discord.Message, args: list[str]):
         elif args[1] == 'interval' and len(args) == 3:
             try:
                 interval = int(args[2])
+                BOT_WORKER.restart()
                 CFG.long_pooling_interval = interval
             except ValueError as e:
                 pass
@@ -110,6 +140,7 @@ async def command_config(message: discord.Message, args: list[str]):
                 if activity_type != discord.ActivityType.unknown:
                     activity = discord.Activity(name=activity_text,
                                                 type=activity_type)
+                    CFG.status = discord.Status.online
                 await client.change_presence(activity=activity)
                 CFG.activity = activity
     await message.channel.send(str(CFG), reference=message)

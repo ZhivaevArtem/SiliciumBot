@@ -120,6 +120,7 @@ class Config(object):
         self._db_adapter.remove_data_by_ids(table, column, usernames)
 
     def truncate_users(self):
+        self._usernames = []
         self._db_adapter.truncate_table('arr_usernames_config_')
 
     # endregion config methods
