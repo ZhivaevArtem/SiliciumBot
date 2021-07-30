@@ -95,6 +95,7 @@ async def command_help(message: discord.Message):
 `usechannel`: use this channel for notifications
 `worker`: get worker status
 `worker <start/stop>`: start/stop worker
+`github`: get link to the source code
     """
     await message.channel.send(response, reference=message)
 
