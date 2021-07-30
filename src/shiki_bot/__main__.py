@@ -13,6 +13,7 @@ dotenv.load_dotenv()
 client = discord.Client()
 
 ADMIN_DISCORD_ID = os.getenv('ADMIN_DISCORD_ID')
+VERSION = "RELEASE 1.2.0"
 DB_ADAPTER = DatabaseAdapter()
 CFG = Config(DB_ADAPTER, client)
 SHIKI_CLIENT = ShikiClient(CFG)
@@ -65,6 +66,8 @@ async def on_message(message: discord.Message):
                 await command_worker(message, args)
             elif args[0] == 'github':
                 await command_github(message)
+            elif args[0] == 'version':
+                await command_version(message)
     except Exception as e:
         print(traceback.format_exc())
 
@@ -80,6 +83,11 @@ async def command_worker(message: discord.Message, args: list[str]):
             BOT_WORKER.stop()
     await message.channel.send("Worker running" if BOT_WORKER.is_running()
                                else "Worker stopped", reference=message)
+
+
+async def command_version(message: discord.Message):
+    global VERSION
+    await message.channel.send(VERSION, reference=message)
 
 
 async def command_help(message: discord.Message):
@@ -100,6 +108,7 @@ async def command_help(message: discord.Message):
 `worker`: get worker status
 `worker <start/stop>`: start/stop worker
 `github`: get link to the source code
+`version`: get version
     """
     await message.channel.send(response, reference=message)
 
@@ -145,6 +154,12 @@ async def command_config(message: discord.Message, args: list[str]):
                 if BOT_WORKER.is_running():
                     BOT_WORKER.restart()
                 CFG.long_pooling_interval = interval
+            except ValueError as e:
+                pass
+        elif args[1] == 'limit' and len(args) == 3:
+            try:
+                limit = int(args[2])
+                CFG.long_pooling_query_limit = limit
             except ValueError as e:
                 pass
         elif args[1] == 'prefix' and len(args) == 3:
