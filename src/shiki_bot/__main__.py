@@ -60,6 +60,8 @@ async def on_message(message: discord.Message):
                 await command_usechannel(message)
             elif args[0] == 'worker':
                 await command_worker(message, args)
+            elif args[0] == 'github':
+                await command_github(message)
     except Exception as e:
         print(e)
 
@@ -171,6 +173,11 @@ async def command_config(message: discord.Message, args: list[str]):
 async def command_usechannel(message: discord.Message):
     await message.channel.send("Okay. This channel", reference=message)
     CFG.message_channel = message.channel
+
+
+async def command_github(message: discord.Message):
+    url = 'https://github.com/thisUsernameIsAlredyTaken/ShikimoriDiscordBot'
+    await message.channel.send(url, reference=message)
 
 # endregion commands
 
