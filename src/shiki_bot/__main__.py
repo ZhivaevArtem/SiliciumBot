@@ -88,6 +88,7 @@ async def command_help(message: discord.Message):
 `config users <add/remove> <usernames>`: add or remove users
 `config users clear`: truncate users
 `config interval <time in seconds>`: interval between requests
+`config limit <count>`: query limit to /api/users/{id}/history
 `config prefix <prefix>`: command prefix
 `config status <online/invisible/idle/dnd>`: set bot status
 `config activity <playing/streaming/listening/watching> <text>`: set bot activity
