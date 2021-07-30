@@ -23,6 +23,7 @@ class Config(object):
         self._message_channel: discord.TextChannel = TextChannelStub()
         self._status = discord.Status.online
         self._long_pooling_interval = 600
+        self._long_pooling_query_limit = 5
         self._prefix = ';'
         self._activity = discord.Activity()
         self._jokes: dict[str, str] = {}
@@ -72,6 +73,21 @@ class Config(object):
             value = 60 * 60 * 24
         self._long_pooling_interval = value
         data = [['long_pooling_interval', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_'], data)
+
+    @property
+    def long_pooling_query_limit(self) -> int:
+        return self._long_pooling_query_limit
+
+    @long_pooling_query_limit.setter
+    def long_pooling_query_limit(self, value: int):
+        if value < 1:
+            value = 1
+        if value > 50:
+            value = 50
+        self._long_pooling_query_limit = value
+        data = [['long_pooling_query_limit', value]]
         self._db_adapter.insert_data_distinct('config_',
                                               ['key_', 'int_val_'], data)
 
@@ -196,6 +212,7 @@ class Config(object):
             'message_channel_id': int(self._message_channel.id),
             'status': str(self._status),
             'long_pooling_interval': int(self._long_pooling_interval),
+            'long_pooling_query_limit': int(self._long_pooling_query_limit),
             'prefix': self._prefix,
             'activity_type': int(self._activity.type),
             'activity_text': self._activity.name
@@ -206,8 +223,8 @@ class Config(object):
             self._usernames = obj['usernames'][:]
         if 'jokes' in obj and obj['jokes'] is not None:
             self._jokes = obj['jokes']
-        if 'message_channel_id' in obj and \
-           obj['message_channel_id'] is not None:
+        if 'message_channel_id' in obj \
+           and obj['message_channel_id'] is not None:
             mcid = int(obj['message_channel_id'])
             if mcid == 0:
                 self._message_channel = TextChannelStub()
@@ -220,10 +237,14 @@ class Config(object):
         if 'long_pooling_interval' in obj \
            and obj['long_pooling_interval'] is not None:
             self._long_pooling_interval = int(obj['long_pooling_interval'])
+        if 'long_pooling_query_limit' in obj \
+           and obj['long_pooling_query_limit'] is not None:
+            self._long_pooling_query_limit \
+                = int(obj['long_pooling_query_limit'])
         if 'prefix' in obj and obj['prefix'] is not None:
             self._prefix = obj['prefix']
-        if 'activity_type' in obj and obj['activity_type'] is not None and \
-           'activity_text' in obj and obj['activity_text'] is not None:
+        if 'activity_type' in obj and obj['activity_type'] is not None \
+           and 'activity_text' in obj and obj['activity_text'] is not None:
             activity_type = int(obj['activity_type'])
             activity_text = obj['activity_text']
             try:

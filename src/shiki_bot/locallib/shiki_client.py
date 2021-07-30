@@ -42,9 +42,10 @@ class ShikiLog(object):
 
 
 class ShikiClient(object):
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
         self._cached_ids: dict[str, list[int]] = {}
+        self._config = config
         self._headers = {
             'User-Agent': 'SiliciumBotChan/0.1.0 Discord' +
                           ' bot for me and my friends'
@@ -53,7 +54,9 @@ class ShikiClient(object):
     # region public
 
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
-        url = f"https://shikimori.one/api/users/{username}/history?limit=5"
+        limit = self._config.long_pooling_query_limit
+        url = f"https://shikimori.one/api/users/{username}" \
+              + f"/history?limit={limit}"
         res = requests.get(url=url, headers=self._headers)
         logs = {d['id']: ShikiLog(d, username) for d in res.json()}
         if username in self._cached_ids:

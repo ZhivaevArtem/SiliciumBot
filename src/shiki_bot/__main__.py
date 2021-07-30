@@ -14,8 +14,8 @@ client = discord.Client()
 
 ADMIN_DISCORD_ID = os.getenv('ADMIN_DISCORD_ID')
 DB_ADAPTER = DatabaseAdapter()
-SHIKI_CLIENT = ShikiClient()
 CFG = Config(DB_ADAPTER, client)
+SHIKI_CLIENT = ShikiClient(CFG)
 BOT_WORKER = BotWorkerTask(CFG, client, SHIKI_CLIENT)
 
 

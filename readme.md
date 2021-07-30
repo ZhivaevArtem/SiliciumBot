@@ -29,12 +29,13 @@ CREATE TABLE config_
 );
 INSERT INTO config_(key_, int_val_, str_val_, bool_val_)
 VALUES
-('activity_text',         NULL, '',       NULL),
-('activity_type',         -1,   NULL,     NULL),
-('long_pooling_interval', 300,  NULL,     NULL),
-('messasge_channel_id',   0,    NULL,     NULL),
-('prefix',                NULL, ';',      NULL),
-('status',                NULL, 'online', NULL);
+('activity_text',            NULL, '',       NULL),
+('activity_type',            -1,   NULL,     NULL),
+('long_pooling_interval',    300,  NULL,     NULL),
+('long_pooling_query_limit', 5,    NULL,     NULL),
+('messasge_channel_id',      0,    NULL,     NULL),
+('prefix',                   NULL, ';',      NULL),
+('status',                   NULL, 'online', NULL);
 ```
 
 ## Environment variables
