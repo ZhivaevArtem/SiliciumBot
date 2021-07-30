@@ -25,6 +25,7 @@ class Config(object):
         self._long_pooling_interval = 600
         self._prefix = ';'
         self._activity = discord.Activity()
+        self._jokes: dict[str, str] = {}
 
     # region public
 
@@ -102,6 +103,10 @@ class Config(object):
                                               ['key_', 'int_val_', 'str_val_'],
                                               data)
 
+    @property
+    def jokes(self) -> dict[str, str]:
+        return self._jokes
+
     # endregion properties
 
     def add_users(self, usernames: list[str]):
@@ -126,6 +131,25 @@ class Config(object):
         self._usernames = []
         self._db_adapter.truncate_table('arr_usernames_config_')
 
+    def add_joke(self, message: str, react: str):
+        table = 'dic_jokes_config_'
+        columns = ['key_', 'val_']
+        data = [[message, react]]
+        self._jokes[message] = react
+        self._db_adapter.insert_data_distinct(table, columns, data)
+
+    def delete_jokes(self, jokes: list[str]):
+        table = 'dic_jokes_config_'
+        column = 'key_'
+        for joke in jokes:
+            if joke in self._jokes:
+                del self._jokes[joke]
+        self._db_adapter.remove_data_by_ids(table, column, jokes)
+
+    def truncate_jokes(self):
+        self._jokes = {}
+        self._db_adapter.truncate_table('dic_jokes_config_')
+
     # endregion config methods
 
     def load(self):
@@ -146,7 +170,13 @@ class Config(object):
                 column = table[len('arr_'): len(table) - len('_config_')]
                 data = self._db_adapter.fetch_data(table, [f"{column}_"])
                 data_arr = [d[0] for d in data]
-                obj[column] = data_arr[:]
+                obj[column] = data_arr
+            elif table.startswith('dic_'):
+                columns = ['key_', 'val_']
+                data = self._db_adapter.fetch_data(table, columns)
+                data_dic = {d[0]: d[1] for d in data}
+                prop_name = table[len('dic_'): len(table) - len('_config_')]
+                obj[prop_name] = data_dic
         self._from_dict(obj)
         return self
 
@@ -162,6 +192,7 @@ class Config(object):
     def _to_dict(self) -> dict:
         return {
             'usernames': self._usernames,
+            'jokes': self._jokes,
             'message_channel_id': int(self._message_channel.id),
             'status': str(self._status),
             'long_pooling_interval': int(self._long_pooling_interval),
@@ -173,6 +204,8 @@ class Config(object):
     def _from_dict(self, obj):
         if 'usernames' in obj and obj['usernames'] is not None:
             self._usernames = obj['usernames'][:]
+        if 'jokes' in obj and obj['jokes'] is not None:
+            self._jokes = obj['jokes']
         if 'message_channel_id' in obj and \
            obj['message_channel_id'] is not None:
             mcid = int(obj['message_channel_id'])

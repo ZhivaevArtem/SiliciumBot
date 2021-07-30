@@ -60,9 +60,11 @@ class ShikiClient(object):
             for cached_id in self._cached_ids[username]:
                 if cached_id in logs:
                     del logs[cached_id]
+            self._cached_ids[username] += logs.keys()
+            return [log for log_id, log in logs.items()]
         else:
             self._cached_ids[username] = []
-        self._cached_ids[username] += logs.keys()
-        return [log for log_id, log in logs.items()]
+            self._cached_ids[username] += logs.keys()
+            return []
 
     # endregion public

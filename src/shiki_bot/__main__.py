@@ -44,8 +44,10 @@ async def on_message(message: discord.Message):
         if message.author == client.user:
             return
         # region jokes
-        if message.content == '1000-7':
-            await message.channel.send('?', reference=message)
+        if message.content.strip() in CFG.jokes and len(CFG.jokes) > 0:
+            await message.channel.send(CFG.jokes[message.content.strip()],
+                                       reference=message)
+            return
         # endregion jokes
         if message.content.startswith(CFG.prefix):
             print(message.author, message.content)
@@ -85,6 +87,9 @@ async def command_help(message: discord.Message):
 `config status <online/invisible/idle/dnd>`: set bot status
 `config activity <playing/streaming/listening/watching> <text>`: set bot activity
 `config activity clear`: remove bot activity
+`config jokes add "<message>" "<reaction>"`: add joke
+`config jokes remove <jokes>`: remove jokes (jokes must be quoted)
+`config jokes clear`: remove all jokes
 `usechannel`: use this channel for notifications
 `worker`: get worker status
 `worker <start/stop>`: start/stop worker
@@ -103,6 +108,21 @@ async def command_config(message: discord.Message, args: list[str]):
                 CFG.truncate_users()
             elif args[2] == 'remove':
                 CFG.delete_users(args[3:])
+        elif args[1] == 'jokes' and len(args) > 2:
+            if args[2] == 'add' and len(args) > 4:
+                substrings = message.content.split('"')
+                if len(substrings) < 4:
+                    return
+                mess = substrings[1]
+                react = substrings[3]
+                if mess and react:
+                    CFG.add_joke(mess, react)
+            elif args[2] == 'clear':
+                CFG.truncate_jokes()
+            elif args[2] == 'remove':
+                substrings = message.content.split('"')
+
+                CFG.delete_jokes(substrings[1::2])
         elif args[1] == 'status' and len(args) == 3:
             try:
                 status = discord.Status(args[2])
@@ -115,7 +135,8 @@ async def command_config(message: discord.Message, args: list[str]):
         elif args[1] == 'interval' and len(args) == 3:
             try:
                 interval = int(args[2])
-                BOT_WORKER.restart()
+                if BOT_WORKER.is_running():
+                    BOT_WORKER.restart()
                 CFG.long_pooling_interval = interval
             except ValueError as e:
                 pass
