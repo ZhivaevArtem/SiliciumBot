@@ -13,6 +13,12 @@ CREATE TABLE arr_usernames_config_
     usernames_ character varying(31),
     CONSTRAINT arr_usernames_config__pkey PRIMARY KEY (usernames_)
 );
+CREATE TABLE dic_jokes_config_
+(
+    key_ character varying(31),
+    val_ character varying(255) NOT NULL,
+    CONSTRAINT dic_jokes_config__pkey PRIMARY KEY (key_)
+);
 CREATE TABLE config_
 (
     key_       character varying(31),
