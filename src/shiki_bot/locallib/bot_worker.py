@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import traceback
 from asyncio.tasks import Task
 
 import discord
@@ -57,5 +58,5 @@ class BotWorkerTask(object):
                         return
                     await asyncio.sleep(2)
         except Exception as e:
-            print(e)
+            print(traceback.format_exc())
             self.restart()

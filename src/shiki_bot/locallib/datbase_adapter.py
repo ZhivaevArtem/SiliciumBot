@@ -1,4 +1,5 @@
 import os
+import traceback
 
 import psycopg2
 
@@ -10,12 +11,19 @@ class DatabaseAdapter(object):
     # region private
 
     def _execute_sql(self, sql: str):
-        with self._pg_connection.cursor() as cursor:
-            print(f'Executing SQL:\n{sql}')
-            cursor.execute(sql)
-            self._pg_connection.commit()
-            if sql.startswith('SELECT'):
-                return cursor.fetchall()
+        try:
+            with self._pg_connection.cursor() as cursor:
+                print(f'Executing SQL:\n{sql}')
+                cursor.execute(sql)
+                self._pg_connection.commit()
+                if sql.startswith('SELECT'):
+                    return cursor.fetchall()
+        except psycopg2.Error as e:
+            if self._pg_connection is not None \
+               and not self._pg_connection.closed:
+                self._pg_connection.close()
+            print(traceback.format_exc())
+            self.connect()
 
     # endregion private
 

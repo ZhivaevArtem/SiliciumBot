@@ -1,4 +1,5 @@
 import os
+import traceback
 
 import discord
 import dotenv
@@ -22,16 +23,18 @@ BOT_WORKER = BotWorkerTask(CFG, client, SHIKI_CLIENT)
 async def on_ready():
     global DB_ADAPTER
     global CFG
+    global BOT_WORKER
     try:
         DB_ADAPTER.connect()
         CFG.load()
+        BOT_WORKER.start()
         if CFG.status != discord.Status.online:
             await client.change_presence(status=discord.Status.online)
         if CFG.activity.type != discord.ActivityType.unknown:
             await client.change_presence(activity=CFG.activity)
     except Exception as e:
         print('Error during initialization')
-        print(e)
+        print(traceback.format_exc())
         await client.close()
         print('Bot not started')
     print('Bot ready')
@@ -63,7 +66,7 @@ async def on_message(message: discord.Message):
             elif args[0] == 'github':
                 await command_github(message)
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
 
 
 # region commands
