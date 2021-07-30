@@ -25,7 +25,7 @@ class DatabaseAdapter(object):
         """Use DATABASE_URL environment variable to connect"""
         url = os.getenv('DATABASE_URL')
         print('Connecting to database')
-        self._pg_connection = psycopg2.connect(url, sslmode="require")
+        self._pg_connection = psycopg2.connect(url)
         return self
 
     def insert_data_distinct(self, table: str, columns: list[str],

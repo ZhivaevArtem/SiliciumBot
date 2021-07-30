@@ -77,17 +77,17 @@ async def command_worker(message: discord.Message, args: list[str]):
 
 async def command_help(message: discord.Message):
     response = """
-**config**: show config
-**config users <add/remove> <usernames>**: add or remove users
-**config users clear**: truncate users
-**config interval <time in seconds>**: interval between requests
-**config prefix <prefix>**: command prefix
-**config status <online/invisible/idle/dnd>**: set bot status
-**config activity <playing/streaming/listening/watching> <text>**: set bot activity
-**config activity clear**: remove bot activity
-**usechannel**: use this channel for notifications
-**worker**: get worker status
-**worker <start/stop>**: start/stop worker
+`config`: show config
+`config users <add/remove> <usernames>`: add or remove users
+`config users clear`: truncate users
+`config interval <time in seconds>`: interval between requests
+`config prefix <prefix>`: command prefix
+`config status <online/invisible/idle/dnd>`: set bot status
+`config activity <playing/streaming/listening/watching> <text>`: set bot activity
+`config activity clear`: remove bot activity
+`usechannel`: use this channel for notifications
+`worker`: get worker status
+`worker <start/stop>`: start/stop worker
     """
     await message.channel.send(response, reference=message)
 
