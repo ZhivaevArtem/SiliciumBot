@@ -58,6 +58,8 @@ class ShikiClient(object):
         url = f"https://shikimori.one/api/users/{username}" \
               + f"/history?limit={limit}"
         res = requests.get(url=url, headers=self._headers)
+        if not res.ok:
+            print(res.content.decode('utf-8'))
         logs = {d['id']: ShikiLog(d, username) for d in res.json()}
         if username in self._cached_ids:
             for cached_id in self._cached_ids[username]:
