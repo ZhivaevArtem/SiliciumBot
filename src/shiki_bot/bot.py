@@ -1,3 +1,4 @@
+import asyncio.exceptions
 import os
 import re
 import traceback
@@ -68,8 +69,11 @@ async def on_message(message: discord.Message):
                 if type(n) in (int, float):
                     await message.channel.send(n, reference=message)
             except TimeoutError:
-                await message.channel.send("Очень сложно, давай-ка сам",
-                                           reference=message)
+                try:
+                    await message.channel.send("Очень сложно, давай-ка сам",
+                                               reference=message)
+                except asyncio.exceptions.CancelledError:
+                    pass
             except:
                 print(traceback.format_exc())
             return
