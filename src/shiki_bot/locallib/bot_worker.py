@@ -57,6 +57,6 @@ class BotWorkerTask(object):
                     if not self._is_running:
                         return
                     await asyncio.sleep(2)
-        except Exception as e:
+        except:
             print(traceback.format_exc())
             self.restart()

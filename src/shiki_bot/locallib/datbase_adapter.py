@@ -18,7 +18,7 @@ class DatabaseAdapter(object):
                 self._pg_connection.commit()
                 if sql.startswith('SELECT'):
                     return cursor.fetchall()
-        except psycopg2.Error as e:
+        except psycopg2.Error:
             if self._pg_connection is not None \
                and not self._pg_connection.closed:
                 self._pg_connection.close()
