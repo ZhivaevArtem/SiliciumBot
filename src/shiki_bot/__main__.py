@@ -129,15 +129,14 @@ async def command_config(message: discord.Message, args: list[str]):
                 substrings = message.content.split('"')
                 if len(substrings) < 4:
                     return
-                mess = substrings[1]
-                react = substrings[3]
+                mess = substrings[1].strip()
+                react = substrings[3].strip()
                 if mess and react:
                     CFG.add_joke(mess, react)
             elif args[2] == 'clear':
                 CFG.truncate_jokes()
             elif args[2] == 'remove':
-                substrings = message.content.split('"')
-
+                substrings = [s.strip() for s in message.content.split('"')]
                 CFG.delete_jokes(substrings[1::2])
         elif args[1] == 'status' and len(args) == 3:
             try:

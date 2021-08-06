@@ -203,7 +203,7 @@ class Config(object):
     def __str__(self) -> str:
         d = self._to_dict()
         s = json.dumps(d, indent=4, ensure_ascii=False).encode('utf-8')
-        return s.decode('utf-8')
+        return s.decode('utf-8').replace("@", "@ ")
 
     def _to_dict(self) -> dict:
         return {
