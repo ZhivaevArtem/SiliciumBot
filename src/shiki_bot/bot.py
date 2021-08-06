@@ -15,7 +15,7 @@ dotenv.load_dotenv()
 client = discord.Client()
 
 ADMIN_DISCORD_ID = os.getenv('ADMIN_DISCORD_ID')
-VERSION = "RELEASE 1.3.0"
+VERSION = "RELEASE 1.3.1"
 DB_ADAPTER = DatabaseAdapter()
 CFG = Config(DB_ADAPTER, client)
 SHIKI_CLIENT = ShikiClient(CFG)
@@ -43,7 +43,7 @@ async def on_ready():
     print('Bot ready')
 
 
-@timeout(2)
+@timeout(0.5)
 def timeout_eval(expr: str):
     return eval(expr)
 
