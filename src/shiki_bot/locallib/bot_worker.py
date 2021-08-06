@@ -56,10 +56,7 @@ class BotWorkerTask(object):
                 for i in range(self._config.long_pooling_interval // 2):
                     if not self._is_running:
                         return
-                    try:
-                        await asyncio.sleep(2)
-                    except asyncio.exceptions.CancelledError:
-                        pass
-        except:
+                    await asyncio.sleep(2)
+        except Exception as e:
             print(traceback.format_exc())
             self.restart()

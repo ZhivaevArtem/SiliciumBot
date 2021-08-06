@@ -251,7 +251,7 @@ class Config(object):
                 activity_type = discord.ActivityType(activity_type)
                 self._activity = discord.Activity(name=activity_text,
                                                   type=activity_type)
-            except ValueError:
+            except ValueError as e:
                 self._activity = discord.Activity()
 
     # endregion private
