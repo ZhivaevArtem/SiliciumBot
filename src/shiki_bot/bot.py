@@ -44,7 +44,7 @@ async def on_ready():
     print('Bot ready')
 
 
-@timeout(0.5)
+@timeout(0.5, use_signals=False)
 def timeout_eval(expr: str):
     return eval(expr)
 
