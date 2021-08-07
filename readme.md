@@ -25,6 +25,7 @@ CREATE TABLE config_
     int_val_   numeric(31,0),
     str_val_   character varying(255),
     bool_val_  boolean,
+    float_val_ real,
     CONSTRAINT config__pkey PRIMARY KEY (key_)
 );
 INSERT INTO config_(key_, int_val_, str_val_, bool_val_, float_val_)

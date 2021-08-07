@@ -12,5 +12,5 @@ def invoke_timeout(func, seconds, *args, **kwargs):
     p = multiprocessing.Process(target=_wrapper, args=(func, dic) + args, kwargs=kwargs)
     p.start()
     p.join(seconds)
-    p.terminate()
+    p.kill()
     return dic['result']
