@@ -17,7 +17,7 @@ dotenv.load_dotenv()
 client = discord.Client()
 
 ADMIN_DISCORD_ID = os.getenv('ADMIN_DISCORD_ID')
-VERSION = "RELEASE 1.3.3"
+VERSION = "RELEASE 1.3.4"
 DB_ADAPTER = DatabaseAdapter()
 CFG = Config(DB_ADAPTER, client)
 SHIKI_CLIENT = ShikiClient(CFG)
