@@ -26,6 +26,7 @@ class Config(object):
         self._long_pooling_query_limit = 5
         self._prefix = ';'
         self._activity = discord.Activity()
+        self._calculator_timeout = 0.5
         self._jokes: dict[str, str] = {}
 
     # region public
@@ -67,10 +68,6 @@ class Config(object):
 
     @long_pooling_interval.setter
     def long_pooling_interval(self, value: int):
-        if value < 2:
-            value = 2
-        if value > 60 * 60 * 24:
-            value = 60 * 60 * 24
         self._long_pooling_interval = value
         data = [['long_pooling_interval', value]]
         self._db_adapter.insert_data_distinct('config_',
@@ -82,10 +79,6 @@ class Config(object):
 
     @long_pooling_query_limit.setter
     def long_pooling_query_limit(self, value: int):
-        if value < 1:
-            value = 1
-        if value > 50:
-            value = 50
         self._long_pooling_query_limit = value
         data = [['long_pooling_query_limit', value]]
         self._db_adapter.insert_data_distinct('config_',
@@ -101,6 +94,17 @@ class Config(object):
         data = [['prefix', value]]
         self._db_adapter.insert_data_distinct('config_',
                                               ['key_', 'str_val_'], data)
+
+    @property
+    def calculator_timeout(self) -> float:
+        return self._calculator_timeout
+
+    @calculator_timeout.setter
+    def calculator_timeout(self, value: float):
+        self._calculator_timeout = value
+        data = [['calculator_timeout', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'float_val_'], data)
 
     @property
     def activity(self) -> discord.Activity:
@@ -173,15 +177,13 @@ class Config(object):
         tables = self._db_adapter.fetch_table_names()
         for table in tables:
             if table == 'config_':
-                columns = ['key_', 'int_val_', 'str_val_', 'bool_val_']
+                columns = ['key_', 'int_val_', 'str_val_',
+                           'bool_val_', 'float_val_']
                 data = self._db_adapter.fetch_data(table, columns)
                 for d in data:
-                    if d[1] is not None:
-                        obj[d[0]] = d[1]
-                    elif d[2] is not None:
-                        obj[d[0]] = d[2]
-                    elif d[3] is not None:
-                        obj[d[0]] = d[3]
+                    for i in range(1, len(d)):
+                        if d[i] is not None:
+                            obj[d[0]] = d[i]
             elif table.startswith('arr_'):
                 column = table[len('arr_'): len(table) - len('_config_')]
                 data = self._db_adapter.fetch_data(table, [f"{column}_"])
@@ -215,7 +217,8 @@ class Config(object):
             'long_pooling_query_limit': int(self._long_pooling_query_limit),
             'prefix': self._prefix,
             'activity_type': int(self._activity.type),
-            'activity_text': self._activity.name
+            'activity_text': self._activity.name,
+            'calculator_timeout': self._calculator_timeout
         }
 
     def _from_dict(self, obj):
@@ -253,5 +256,7 @@ class Config(object):
                                                   type=activity_type)
             except ValueError as e:
                 self._activity = discord.Activity()
+        if 'calculator_timeout' in obj and obj['calculator_timeout'] is not None:
+            self._calculator_timeout = obj['calculator_timeout']
 
     # endregion private
