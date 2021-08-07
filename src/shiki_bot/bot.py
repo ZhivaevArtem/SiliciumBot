@@ -13,7 +13,7 @@ from locallib import invoke_timeout
 
 client = discord.Client()
 
-VERSION = "RELEASE 1.3.6"
+VERSION = "RELEASE 1.3.7"
 DB_ADAPTER = DatabaseAdapter()
 CFG = Config(DB_ADAPTER, client)
 SHIKI_CLIENT = ShikiClient(CFG)
