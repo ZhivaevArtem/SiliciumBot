@@ -51,9 +51,12 @@ class DatabaseAdapter(object):
                 elif type(val) == int:
                     values.append(str(val))
                 elif type(val) == str:
-                    values.append(f"'{val}'")
+                    s = val.replace("'", "''")
+                    values.append(f"'{s}'")
                 elif type(val) == bool:
-                    values.append('true' if val else 'false')
+                    values.append(str(val).lower())
+                elif type(val) == float:
+                    values.append(str(val))
             values_set += ", ".join(values) + ")"
             values_sets.append(values_set)
         sql += ",\n".join(values_sets)

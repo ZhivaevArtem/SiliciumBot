@@ -4,8 +4,6 @@ import re
 import traceback
 
 import discord
-import dotenv
-from wrapt_timeout_decorator import timeout
 
 from locallib import BotWorkerTask
 from locallib import Config
@@ -13,11 +11,9 @@ from locallib import DatabaseAdapter
 from locallib import ShikiClient
 from locallib import invoke_timeout
 
-dotenv.load_dotenv()
 client = discord.Client()
 
-ADMIN_DISCORD_ID = os.getenv('ADMIN_DISCORD_ID')
-VERSION = "RELEASE 1.3.4"
+VERSION = "RELEASE 1.3.6"
 DB_ADAPTER = DatabaseAdapter()
 CFG = Config(DB_ADAPTER, client)
 SHIKI_CLIENT = ShikiClient(CFG)
@@ -45,11 +41,6 @@ async def on_ready():
     print('Bot ready')
 
 
-@timeout(0.5, use_signals=False)
-def timeout_eval(expr: str):
-    return eval(expr)
-
-
 @client.event
 async def on_message(message: discord.Message):
     global CFG
@@ -66,7 +57,7 @@ async def on_message(message: discord.Message):
         if re.match(r'^.*[0-9]+.*$', content) \
            and re.match(r'^[0-9/*\-+. \t\n()]+$', content) \
            and not re.match(r'^[\-+]*[ \t]*[0-9]*\.?[0-9]*$', content):
-            n = invoke_timeout(eval, 5, content)
+            n = invoke_timeout(eval, CFG.calculator_timeout, content)
             if type(n) in (int, float):
                 await message.channel.send(n, reference=message)
             else:
@@ -124,13 +115,14 @@ activity
 `config activity clear`: remove bot activity
 `config jokes add "<message>" "<reaction>"`: add joke
 `config jokes remove <jokes>`: remove jokes (jokes must be quoted)
+`config timeout <time in seconds>`: max time per single math operation
 `config jokes clear`: remove all jokes
 `usechannel`: use this channel for notifications
 `worker`: get worker status
 `worker <start/stop>`: start/stop worker
 `github`: get link to the source code
 `version`: get version
-    """
+"""
     await message.channel.send(response, reference=message)
 
 
@@ -171,6 +163,10 @@ async def command_config(message: discord.Message, args: list[str]):
         elif args[1] == 'interval' and len(args) == 3:
             try:
                 interval = int(args[2])
+                if interval < 2:
+                    interval = 2
+                elif interval > 3600:
+                    interval = 3600
                 if BOT_WORKER.is_running():
                     BOT_WORKER.restart()
                 CFG.long_pooling_interval = interval
@@ -179,11 +175,25 @@ async def command_config(message: discord.Message, args: list[str]):
         elif args[1] == 'limit' and len(args) == 3:
             try:
                 limit = int(args[2])
+                if limit < 2:
+                    limit = 2
+                elif limit > 50:
+                    limit = 50
                 CFG.long_pooling_query_limit = limit
             except ValueError:
                 pass
         elif args[1] == 'prefix' and len(args) == 3:
             CFG.prefix = args[2]
+        elif args[1] == 'timeout' and len(args) == 3:
+            try:
+                timeout = float(args[2])
+                if timeout > 10:
+                    timeout = 10
+                elif timeout < 0.1:
+                    timeout = 0.1
+                CFG.calculator_timeout = timeout
+            except ValueError:
+                pass
         elif args[1] == 'activity':
             if len(args) == 3:
                 activity = discord.Activity()

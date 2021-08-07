@@ -27,15 +27,16 @@ CREATE TABLE config_
     bool_val_  boolean,
     CONSTRAINT config__pkey PRIMARY KEY (key_)
 );
-INSERT INTO config_(key_, int_val_, str_val_, bool_val_)
+INSERT INTO config_(key_, int_val_, str_val_, bool_val_, float_val_)
 VALUES
-('activity_text',            NULL, '',       NULL),
-('activity_type',            -1,   NULL,     NULL),
-('long_pooling_interval',    300,  NULL,     NULL),
-('long_pooling_query_limit', 5,    NULL,     NULL),
-('messasge_channel_id',      0,    NULL,     NULL),
-('prefix',                   NULL, ';',      NULL),
-('status',                   NULL, 'online', NULL);
+('activity_text',            NULL, '',       NULL, NULL),
+('activity_type',            -1,   NULL,     NULL, NULL),
+('long_pooling_interval',    300,  NULL,     NULL, NULL),
+('long_pooling_query_limit', 5,    NULL,     NULL, NULL),
+('messasge_channel_id',      0,    NULL,     NULL, NULL),
+('prefix',                   NULL, ';',      NULL, NULL),
+('status',                   NULL, 'online', NULL, NULL),
+('calculator_timeout',       NULL, NULL,     NULL, 0.5);
 ```
 
 ## Environment variables
