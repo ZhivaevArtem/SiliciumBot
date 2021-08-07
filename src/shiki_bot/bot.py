@@ -11,6 +11,7 @@ from locallib import BotWorkerTask
 from locallib import Config
 from locallib import DatabaseAdapter
 from locallib import ShikiClient
+from locallib import invoke_timeout
 
 dotenv.load_dotenv()
 client = discord.Client()
@@ -62,20 +63,15 @@ async def on_message(message: discord.Message):
                                        reference=message)
             return
         # endregion jokes
-        if re.match(r'^[0-9/*\-+. \t\n()]+$', content) \
+        if re.match(r'^.*[0-9]+.*$', content) \
+           and re.match(r'^[0-9/*\-+. \t\n()]+$', content) \
            and not re.match(r'^[\-+]*[ \t]*[0-9]*\.?[0-9]*$', content):
-            try:
-                n = timeout_eval(content)
-                if type(n) in (int, float):
-                    await message.channel.send(n, reference=message)
-            except TimeoutError:
-                try:
-                    await message.channel.send("Очень сложно, давай-ка сам",
-                                               reference=message)
-                except asyncio.exceptions.CancelledError:
-                    pass
-            except:
-                print(traceback.format_exc())
+            n = invoke_timeout(eval, 5, content)
+            if type(n) in (int, float):
+                await message.channel.send(n, reference=message)
+            else:
+                await message.channel.send("Очень сложно, давай-ка сам",
+                                           reference=message)
             return
         if message.content.startswith(CFG.prefix):
             print(message.author, message.channel.id, message.content)
