@@ -5,7 +5,7 @@ import traceback
 
 import discord
 
-from locallib import BotWorkerTask
+from locallib import LoopRequestsTask
 from locallib import Config
 from locallib import DatabaseAdapter
 from locallib import ShikiClient
@@ -17,18 +17,18 @@ VERSION = "RELEASE 1.3.7"
 DB_ADAPTER = DatabaseAdapter()
 CFG = Config(DB_ADAPTER, client)
 SHIKI_CLIENT = ShikiClient(CFG)
-BOT_WORKER = BotWorkerTask(CFG, client, SHIKI_CLIENT)
+LOOP_REQUESTS = LoopRequestsTask(CFG, client, SHIKI_CLIENT)
 
 
 @client.event
 async def on_ready():
     global DB_ADAPTER
     global CFG
-    global BOT_WORKER
+    global LOOP_REQUESTS
     try:
         DB_ADAPTER.connect()
         CFG.load()
-        BOT_WORKER.start()
+        LOOP_REQUESTS.start()
         if CFG.status != discord.Status.online:
             await client.change_presence(status=discord.Status.online)
         if CFG.activity.type != discord.ActivityType.unknown:
@@ -86,13 +86,13 @@ async def on_message(message: discord.Message):
 # region commands
 
 async def command_worker(message: discord.Message, args: list[str]):
-    global BOT_WORKER
+    global LOOP_REQUESTS
     if len(args) > 1:
         if args[1] == 'start':
-            BOT_WORKER.start()
+            LOOP_REQUESTS.start()
         elif args[1] == 'stop':
-            BOT_WORKER.stop()
-    await message.channel.send("Worker running" if BOT_WORKER.is_running()
+            LOOP_REQUESTS.stop()
+    await message.channel.send("Worker running" if LOOP_REQUESTS.is_running()
                                else "Worker stopped", reference=message)
 
 
@@ -126,9 +126,10 @@ activity
     await message.channel.send(response, reference=message)
 
 
+# TODO: remove some commands from ;config section
 async def command_config(message: discord.Message, args: list[str]):
     global CFG
-    global BOT_WORKER
+    global LOOP_REQUESTS
     if len(args) > 1:
         if args[1] == 'users' and len(args) > 2:
             if args[2] == 'add':
@@ -167,8 +168,8 @@ async def command_config(message: discord.Message, args: list[str]):
                     interval = 2
                 elif interval > 3600:
                     interval = 3600
-                if BOT_WORKER.is_running():
-                    BOT_WORKER.restart()
+                if LOOP_REQUESTS.is_running():
+                    LOOP_REQUESTS.restart()
                 CFG.long_pooling_interval = interval
             except ValueError:
                 pass
