@@ -58,6 +58,6 @@ class LoopRequestsTask(object):
                     if not self._is_running:
                         return
                     await asyncio.sleep(2)
-        except:
+        except Exception:
             print(traceback.format_exc())
             self.restart()

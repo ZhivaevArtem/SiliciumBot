@@ -256,7 +256,8 @@ class Config(object):
                                                   type=activity_type)
             except ValueError as e:
                 self._activity = discord.Activity()
-        if 'calculator_timeout' in obj and obj['calculator_timeout'] is not None:
+        if 'calculator_timeout' in obj \
+           and obj['calculator_timeout'] is not None:
             self._calculator_timeout = obj['calculator_timeout']
 
     # endregion private

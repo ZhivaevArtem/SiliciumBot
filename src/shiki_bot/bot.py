@@ -33,7 +33,7 @@ async def on_ready():
             await client.change_presence(status=discord.Status.online)
         if CFG.activity.type != discord.ActivityType.unknown:
             await client.change_presence(activity=CFG.activity)
-    except:
+    except Exception:
         print('Error during initialization')
         print(traceback.format_exc())
         await client.close()
@@ -79,7 +79,7 @@ async def on_message(message: discord.Message):
                 await command_github(message)
             elif args[0] == 'version':
                 await command_version(message)
-    except:
+    except Exception:
         print(traceback.format_exc())
 
 
