@@ -1,28 +1,6 @@
 import re
-from enum import Enum
 
 import requests
-
-
-class ActionType(Enum):
-    ADDED = 1
-    MOVED = 2
-    DELETED = 3
-    SCORED = 4
-
-
-class CollectionType(Enum):
-    NONE = 0
-    PLANNED = 1
-    WATCHING = 2
-    DROPPED = 3
-    WATCHED = 4
-    DELAYED = 5
-
-
-class TitleType(Enum):
-    ANIME = 1
-    MANGA = 2
 
 
 class ShikiLog(object):

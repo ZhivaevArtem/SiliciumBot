@@ -9,7 +9,6 @@ from .config import Config
 from .shiki_client import ShikiClient
 
 
-# TODO: rename to a LoopRequestsTask
 class LoopRequestsTask(object):
     def __init__(self, config: Config, discord_client: discord.Client,
                  shiki_client: ShikiClient):

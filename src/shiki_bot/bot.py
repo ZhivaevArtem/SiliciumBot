@@ -1,13 +1,11 @@
-import asyncio.exceptions
-import os
 import re
 import traceback
 
 import discord
 
-from locallib import LoopRequestsTask
 from locallib import Config
 from locallib import DatabaseAdapter
+from locallib import LoopRequestsTask
 from locallib import ShikiClient
 from locallib import invoke_timeout
 
