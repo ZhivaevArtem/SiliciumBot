@@ -1,5 +1,5 @@
 if __name__ == '__main__':
     import os
-    from bot import client
+    from bot import bot
     TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-    client.run(TOKEN)
+    bot.run(TOKEN)

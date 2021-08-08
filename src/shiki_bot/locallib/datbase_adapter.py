@@ -5,8 +5,6 @@ import psycopg2
 
 
 class DatabaseAdapter(object):
-    def __init__(self):
-        self._pg_connection = None
 
     # region private
 
@@ -23,18 +21,26 @@ class DatabaseAdapter(object):
                and not self._pg_connection.closed:
                 self._pg_connection.close()
             print(traceback.format_exc())
-            self.connect()
+            self._connect()
 
-    # endregion private
-
-    # region public
-
-    def connect(self):
+    def _connect(self):
         """Use DATABASE_URL environment variable to connect"""
         url = os.getenv('DATABASE_URL')
         print('Connecting to database')
         self._pg_connection = psycopg2.connect(url)
         return self
+
+    # region magic
+
+    def __init__(self):
+        self._pg_connection = None
+        self._connect()
+
+    # endregion magic
+
+    # endregion private
+
+    # region public
 
     def insert_data_distinct(self, table: str, columns: list[str],
                              data: list[list]) -> None:

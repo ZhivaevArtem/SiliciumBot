@@ -1,6 +1,7 @@
 import json
 
 import discord
+from discord.ext import commands
 
 from .datbase_adapter import DatabaseAdapter
 
@@ -14,165 +15,10 @@ class TextChannelStub(discord.channel.TextChannel):
 
 
 class Config(object):
-    def __init__(self, db_adapter: DatabaseAdapter, client: discord.Client):
-        super().__init__()
-        self._client = client
-        self._db_adapter = db_adapter
-        # config itself
-        self._usernames = []
-        self._message_channel: discord.TextChannel = TextChannelStub()
-        self._status = discord.Status.online
-        self._long_pooling_interval = 600
-        self._long_pooling_query_limit = 5
-        self._prefix = ';'
-        self._activity = discord.Activity()
-        self._calculator_timeout = 0.5
-        self._jokes: dict[str, str] = {}
 
-    # region public
+    # region private
 
-    # region config methods
-
-    # region properties
-
-    @property
-    def usernames(self) -> list[str]:
-        return self._usernames
-
-    @property
-    def message_channel(self) -> discord.TextChannel:
-        return self._message_channel
-
-    @message_channel.setter
-    def message_channel(self, value: discord.TextChannel):
-        self._message_channel = value
-        data = ['message_channel_id', value.id]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'int_val_'],
-                                              [data])
-
-    @property
-    def status(self) -> str:
-        return self._status
-
-    @status.setter
-    def status(self, value: str):
-        self._status = value
-        data = [['status', str(value)]]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'str_val_'], data)
-
-    @property
-    def long_pooling_interval(self) -> int:
-        return self._long_pooling_interval
-
-    @long_pooling_interval.setter
-    def long_pooling_interval(self, value: int):
-        self._long_pooling_interval = value
-        data = [['long_pooling_interval', value]]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'int_val_'], data)
-
-    @property
-    def long_pooling_query_limit(self) -> int:
-        return self._long_pooling_query_limit
-
-    @long_pooling_query_limit.setter
-    def long_pooling_query_limit(self, value: int):
-        self._long_pooling_query_limit = value
-        data = [['long_pooling_query_limit', value]]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'int_val_'], data)
-
-    @property
-    def prefix(self) -> str:
-        return self._prefix
-
-    @prefix.setter
-    def prefix(self, value: str):
-        self._prefix = value
-        data = [['prefix', value]]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'str_val_'], data)
-
-    @property
-    def calculator_timeout(self) -> float:
-        return self._calculator_timeout
-
-    @calculator_timeout.setter
-    def calculator_timeout(self, value: float):
-        self._calculator_timeout = value
-        data = [['calculator_timeout', value]]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'float_val_'], data)
-
-    @property
-    def activity(self) -> discord.Activity:
-        return self._activity
-
-    @activity.setter
-    def activity(self, value: discord.Activity):
-        self._activity = value
-        activity_type = int(value.type)
-        activity_text = value.name
-        if activity_type == discord.ActivityType.unknown:
-            activity_text = ''
-        data = [['activity_text', None, activity_text],
-                ['activity_type', int(activity_type), None]]
-        self._db_adapter.insert_data_distinct('config_',
-                                              ['key_', 'int_val_', 'str_val_'],
-                                              data)
-
-    @property
-    def jokes(self) -> dict[str, str]:
-        return self._jokes
-
-    # endregion properties
-
-    def add_users(self, usernames: list[str]):
-        table = 'arr_usernames_config_'
-        columns = ['usernames_']
-        to_add_users = [u for u in usernames if u not in self._usernames]
-        if len(to_add_users) == 0:
-            return
-        data = [[u] for u in to_add_users]
-        self._usernames += to_add_users
-        self._db_adapter.insert_data_distinct(table, columns, data)
-
-    def delete_users(self, usernames: list[str]):
-        table = 'arr_usernames_config_'
-        column = 'usernames_'
-        for user in usernames:
-            if user in self._usernames:
-                self._usernames.remove(user)
-        self._db_adapter.remove_data_by_ids(table, column, usernames)
-
-    def truncate_users(self):
-        self._usernames = []
-        self._db_adapter.truncate_table('arr_usernames_config_')
-
-    def add_joke(self, message: str, react: str):
-        table = 'dic_jokes_config_'
-        columns = ['key_', 'val_']
-        data = [[message, react]]
-        self._jokes[message] = react
-        self._db_adapter.insert_data_distinct(table, columns, data)
-
-    def delete_jokes(self, jokes: list[str]):
-        table = 'dic_jokes_config_'
-        column = 'key_'
-        for joke in jokes:
-            if joke in self._jokes:
-                del self._jokes[joke]
-        self._db_adapter.remove_data_by_ids(table, column, jokes)
-
-    def truncate_jokes(self):
-        self._jokes = {}
-        self._db_adapter.truncate_table('dic_jokes_config_')
-
-    # endregion config methods
-
-    def load(self):
+    def _load(self):
         obj = {}
         tables = self._db_adapter.fetch_table_names()
         for table in tables:
@@ -198,66 +44,245 @@ class Config(object):
         self._from_dict(obj)
         return self
 
-    # endregion public
+    def _to_dict(self) -> dict:
+        return {
+            'activity_text': self._activity.name,
+            'activity_type': int(self._activity.type),
+            'calculator_timeout': self._calculator_timeout,
+            'history_request_limit': int(self._history_request_limit),
+            'is_worker_running': self._is_worker_running,
+            'jokes': self._jokes,
+            'loop_requests_interval': int(self._loop_requests_interval),
+            'notification_channel_id': int(self._notification_channel.id),
+            'prefix': self._prefix,
+            'status': str(self._status),
+            'usernames': self._usernames
+        }
 
-    # region private
+    def _from_dict(self, obj):
+        if 'activity_text' in obj and obj['activity_text'] is not None \
+           and 'activity_type' in obj and obj['activity_type'] is not None:
+            activity_text = obj['activity_text']
+            activity_type = int(obj['activity_type'])
+            try:
+                activity_type = discord.ActivityType(activity_type)
+                self._activity = discord.Activity(name=activity_text,
+                                                  type=activity_type)
+            except ValueError:
+                self._activity = discord.Activity()
+        if 'calculator_timeout' in obj \
+           and obj['calculator_timeout'] is not None:
+            self._calculator_timeout = obj['calculator_timeout']
+        if 'history_request_limit' in obj \
+           and obj['history_request_limit'] is not None:
+            self._history_request_limit \
+                = int(obj['history_request_limit'])
+        if 'is_worker_running' in obj and obj['is_worker_running'] is not None:
+            self._is_worker_running = obj['is_worker_running']
+        if 'jokes' in obj and obj['jokes'] is not None:
+            self._jokes = obj['jokes']
+        if 'loop_requests_interval' in obj \
+           and obj['loop_requests_interval'] is not None:
+            self._loop_requests_interval = int(obj['loop_requests_interval'])
+        if 'notification_channel_id' in obj \
+           and obj['notification_channel_id'] is not None:
+            mcid = int(obj['notification_channel_id'])
+            if mcid == 0:
+                self._notification_channel = TextChannelStub()
+            else:
+                self._notification_channel = self._bot.get_channel(mcid)
+            if self._notification_channel is None:
+                self._notification_channel = TextChannelStub()
+        if 'prefix' in obj and obj['prefix'] is not None:
+            self._prefix = obj['prefix']
+        if 'status' in obj and obj['status'] is not None:
+            self._status = discord.Status(obj['status'])
+        if 'usernames' in obj and obj['usernames'] is not None:
+            self._usernames = obj['usernames'][:]
+
+    # region magic
+
+    def __init__(self, db_adapter: DatabaseAdapter, bot: commands.Bot):
+        super().__init__()
+        self._bot = bot
+        self._db_adapter = db_adapter
+        # config itself
+        self._activity = discord.Activity()
+        self._calculator_timeout = 0.5
+        self._history_request_limit = 5
+        self._is_worker_running = True
+        self._jokes: dict[str, str] = {}
+        self._loop_requests_interval = 600
+        self._notification_channel: discord.TextChannel = TextChannelStub()
+        self._prefix = ';'
+        self._status = discord.Status.online
+        self._usernames = []
+        self._load()
 
     def __str__(self) -> str:
         d = self._to_dict()
         s = json.dumps(d, indent=4, ensure_ascii=False).encode('utf-8')
         return s.decode('utf-8').replace("@", "@ ")
 
-    def _to_dict(self) -> dict:
-        return {
-            'usernames': self._usernames,
-            'jokes': self._jokes,
-            'message_channel_id': int(self._message_channel.id),
-            'status': str(self._status),
-            'long_pooling_interval': int(self._long_pooling_interval),
-            'long_pooling_query_limit': int(self._long_pooling_query_limit),
-            'prefix': self._prefix,
-            'activity_type': int(self._activity.type),
-            'activity_text': self._activity.name,
-            'calculator_timeout': self._calculator_timeout
-        }
-
-    def _from_dict(self, obj):
-        if 'usernames' in obj and obj['usernames'] is not None:
-            self._usernames = obj['usernames'][:]
-        if 'jokes' in obj and obj['jokes'] is not None:
-            self._jokes = obj['jokes']
-        if 'message_channel_id' in obj \
-           and obj['message_channel_id'] is not None:
-            mcid = int(obj['message_channel_id'])
-            if mcid == 0:
-                self._message_channel = TextChannelStub()
-            else:
-                self._message_channel = self._client.get_channel(mcid)
-            if self._message_channel is None:
-                self._message_channel = TextChannelStub()
-        if 'status' in obj and obj['status'] is not None:
-            self._status = discord.Status(obj['status'])
-        if 'long_pooling_interval' in obj \
-           and obj['long_pooling_interval'] is not None:
-            self._long_pooling_interval = int(obj['long_pooling_interval'])
-        if 'long_pooling_query_limit' in obj \
-           and obj['long_pooling_query_limit'] is not None:
-            self._long_pooling_query_limit \
-                = int(obj['long_pooling_query_limit'])
-        if 'prefix' in obj and obj['prefix'] is not None:
-            self._prefix = obj['prefix']
-        if 'activity_type' in obj and obj['activity_type'] is not None \
-           and 'activity_text' in obj and obj['activity_text'] is not None:
-            activity_type = int(obj['activity_type'])
-            activity_text = obj['activity_text']
-            try:
-                activity_type = discord.ActivityType(activity_type)
-                self._activity = discord.Activity(name=activity_text,
-                                                  type=activity_type)
-            except ValueError as e:
-                self._activity = discord.Activity()
-        if 'calculator_timeout' in obj \
-           and obj['calculator_timeout'] is not None:
-            self._calculator_timeout = obj['calculator_timeout']
+    # endregion magic
 
     # endregion private
+
+    # region public
+
+    # region properties
+
+    @property
+    def activity(self) -> discord.Activity:
+        return self._activity
+
+    @activity.setter
+    def activity(self, value: discord.Activity):
+        self._activity = value
+        activity_type = int(value.type)
+        activity_text = value.name
+        if activity_type == discord.ActivityType.unknown:
+            activity_text = ''
+        data = [['activity_text', None, activity_text],
+                ['activity_type', int(activity_type), None]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_', 'str_val_'],
+                                              data)
+
+    @property
+    def calculator_timeout(self) -> float:
+        return self._calculator_timeout
+
+    @calculator_timeout.setter
+    def calculator_timeout(self, value: float):
+        self._calculator_timeout = value
+        data = [['calculator_timeout', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'float_val_'], data)
+
+    @property
+    def history_request_limit(self) -> int:
+        return self._history_request_limit
+
+    @history_request_limit.setter
+    def history_request_limit(self, value: int):
+        self._history_request_limit = value
+        data = [['history_request_limit', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_'], data)
+
+    @property
+    def is_worker_running(self) -> bool:
+        return self._is_worker_running
+
+    @is_worker_running.setter
+    def is_worker_running(self, value: bool):
+        if self._is_worker_running == value:
+            return
+        self._is_worker_running = value
+        data = [['is_worker_running', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'bool_val_'], data)
+
+    @property
+    def jokes(self) -> dict[str, str]:
+        return self._jokes
+
+    @property
+    def loop_requests_interval(self) -> int:
+        return self._loop_requests_interval
+
+    @loop_requests_interval.setter
+    def loop_requests_interval(self, value: int):
+        self._loop_requests_interval = value
+        data = [['loop_requests_interval', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_'], data)
+
+    @property
+    def notification_channel(self) -> discord.TextChannel:
+        return self._notification_channel
+
+    @notification_channel.setter
+    def notification_channel(self, value: discord.TextChannel):
+        self._notification_channel = value
+        data = [['notification_channel_id', value.id]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'int_val_'], data)
+
+    @property
+    def prefix(self) -> str:
+        return self._prefix
+
+    @prefix.setter
+    def prefix(self, value: str):
+        self._prefix = value
+        data = [['prefix', value]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'str_val_'], data)
+
+    @property
+    def status(self) -> str:
+        return self._status
+
+    @status.setter
+    def status(self, value: str):
+        self._status = value
+        data = [['status', str(value)]]
+        self._db_adapter.insert_data_distinct('config_',
+                                              ['key_', 'str_val_'], data)
+
+    @property
+    def usernames(self) -> list[str]:
+        return self._usernames
+
+    # endregion properties
+
+    def add_joke(self, message: str, react: str):
+        if message in self._jokes and self._jokes[message] == react:
+            return
+        table = 'dic_jokes_config_'
+        columns = ['key_', 'val_']
+        data = [[message, react]]
+        self._jokes[message] = react
+        self._db_adapter.insert_data_distinct(table, columns, data)
+
+    def delete_jokes(self, jokes: list[str]):
+        if len(set(jokes) & set(self._jokes.keys())) == 0:
+            return
+        table = 'dic_jokes_config_'
+        column = 'key_'
+        for joke in jokes:
+            if joke in self._jokes:
+                del self._jokes[joke]
+        self._db_adapter.remove_data_by_ids(table, column, jokes)
+
+    def truncate_jokes(self):
+        self._jokes = {}
+        self._db_adapter.truncate_table('dic_jokes_config_')
+
+    def add_users(self, usernames: list[str]):
+        table = 'arr_usernames_config_'
+        columns = ['usernames_']
+        to_add_users = [u for u in usernames if u not in self._usernames]
+        if len(to_add_users) == 0:
+            return
+        data = [[u] for u in to_add_users]
+        self._usernames += to_add_users
+        self._db_adapter.insert_data_distinct(table, columns, data)
+
+    def delete_users(self, usernames: list[str]):
+        if len(set(usernames) & set(self._usernames)) == 0:
+            return
+        table = 'arr_usernames_config_'
+        column = 'usernames_'
+        for user in usernames:
+            if user in self._usernames:
+                self._usernames.remove(user)
+        self._db_adapter.remove_data_by_ids(table, column, usernames)
+
+    def truncate_users(self):
+        self._usernames = []
+        self._db_adapter.truncate_table('arr_usernames_config_')
+
+    # endregion public

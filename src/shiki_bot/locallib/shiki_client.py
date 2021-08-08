@@ -32,7 +32,7 @@ class ShikiClient(object):
     # region public
 
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
-        limit = self._config.long_pooling_query_limit
+        limit = self._config.history_request_limit
         url = f"https://shikimori.one/api/users/{username}" \
               + f"/history?limit={limit}"
         res = requests.get(url=url, headers=self._headers)

@@ -18,21 +18,43 @@ class LoopRequestsTask(object):
         self._shiki_client = shiki_client
         self._task: Task or None = None
         self._is_running = False
+        self._restart_attempts = 0
+        self._MAX_RESTART_ATTEMPTS = 5
 
-    def start(self):
+    def start(self, callback=None):
         if not self.is_running():
             self._is_running = True
             self._task = self._discord_client.loop.create_task(self._run())
+            self._restart_attempts = 0
             print('Worker started')
+            if callback is not None:
+                try:
+                    callback()
+                except Exception:
+                    print(traceback.format_exc())
 
-    def stop(self):
+    def stop(self, callback=None):
         if self.is_running():
+            if callback is not None:
+                def cb():
+                    try:
+                        callback()
+                    except Exception:
+                        print(traceback.format_exc())
+                self._task.add_done_callback(lambda e: cb())
             self._is_running = False
             print('Worker stopped')
 
-    def restart(self):
+    def restart(self, callback=None):
         if self.is_running():
             self._task.add_done_callback(lambda e: self.start())
+            if callback is not None:
+                def cb():
+                    try:
+                        callback()
+                    except Exception:
+                        print(traceback.format_exc())
+                self._task.add_done_callback(lambda e: cb())
             self.stop()
         else:
             self.start()
@@ -52,11 +74,16 @@ class LoopRequestsTask(object):
                         response += message
                         print(message)
                 if response:
-                    await self._config.message_channel.send(response)
-                for i in range(self._config.long_pooling_interval // 2):
+                    await self._config.notification_channel.send(response)
+                for i in range(self._config.loop_requests_interval // 2):
                     if not self._is_running:
                         return
                     await asyncio.sleep(2)
         except Exception:
             print(traceback.format_exc())
-            self.restart()
+            if self._restart_attempts < self._MAX_RESTART_ATTEMPTS:
+                self._restart_attempts += 1
+                self.restart()
+            else:
+                print(f"Cannot restart shiki worker (attempts: "
+                      + f"{self._MAX_RESTART_ATTEMPTS})")
