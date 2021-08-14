@@ -13,11 +13,11 @@ from locallib import ShikiClient
 from locallib import invoke_timeout
 from discord_cogs import BotCog
 
-bot = commands.Bot(command_prefix=".", help_command=None)
+bot = commands.Bot(command_prefix=";", help_command=None)
 
 # region init
 
-VERSION = "RELEASE 1.3.8"
+VERSION = "RELEASE 1.3.10"
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 GITHUB = 'https://github.com/thisUsernameIsAlredyTaken/ShikimoriDiscordBot'
 try:
