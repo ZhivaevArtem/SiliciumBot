@@ -6,19 +6,20 @@ import traceback
 import discord
 from discord.ext import commands
 
-from locallib import BotCog
 from locallib import Config
 from locallib import DatabaseAdapter
 from locallib import LoopRequestsTask
 from locallib import ShikiClient
 from locallib import invoke_timeout
+from discord_cogs import BotCog
 
-bot = commands.Bot(command_prefix=";")
+bot = commands.Bot(command_prefix=".", help_command=None)
 
 # region init
 
 VERSION = "RELEASE 1.3.8"
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
+GITHUB = 'https://github.com/thisUsernameIsAlredyTaken/ShikimoriDiscordBot'
 try:
     global DB_ADAPTER
     global CFG
@@ -46,7 +47,7 @@ async def on_ready():
         bot.command_prefix = CFG.prefix
     if CFG.is_worker_running:
         LOOP_REQUESTS.start()
-    print('Bot ready')
+    print(f'Bot ready. Prefix: {CFG.prefix}')
 
 
 @bot.event
@@ -77,4 +78,9 @@ async def on_message(message: discord.Message):
         print(traceback.format_exc())
 
 
-bot.add_cog(BotCog(bot, CFG, ADMIN_ID, LOOP_REQUESTS, VERSION))
+bot.add_cog(BotCog(bot=bot,
+                   cfg=CFG,
+                   loop=LOOP_REQUESTS,
+                   admin_id=ADMIN_ID,
+                   version=VERSION,
+                   github=GITHUB))

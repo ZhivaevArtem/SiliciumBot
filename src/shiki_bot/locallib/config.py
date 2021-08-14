@@ -239,8 +239,6 @@ class Config(object):
     # endregion properties
 
     def add_joke(self, message: str, react: str):
-        if message in self._jokes and self._jokes[message] == react:
-            return
         table = 'dic_jokes_config_'
         columns = ['key_', 'val_']
         data = [[message, react]]
@@ -248,8 +246,6 @@ class Config(object):
         self._db_adapter.insert_data_distinct(table, columns, data)
 
     def delete_jokes(self, jokes: list[str]):
-        if len(set(jokes) & set(self._jokes.keys())) == 0:
-            return
         table = 'dic_jokes_config_'
         column = 'key_'
         for joke in jokes:
@@ -265,15 +261,11 @@ class Config(object):
         table = 'arr_usernames_config_'
         columns = ['usernames_']
         to_add_users = [u for u in usernames if u not in self._usernames]
-        if len(to_add_users) == 0:
-            return
         data = [[u] for u in to_add_users]
         self._usernames += to_add_users
         self._db_adapter.insert_data_distinct(table, columns, data)
 
     def delete_users(self, usernames: list[str]):
-        if len(set(usernames) & set(self._usernames)) == 0:
-            return
         table = 'arr_usernames_config_'
         column = 'usernames_'
         for user in usernames:

@@ -56,8 +56,6 @@ class LoopRequestsTask(object):
                         print(traceback.format_exc())
                 self._task.add_done_callback(lambda e: cb())
             self.stop()
-        else:
-            self.start()
 
     def is_running(self) -> bool:
         return self._task is not None and not self._task.done()
