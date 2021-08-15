@@ -142,8 +142,8 @@ class Config(object):
         data = [['activity_text', None, activity_text],
                 ['activity_type', int(activity_type), None]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'int_val_', 'str_val_'],
-                                              data)
+                                          ['key_', 'int_val_', 'str_val_'],
+                                          data)
 
     @property
     def calculator_timeout(self) -> float:
@@ -154,7 +154,7 @@ class Config(object):
         self._calculator_timeout = value
         data = [['calculator_timeout', value]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'float_val_'], data)
+                                          ['key_', 'float_val_'], data)
 
     @property
     def history_request_limit(self) -> int:
@@ -165,7 +165,7 @@ class Config(object):
         self._history_request_limit = value
         data = [['history_request_limit', value]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'int_val_'], data)
+                                          ['key_', 'int_val_'], data)
 
     @property
     def is_worker_running(self) -> bool:
@@ -178,7 +178,7 @@ class Config(object):
         self._is_worker_running = value
         data = [['is_worker_running', value]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'bool_val_'], data)
+                                          ['key_', 'bool_val_'], data)
 
     @property
     def jokes(self) -> dict[str, str]:
@@ -193,7 +193,7 @@ class Config(object):
         self._loop_requests_interval = value
         data = [['loop_requests_interval', value]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'int_val_'], data)
+                                          ['key_', 'int_val_'], data)
 
     @property
     def notification_channel(self) -> discord.TextChannel:
@@ -204,7 +204,7 @@ class Config(object):
         self._notification_channel = value
         data = [['notification_channel_id', value.id]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'int_val_'], data)
+                                          ['key_', 'int_val_'], data)
 
     @property
     def prefix(self) -> str:
@@ -215,7 +215,7 @@ class Config(object):
         self._prefix = value
         data = [['prefix', value]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'str_val_'], data)
+                                          ['key_', 'str_val_'], data)
 
     @property
     def status(self) -> str:
@@ -226,7 +226,7 @@ class Config(object):
         self._status = value
         data = [['status', str(value)]]
         G.DB_ADAPTER.insert_data_distinct('config_',
-                                              ['key_', 'str_val_'], data)
+                                          ['key_', 'str_val_'], data)
 
     @property
     def usernames(self) -> list[str]:

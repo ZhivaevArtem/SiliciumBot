@@ -51,4 +51,3 @@ class BotCog(ExceptionCog):
             if new_activity != G.CFG.activity:
                 G.CFG.activity = new_activity
                 await G.BOT.change_presence(activity=new_activity)
-
