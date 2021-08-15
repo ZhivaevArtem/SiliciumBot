@@ -1,9 +1,8 @@
 import json
 
 import discord
-from discord.ext import commands
 
-from .datbase_adapter import DatabaseAdapter
+from ..globals import G
 
 
 class TextChannelStub(discord.channel.TextChannel):
@@ -20,24 +19,24 @@ class Config(object):
 
     def _load(self):
         obj = {}
-        tables = self._db_adapter.fetch_table_names()
+        tables = G.DB_ADAPTER.fetch_table_names()
         for table in tables:
             if table == 'config_':
                 columns = ['key_', 'int_val_', 'str_val_',
                            'bool_val_', 'float_val_']
-                data = self._db_adapter.fetch_data(table, columns)
+                data = G.DB_ADAPTER.fetch_data(table, columns)
                 for d in data:
                     for i in range(1, len(d)):
                         if d[i] is not None:
                             obj[d[0]] = d[i]
             elif table.startswith('arr_'):
                 column = table[len('arr_'): len(table) - len('_config_')]
-                data = self._db_adapter.fetch_data(table, [f"{column}_"])
+                data = G.DB_ADAPTER.fetch_data(table, [f"{column}_"])
                 data_arr = [d[0] for d in data]
                 obj[column] = data_arr
             elif table.startswith('dic_'):
                 columns = ['key_', 'val_']
-                data = self._db_adapter.fetch_data(table, columns)
+                data = G.DB_ADAPTER.fetch_data(table, columns)
                 data_dic = {d[0]: d[1] for d in data}
                 prop_name = table[len('dic_'): len(table) - len('_config_')]
                 obj[prop_name] = data_dic
@@ -90,7 +89,7 @@ class Config(object):
             if mcid == 0:
                 self._notification_channel = TextChannelStub()
             else:
-                self._notification_channel = self._bot.get_channel(mcid)
+                self._notification_channel = G.BOT.get_channel(mcid)
             if self._notification_channel is None:
                 self._notification_channel = TextChannelStub()
         if 'prefix' in obj and obj['prefix'] is not None:
@@ -102,11 +101,8 @@ class Config(object):
 
     # region magic
 
-    def __init__(self, db_adapter: DatabaseAdapter, bot: commands.Bot):
+    def __init__(self):
         super().__init__()
-        self._bot = bot
-        self._db_adapter = db_adapter
-        # config itself
         self._activity = discord.Activity()
         self._calculator_timeout = 0.5
         self._history_request_limit = 5
@@ -145,7 +141,7 @@ class Config(object):
             activity_text = ''
         data = [['activity_text', None, activity_text],
                 ['activity_type', int(activity_type), None]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'int_val_', 'str_val_'],
                                               data)
 
@@ -157,7 +153,7 @@ class Config(object):
     def calculator_timeout(self, value: float):
         self._calculator_timeout = value
         data = [['calculator_timeout', value]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'float_val_'], data)
 
     @property
@@ -168,7 +164,7 @@ class Config(object):
     def history_request_limit(self, value: int):
         self._history_request_limit = value
         data = [['history_request_limit', value]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'int_val_'], data)
 
     @property
@@ -181,7 +177,7 @@ class Config(object):
             return
         self._is_worker_running = value
         data = [['is_worker_running', value]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'bool_val_'], data)
 
     @property
@@ -196,7 +192,7 @@ class Config(object):
     def loop_requests_interval(self, value: int):
         self._loop_requests_interval = value
         data = [['loop_requests_interval', value]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'int_val_'], data)
 
     @property
@@ -207,7 +203,7 @@ class Config(object):
     def notification_channel(self, value: discord.TextChannel):
         self._notification_channel = value
         data = [['notification_channel_id', value.id]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'int_val_'], data)
 
     @property
@@ -218,7 +214,7 @@ class Config(object):
     def prefix(self, value: str):
         self._prefix = value
         data = [['prefix', value]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'str_val_'], data)
 
     @property
@@ -229,7 +225,7 @@ class Config(object):
     def status(self, value: str):
         self._status = value
         data = [['status', str(value)]]
-        self._db_adapter.insert_data_distinct('config_',
+        G.DB_ADAPTER.insert_data_distinct('config_',
                                               ['key_', 'str_val_'], data)
 
     @property
@@ -243,7 +239,7 @@ class Config(object):
         columns = ['key_', 'val_']
         data = [[message, react]]
         self._jokes[message] = react
-        self._db_adapter.insert_data_distinct(table, columns, data)
+        G.DB_ADAPTER.insert_data_distinct(table, columns, data)
 
     def delete_jokes(self, jokes: list[str]):
         table = 'dic_jokes_config_'
@@ -251,11 +247,11 @@ class Config(object):
         for joke in jokes:
             if joke in self._jokes:
                 del self._jokes[joke]
-        self._db_adapter.remove_data_by_ids(table, column, jokes)
+        G.DB_ADAPTER.remove_data_by_ids(table, column, jokes)
 
     def truncate_jokes(self):
         self._jokes = {}
-        self._db_adapter.truncate_table('dic_jokes_config_')
+        G.DB_ADAPTER.truncate_table('dic_jokes_config_')
 
     def add_users(self, usernames: list[str]):
         table = 'arr_usernames_config_'
@@ -263,7 +259,7 @@ class Config(object):
         to_add_users = [u for u in usernames if u not in self._usernames]
         data = [[u] for u in to_add_users]
         self._usernames += to_add_users
-        self._db_adapter.insert_data_distinct(table, columns, data)
+        G.DB_ADAPTER.insert_data_distinct(table, columns, data)
 
     def delete_users(self, usernames: list[str]):
         table = 'arr_usernames_config_'
@@ -271,10 +267,10 @@ class Config(object):
         for user in usernames:
             if user in self._usernames:
                 self._usernames.remove(user)
-        self._db_adapter.remove_data_by_ids(table, column, usernames)
+        G.DB_ADAPTER.remove_data_by_ids(table, column, usernames)
 
     def truncate_users(self):
         self._usernames = []
-        self._db_adapter.truncate_table('arr_usernames_config_')
+        G.DB_ADAPTER.truncate_table('arr_usernames_config_')
 
     # endregion public

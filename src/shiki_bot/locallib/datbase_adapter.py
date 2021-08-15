@@ -1,7 +1,8 @@
-import os
 import traceback
 
 import psycopg2
+
+from ..globals import G
 
 
 class DatabaseAdapter(object):
@@ -24,10 +25,8 @@ class DatabaseAdapter(object):
             self._connect()
 
     def _connect(self):
-        """Use DATABASE_URL environment variable to connect"""
-        url = os.getenv('DATABASE_URL')
         print('Connecting to database')
-        self._pg_connection = psycopg2.connect(url)
+        self._pg_connection = psycopg2.connect(G.DATABASE_URL)
         return self
 
     # region magic
