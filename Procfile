@@ -1,1 +1,1 @@
-worker: python src/shiki_bot/__main__.py
+worker: python src/silicium_bot/__main__.py

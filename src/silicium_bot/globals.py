@@ -1,10 +1,10 @@
 import os
 import traceback
 
-from shiki_bot.locallib import Config
-from shiki_bot.locallib import DatabaseAdapter
-from shiki_bot.locallib import LoopRequestsTask
-from shiki_bot.locallib import ShikiClient
+from silicium_bot.locallib import Config
+from silicium_bot.locallib import DatabaseAdapter
+from silicium_bot.locallib import LoopRequestsTask
+from silicium_bot.locallib import ShikiClient
 
 
 class Globals(object):
