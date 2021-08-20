@@ -18,16 +18,45 @@ class ShikiModule(ModuleBase):
     async def shiki(self, ctx: commands.Context):
         pass
 
-    # shiki status
-    @shiki.command()
+    @shiki.group(invoke_without_command=True)
+    async def request(self, ctx: commands.Context):
+        pass
+
+    # shiki request limit
+    @request.command()
+    async def limit(self, ctx: commands.Context, new_limit=None):
+        self.raise_if_not_me(ctx)
+        if new_limit is None:
+            text = f"Shiki request limit: {G.CFG.history_request_limit}"
+            await ctx.send(text, reference=ctx.message)
+            return
+        try:
+            lim = self.claim(int(new_limit), 2, 50)
+            if lim != G.CFG.history_request_limit:
+                G.CFG.history_request_limit = lim
+            text = f"New shiki request limit: {lim}"
+            await ctx.send(text, reference=ctx.message)
+        except ValueError:
+            pass
+
+    # shiki daemon
+    @shiki.group(invoke_without_command=True)
+    async def daemon(self, ctx: commands.Context):
+        self.raise_if_not_me(ctx)
+        await ctx.send(
+            "Worker is running" if self.loop_requests_task.is_running()
+            else "Worker is not running", reference=ctx.message)
+
+    # shiki daemon status
+    @daemon.command()
     async def status(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         await ctx.send(
             "Worker is running" if self.loop_requests_task.is_running()
             else "Worker is not running", reference=ctx.message)
 
-    # shiki interval
-    @shiki.command()
+    # shiki daemon interval
+    @daemon.command()
     async def interval(self, ctx: commands.Context, new_interval=None):
         self.raise_if_not_me(ctx)
         if new_interval is None:
@@ -46,25 +75,8 @@ class ShikiModule(ModuleBase):
         except ValueError:
             pass
 
-    # shiki limit
-    @shiki.command()
-    async def limit(self, ctx: commands.Context, new_limit=None):
-        self.raise_if_not_me(ctx)
-        if new_limit is None:
-            text = f"Shiki request limit: {G.CFG.history_request_limit}"
-            await ctx.send(text, reference=ctx.message)
-            return
-        try:
-            lim = self.claim(int(new_limit), 2, 50)
-            if lim != G.CFG.history_request_limit:
-                G.CFG.history_request_limit = lim
-            text = f"New shiki request limit: {lim}"
-            await ctx.send(text, reference=ctx.message)
-        except ValueError:
-            pass
-
-    # shiki start
-    @shiki.command()
+    # shiki daemon start
+    @daemon.command()
     async def start(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if self.loop_requests_task.is_running():
@@ -75,8 +87,8 @@ class ShikiModule(ModuleBase):
                                                           "Worker started"))
         G.CFG.is_worker_running = True
 
-    # shiki stop
-    @shiki.command()
+    # shiki daemon stop
+    @daemon.command()
     async def stop(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if not self.loop_requests_task.is_running():
@@ -86,8 +98,8 @@ class ShikiModule(ModuleBase):
                                                          "Worker stopped"))
         G.CFG.is_worker_running = False
 
-    # shiki restart
-    @shiki.command()
+    # shiki daemon restart
+    @daemon.command()
     async def restart(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if not self.loop_requests_task.is_running():

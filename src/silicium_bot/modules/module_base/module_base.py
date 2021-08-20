@@ -53,7 +53,7 @@ class ModuleBase(commands.Cog):
         ignored = (commands.CommandNotFound,
                    commands.MissingRequiredArgument)
         if type(error) in ignored:
-            print('Ignored exception:')
+            print(f'Ignored exception caused by {ctx.author}')
             print(type(error))
             print(error)
             return
@@ -61,4 +61,3 @@ class ModuleBase(commands.Cog):
             raise error
         except Exception:
             print(traceback.format_exc())
-

@@ -16,15 +16,15 @@ class JokesModule(ModuleBase):
     # jokes
     @commands.group(invoke_without_command=True)
     async def jokes(self, ctx: commands.Context):
-        text = ", ".join([f"{j} -> {r}" for j, r in G.CFG.jokes.items()])
+        text = "\n".join([f"{j} -> {r}" for j, r in G.CFG.jokes.items()])
         if text:
             await ctx.send(text, reference=ctx.message)
         else:
             await ctx.send("There are no jokes")
 
     # jokes add
-    @jokes.command("add")
-    async def add_joke(self, ctx: commands.Context, message: str, react: str):
+    @jokes.command()
+    async def add(self, ctx: commands.Context, message: str, react: str):
         if message not in G.CFG.jokes \
            or G.CFG.jokes[message] != react:
             G.CFG.add_joke(message, react)
@@ -32,8 +32,8 @@ class JokesModule(ModuleBase):
                        reference=ctx.message)
 
     # jokes remove
-    @jokes.command("remove")
-    async def remove_jokes(self, ctx: commands.Context, *args):
+    @jokes.command()
+    async def remove(self, ctx: commands.Context, *args):
         if len(args) == 0:
             await ctx.send("At least one joke must be passed",
                            reference=ctx.message)
@@ -48,8 +48,8 @@ class JokesModule(ModuleBase):
         await ctx.send(f"Jokes removed: {text}", reference=ctx.message)
 
     # jokes truncate
-    @jokes.command("truncate")
-    async def truncate_jokes(self, ctx: commands.Context):
+    @jokes.command()
+    async def truncate(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if len(G.CFG.jokes) != 0:
             G.CFG.truncate_jokes()

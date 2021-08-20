@@ -35,16 +35,24 @@ class BotModule(ModuleBase):
     # bot status
     @bot.command()
     async def status(self, ctx: commands.Context, new_status: str):
-        if new_status in ('online', 'invisible', 'idle', 'dnd'):
-            stat = discord.Status(new_status)
+        status_map = {
+            'online': discord.Status.online,
+            'invisible': discord.Status.invisible,
+            'idle': discord.Status.idle,
+            'dnd': discord.Status.dnd
+        }
+        if new_status in status_map:
+            stat = status_map[new_status]
             if G.CFG.status != stat:
                 G.CFG.status = stat
+                G.CFG.activity = discord.Activity(
+                    name="", type=discord.ActivityType.unknown)
                 await G.BOT.change_presence(status=stat)
 
     # bot activity
     @bot.command()
     async def activity(self, ctx: commands.Context,
-                       activity_type: str, activity_text: str):
+                       activity_type: str, *, activity_text: str):
         type_map = {
             'playing': discord.ActivityType.playing,
             'streaming': discord.ActivityType.streaming,
@@ -56,4 +64,5 @@ class BotModule(ModuleBase):
                                             type=type_map[activity_type])
             if new_activity != G.CFG.activity:
                 G.CFG.activity = new_activity
+                G.CFG.status = ""
                 await G.BOT.change_presence(activity=new_activity)
