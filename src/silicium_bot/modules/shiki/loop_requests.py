@@ -3,8 +3,10 @@ import datetime
 import traceback
 from asyncio.tasks import Task
 
-from silicium_bot.modules.shiki.shiki_client import ShikiClient
+import discord
+
 from silicium_bot.globals import G
+from silicium_bot.modules.shiki.shiki_client import ShikiClient
 
 
 class LoopRequestsTask(object):
@@ -63,11 +65,12 @@ class LoopRequestsTask(object):
                 for username in G.CFG.usernames:
                     logs = self._shiki_client.retrieve_user_logs(username)
                     for log in logs:
-                        message = log.get_message() + "\n"
+                        message = log.get_embed_message() + "\n"
                         response += message
                         print(message)
                 if response:
-                    await G.CFG.notification_channel.send(response)
+                    embed = discord.Embed(description=response)
+                    await G.CFG.notification_channel.send(embed=embed)
                 for i in range(G.CFG.loop_requests_interval // 2):
                     if not self._is_running:
                         return

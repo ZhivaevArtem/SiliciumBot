@@ -11,6 +11,7 @@ class ShikiLog(object):
         self.id: int = data['id']
         self.username = username
         self.data = data
+        self.url = f"{G.SHIKI_API}/{data['target']['url']}"
         self.description: str = re.sub('</?\\w+>', '', data['description'])
         self.title: str = data['target']['name']
         self.russian_title: str = data['target']['russian']
@@ -18,6 +19,12 @@ class ShikiLog(object):
     def get_message(self):
         message = f"{self.username}: {self.description}:"
         message += f" {self.russian_title} / {self.title}"
+        return message
+
+    def get_embed_message(self):
+        url = f"{G.SHIKI_API}/{self.username}"
+        message = f"[{self.username}]({url}): {self.description}:"
+        message += f" [{self.russian_title} / {self.title}]({self.url})"
         return message
 
 
@@ -34,7 +41,7 @@ class ShikiClient(object):
 
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
         limit = G.CFG.history_request_limit
-        url = f"https://shikimori.one/api/users/{username}" \
+        url = f"{G.SHIKI_API}/api/users/{username}" \
               + f"/history?limit={limit}"
         res = requests.get(url=url, headers=self._headers)
         if not res.ok:
