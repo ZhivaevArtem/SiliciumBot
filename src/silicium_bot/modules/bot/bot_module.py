@@ -8,9 +8,9 @@ from silicium_bot.globals import G
 class BotModule(ModuleBase):
     async def on_ready(self):
         if G.CFG.activity.type != discord.ActivityType.unknown:
-            G.BOT.change_presence(activity=G.CFG.activity)
+            await G.BOT.change_presence(activity=G.CFG.activity)
         elif G.CFG.status != discord.Status.online:
-            G.BOT.change_presence(status=G.CFG.status)
+            await G.BOT.change_presence(status=G.CFG.status)
         if G.BOT.command_prefix != G.CFG.prefix:
             G.BOT.command_prefix = G.CFG.prefix
 
