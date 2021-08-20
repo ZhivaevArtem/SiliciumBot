@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 from silicium_bot.globals import G
@@ -44,7 +43,7 @@ Admin commands:
 `shiki daemon [status]`
 `shiki daemon [{start|stop|restart}]`
 `shiki daemon interval [seconds: int]`
-`shiki daemon limit [count: int]`
+`shiki request limit [count: int]`
 `shiki users [truncate]`
 `shiki usechannel`
 """.strip()

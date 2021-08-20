@@ -39,6 +39,7 @@ class JokesModule(ModuleBase):
                            reference=ctx.message)
             return
         to_del = [j for j in args if j in G.CFG.jokes]
+        to_del = list(set(to_del))
         if len(to_del) == 0:
             await ctx.send("There are no jokes to remove",
                            reference=ctx.message)
@@ -53,7 +54,7 @@ class JokesModule(ModuleBase):
         self.raise_if_not_me(ctx)
         if len(G.CFG.jokes) != 0:
             G.CFG.truncate_jokes()
-        await ctx.send("Jokes truncated")
+        await ctx.send("Jokes truncated", reference=ctx.message)
 
 
 

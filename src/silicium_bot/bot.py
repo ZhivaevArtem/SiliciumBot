@@ -9,7 +9,9 @@ from silicium_bot.database_adapter import DatabaseAdapter
 from silicium_bot.globals import G
 from silicium_bot.modules import cogs
 
-bot = commands.Bot(command_prefix=";", help_command=None)
+bot = commands.Bot(command_prefix=";", help_command=None,
+                   case_insensitive=True)
+
 
 # region init
 
@@ -21,6 +23,7 @@ except Exception:
     print("Failed to init")
     print(traceback.format_exc())
     sys.exit(-1)
+
 
 # endregion init
 
@@ -50,6 +53,7 @@ async def on_message(message: discord.Message):
         await bot.process_commands(message)
     except Exception:
         print(traceback.format_exc())
+
 
 for cog in cogs:
     bot.add_cog(cog)

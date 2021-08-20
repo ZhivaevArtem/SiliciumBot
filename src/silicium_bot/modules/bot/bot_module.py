@@ -23,7 +23,7 @@ class BotModule(ModuleBase):
     async def prefix(self, ctx: commands.Context, new_prefix=None):
         self.raise_if_not_me(ctx)
         if new_prefix is None:
-            await ctx.send(f'Current prefix: "{self.bot.command_prefix}"',
+            await ctx.send(f'Current prefix: "{G.BOT.command_prefix}"',
                            reference=ctx.message)
         else:
             if G.CFG.prefix != new_prefix:
@@ -34,7 +34,9 @@ class BotModule(ModuleBase):
 
     # bot status
     @bot.command()
-    async def status(self, ctx: commands.Context, new_status: str):
+    async def status(self, ctx: commands.Context, new_status=None):
+        if new_status is None:
+            await ctx.send(f"{G.CFG.status}", reference=ctx.message)
         status_map = {
             'online': discord.Status.online,
             'invisible': discord.Status.invisible,
@@ -52,7 +54,21 @@ class BotModule(ModuleBase):
     # bot activity
     @bot.command()
     async def activity(self, ctx: commands.Context,
-                       activity_type: str, *, activity_text: str):
+                       activity_type=None, *, activity_text=None):
+        if activity_type is None and activity_text is None:
+            type_str_map = {
+                discord.ActivityType.playing:   'playing',
+                discord.ActivityType.listening: 'listening',
+                discord.ActivityType.watching:  'watching',
+                discord.ActivityType.streaming: 'streaming',
+            }
+            if G.CFG.activity.type in type_str_map:
+                text = f"{type_str_map[G.CFG.activity.type]}:" \
+                       + " {G.CFG.activity.name}"
+            else:
+                text = "There is no activity"
+            await ctx.send(text, reference=ctx.message)
+            return
         type_map = {
             'playing': discord.ActivityType.playing,
             'streaming': discord.ActivityType.streaming,

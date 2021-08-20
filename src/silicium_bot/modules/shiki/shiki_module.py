@@ -44,16 +44,16 @@ class ShikiModule(ModuleBase):
     async def daemon(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         await ctx.send(
-            "Worker is running" if self.loop_requests_task.is_running()
-            else "Worker is not running", reference=ctx.message)
+            "Daemon is running" if self.loop_requests_task.is_running()
+            else "Daemon is not running", reference=ctx.message)
 
     # shiki daemon status
     @daemon.command()
     async def status(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         await ctx.send(
-            "Worker is running" if self.loop_requests_task.is_running()
-            else "Worker is not running", reference=ctx.message)
+            "Daemon is running" if self.loop_requests_task.is_running()
+            else "Daemon is not running", reference=ctx.message)
 
     # shiki daemon interval
     @daemon.command()
@@ -80,11 +80,11 @@ class ShikiModule(ModuleBase):
     async def start(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if self.loop_requests_task.is_running():
-            await ctx.send("Worker is already running",
+            await ctx.send("Daemon is already running",
                            reference=ctx.message)
             return
         self.loop_requests_task.start(self.send_sync_func(ctx,
-                                                          "Worker started"))
+                                                          "Daemon started"))
         G.CFG.is_worker_running = True
 
     # shiki daemon stop
@@ -92,10 +92,10 @@ class ShikiModule(ModuleBase):
     async def stop(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if not self.loop_requests_task.is_running():
-            await ctx.send("Worker has already been stopped")
+            await ctx.send("Daemon has already been stopped")
             return
         self.loop_requests_task.stop(self.send_sync_func(ctx,
-                                                         "Worker stopped"))
+                                                         "Daemon stopped"))
         G.CFG.is_worker_running = False
 
     # shiki daemon restart
@@ -103,10 +103,10 @@ class ShikiModule(ModuleBase):
     async def restart(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if not self.loop_requests_task.is_running():
-            await ctx.send("Worker is not running")
+            await ctx.send("Daemon is not running", reference=ctx.message)
             return
         self.loop_requests_task.restart(
-            self.send_sync_func(ctx, "Worker restarted"))
+            self.send_sync_func(ctx, "Daemon restarted"))
 
     # shiki users
     @shiki.group(invoke_without_command=True)
@@ -125,8 +125,9 @@ class ShikiModule(ModuleBase):
                            reference=ctx.message)
             return
         to_add = [u for u in args if u not in G.CFG.usernames]
+        to_add = list(set(to_add))
         if len(to_add) == 0:
-            await ctx.send("There are no users to add")
+            await ctx.send("There are no users to add", reference=ctx.message)
             return
         G.CFG.add_users(to_add)
         text = ", ".join(to_add)
@@ -140,8 +141,10 @@ class ShikiModule(ModuleBase):
                            reference=ctx.message)
             return
         to_del = [u for u in args if u in G.CFG.usernames]
+        to_del = list(set(to_del))
         if len(to_del) == 0:
-            await ctx.send("There are no users to remove")
+            await ctx.send("There are no users to remove",
+                           reference=ctx.message)
             return
         G.CFG.delete_users(to_del)
         text = ", ".join(to_del)

@@ -21,7 +21,7 @@ class LoopRequestsTask(object):
             self._is_running = True
             self._task = G.BOT.loop.create_task(self._run())
             self._restart_attempts = 0
-            print('Worker started')
+            print('Daemon started')
             if callback is not None:
                 try:
                     callback()
@@ -38,7 +38,7 @@ class LoopRequestsTask(object):
                         print(traceback.format_exc())
                 self._task.add_done_callback(lambda e: cb())
             self._is_running = False
-            print('Worker stopped')
+            print('Daemon stopped')
 
     def restart(self, callback=None):
         if self.is_running():
@@ -58,7 +58,7 @@ class LoopRequestsTask(object):
     async def _run(self):
         try:
             while self._is_running:
-                print(f'Worker: {datetime.datetime.now()}')
+                print(f'Daemon: {datetime.datetime.now()}')
                 response = ""
                 for username in G.CFG.usernames:
                     logs = self._shiki_client.retrieve_user_logs(username)

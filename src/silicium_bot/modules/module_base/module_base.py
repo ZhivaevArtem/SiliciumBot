@@ -7,6 +7,10 @@ from discord.ext import commands
 from silicium_bot.globals import G
 
 
+def _wrapper(func, dic, *args, **kwargs):
+    dic['result'] = func(*args, **kwargs)
+
+
 class ModuleBase(commands.Cog):
     async def on_message(self, message) -> bool:
         return False
@@ -22,11 +26,7 @@ class ModuleBase(commands.Cog):
         m = multiprocessing.Manager()
         dic = m.dict()
         dic['result'] = None
-
-        def wrapper(func, dic, *args, **kwargs):
-            dic['result'] = func(*args, **kwargs)
-
-        p = multiprocessing.Process(target=wrapper,
+        p = multiprocessing.Process(target=_wrapper,
                                     args=(func, dic) + args, kwargs=kwargs)
         p.start()
         p.join(seconds)
