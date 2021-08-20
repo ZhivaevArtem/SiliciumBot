@@ -18,7 +18,6 @@ bot = commands.Bot(command_prefix=";", help_command=None,
 try:
     G.BOT = bot
     G.DB_ADAPTER = DatabaseAdapter()
-    G.CFG = Config()
 except Exception:
     print("Failed to init")
     print(traceback.format_exc())
@@ -31,6 +30,7 @@ except Exception:
 @bot.event
 async def on_ready():
     try:
+        G.CFG = Config()
         for cog in cogs:
             await cog.on_ready()
         print(f"Bot ready. Prefix: {bot.command_prefix}")
