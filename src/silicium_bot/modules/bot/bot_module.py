@@ -1,12 +1,18 @@
 import discord
 from discord.ext import commands
 
-from .exception_cog import ExceptionCog
-from .functions import *
-from ..globals import G
+from ..module_base import ModuleBase
+from ...globals import G
 
 
-class BotCog(ExceptionCog):
+class BotModule(ModuleBase):
+    def on_ready(self):
+        if G.CFG.activity.type != discord.ActivityType.unknown:
+            G.BOT.change_presence(activity=G.CFG.activity)
+        elif G.CFG.status != discord.Status.online:
+            G.BOT.change_presence(status=G.CFG.status)
+        if G.BOT.command_prefix != G.CFG.prefix:
+            G.BOT.command_prefix = G.CFG.prefix
 
     @commands.group(invoke_without_command=True)
     async def bot(self, ctx: commands.Context):
@@ -15,7 +21,7 @@ class BotCog(ExceptionCog):
     # bot prefix
     @bot.command()
     async def prefix(self, ctx: commands.Context, new_prefix=None):
-        raise_if_not_me(ctx)
+        self.raise_if_not_me(ctx)
         if new_prefix is None:
             await ctx.send(f'Current prefix: "{self.bot.command_prefix}"',
                            reference=ctx.message)
@@ -40,10 +46,10 @@ class BotCog(ExceptionCog):
     async def activity(self, ctx: commands.Context,
                        activity_type: str, activity_text: str):
         type_map = {
-            'playing':   discord.ActivityType.playing,
+            'playing': discord.ActivityType.playing,
             'streaming': discord.ActivityType.streaming,
             'listening': discord.ActivityType.listening,
-            'watching':  discord.ActivityType.watching,
+            'watching': discord.ActivityType.watching,
         }
         if activity_type in type_map:
             new_activity = discord.Activity(name=activity_text,

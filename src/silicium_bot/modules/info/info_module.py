@@ -1,11 +1,10 @@
 from discord.ext import commands
 
-from exception_cog import ExceptionCog
-from ..globals import G
+from ..module_base import ModuleBase
+from ...globals import G
 
 
-class InfoCog(ExceptionCog):
-
+class InfoModule(ModuleBase):
     # github
     @commands.command()
     async def github(self, ctx: commands.Context):
@@ -39,5 +38,6 @@ Admin commands:
 `shiki limit [count: int]`
 `shiki users truncate`
 `shiki usechannel`
-""".strip()
+    """.strip()
         await ctx.send(help_string, reference=ctx.message)
+

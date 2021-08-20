@@ -1,11 +1,17 @@
 from discord.ext import commands
 
-from .exception_cog import ExceptionCog
-from .functions import *
-from ..globals import G
+from ..module_base import ModuleBase
+from ...globals import G
 
 
-class JokesCog(ExceptionCog):
+class JokesModule(ModuleBase):
+    def on_message(self, message) -> bool:
+        content = message.content.strip()
+        if content in G.CFG.jokes and len(G.CFG.jokes) > 0:
+            await message.channel.send(G.CFG.jokes[content],
+                                       reference=message)
+            return True
+        return False
 
     # jokes
     @commands.group(invoke_without_command=True)
@@ -44,7 +50,10 @@ class JokesCog(ExceptionCog):
     # jokes truncate
     @jokes.command("truncate")
     async def truncate_jokes(self, ctx: commands.Context):
-        raise_if_not_me(ctx)
+        self.raise_if_not_me(ctx)
         if len(G.CFG.jokes) != 0:
             G.CFG.truncate_jokes()
         await ctx.send("Jokes truncated")
+
+
+

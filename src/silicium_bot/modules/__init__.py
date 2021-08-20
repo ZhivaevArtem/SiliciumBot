@@ -1,6 +1,13 @@
-from bot_cog import BotCog
-from info_cog import InfoCog
-from jokes_cog import JokesCog
-from shiki_cog import ShikiCog
+from .bot import BotModule
+from .jokes import JokesModule
+from .shiki import ShikiModule
+from .calculator import CalculatorModule
+from .info import InfoModule
 
-cogs = [BotCog, InfoCog, JokesCog, ShikiCog]
+cogs = [
+    JokesModule,
+    CalculatorModule,
+    BotModule,
+    ShikiModule,
+    InfoModule
+]
