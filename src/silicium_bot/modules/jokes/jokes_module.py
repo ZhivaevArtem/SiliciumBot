@@ -1,11 +1,11 @@
 from discord.ext import commands
 
-from ..module_base import ModuleBase
-from ...globals import G
+from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.globals import G
 
 
 class JokesModule(ModuleBase):
-    def on_message(self, message) -> bool:
+    async def on_message(self, message) -> bool:
         content = message.content.strip()
         if content in G.CFG.jokes and len(G.CFG.jokes) > 0:
             await message.channel.send(G.CFG.jokes[content],

@@ -4,18 +4,14 @@ import traceback
 
 from discord.ext import commands
 
-from ...globals import G
-
-
-def _wrapper(func, dic, *args, **kwargs):
-    dic['result'] = func(*args, **kwargs)
+from silicium_bot.globals import G
 
 
 class ModuleBase(commands.Cog):
-    def on_message(self, message) -> bool:
+    async def on_message(self, message) -> bool:
         return False
 
-    def on_ready(self):
+    async def on_ready(self):
         pass
 
     def raise_if_not_me(self, ctx):

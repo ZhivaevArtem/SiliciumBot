@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands
 
-from ..module_base import ModuleBase
-from ...globals import G
+from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.globals import G
 
 
 class BotModule(ModuleBase):
-    def on_ready(self):
+    async def on_ready(self):
         if G.CFG.activity.type != discord.ActivityType.unknown:
             G.BOT.change_presence(activity=G.CFG.activity)
         elif G.CFG.status != discord.Status.online:

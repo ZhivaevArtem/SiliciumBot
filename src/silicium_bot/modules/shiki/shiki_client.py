@@ -2,7 +2,7 @@ import re
 
 import requests
 
-from ...globals import G
+from silicium_bot.globals import G
 
 
 class ShikiLog(object):

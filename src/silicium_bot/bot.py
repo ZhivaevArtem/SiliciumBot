@@ -7,7 +7,7 @@ from discord.ext import commands
 from silicium_bot.configuration import Config
 from silicium_bot.database_adapter import DatabaseAdapter
 from silicium_bot.globals import G
-from .modules import cogs
+from silicium_bot.modules import cogs
 
 bot = commands.Bot(command_prefix=";", help_command=None)
 
@@ -29,8 +29,10 @@ except Exception:
 async def on_ready():
     try:
         for cog in cogs:
-            cog.on_ready()
+            await cog.on_ready()
         print(f"Bot ready. Prefix: {bot.command_prefix}")
+        print(f"Config:")
+        print(f"{G.CFG}")
     except Exception:
         print("Failed to start")
         print(traceback.format_exc())
@@ -43,8 +45,11 @@ async def on_message(message: discord.Message):
         if message.author == bot.user:
             return
         for cog in cogs:
-            if cog.on_message(message):
+            if await cog.on_message(message):
                 return
         await bot.process_commands(message)
     except Exception:
         print(traceback.format_exc())
+
+for cog in cogs:
+    bot.add_cog(cog)

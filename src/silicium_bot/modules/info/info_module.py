@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from ..module_base import ModuleBase
-from ...globals import G
+from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.globals import G
 
 
 class InfoModule(ModuleBase):

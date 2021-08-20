@@ -5,9 +5,9 @@ from .calculator import CalculatorModule
 from .info import InfoModule
 
 cogs = [
-    JokesModule,
-    CalculatorModule,
-    BotModule,
-    ShikiModule,
-    InfoModule
+    JokesModule(),
+    CalculatorModule(),
+    BotModule(),
+    ShikiModule(),
+    InfoModule()
 ]

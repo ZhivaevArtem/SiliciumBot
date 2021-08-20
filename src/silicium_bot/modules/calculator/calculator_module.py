@@ -2,12 +2,12 @@ import re
 
 from discord.ext import commands
 
-from ..module_base import ModuleBase
-from ...globals import G
+from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.globals import G
 
 
 class CalculatorModule(ModuleBase):
-    def on_message(self, message) -> bool:
+    async def on_message(self, message) -> bool:
         content = message.content.strip()
         if re.match(r'^.*[0-9]+.*$', content) \
            and re.match(r'^[0-9/*\-+. \t\n()]+$', content) \

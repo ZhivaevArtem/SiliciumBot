@@ -2,9 +2,6 @@ import os
 
 from discord.ext import commands
 
-from ..configuration import Config
-from ..database_adapter import DatabaseAdapter
-
 
 class Glob:
     def __init__(self):
@@ -15,8 +12,8 @@ class Glob:
                       + "/ShikimoriDiscordBot "
         self.SHIKI_API = "https://shikimori.one"
         self.BOT: commands.Bot = None
-        self.DB_ADAPTER: DatabaseAdapter = None
-        self.CFG: Config = None
+        self.DB_ADAPTER = None
+        self.CFG = None
 
 
 G = Glob()

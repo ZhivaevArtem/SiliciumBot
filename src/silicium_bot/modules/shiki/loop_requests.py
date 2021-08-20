@@ -3,8 +3,8 @@ import datetime
 import traceback
 from asyncio.tasks import Task
 
-from .shiki_client import ShikiClient
-from ...globals import G
+from silicium_bot.modules.shiki.shiki_client import ShikiClient
+from silicium_bot.globals import G
 
 
 class LoopRequestsTask(object):

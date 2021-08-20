@@ -1,15 +1,15 @@
 from discord.ext import commands
 
-from .loop_requests import LoopRequestsTask
-from ..module_base import ModuleBase
-from ...globals import G
+from silicium_bot.modules.shiki.loop_requests import LoopRequestsTask
+from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.globals import G
 
 
 class ShikiModule(ModuleBase):
     def __init__(self):
         self.loop_requests_task = None
 
-    def on_ready(self):
+    async def on_ready(self):
         self.loop_requests_task = LoopRequestsTask()
         if G.CFG.is_worker_running:
             self.loop_requests_task.start()
