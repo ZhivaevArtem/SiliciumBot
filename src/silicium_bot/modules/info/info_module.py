@@ -19,7 +19,7 @@ class InfoModule(ModuleBase):
     @commands.command()
     async def config(self, ctx):
         self.raise_if_not_me(ctx)
-        await ctx.send(f'{str(G.CFG).replace("<@!", "<@ !")}',
+        await ctx.send(f'{str(G.CFG).replace("<@", "<@ ")}',
                        reference=ctx.message)
 
     # help
