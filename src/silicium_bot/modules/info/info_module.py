@@ -19,17 +19,19 @@ class InfoModule(ModuleBase):
     @commands.command()
     async def config(self, ctx):
         self.raise_if_not_me(ctx)
-        await ctx.send(f'{G.CFG}', reference=ctx.message)
+        await ctx.send(f'{str(G.CFG).replace("<@!", "<@ !")}',
+                       reference=ctx.message)
 
     # help
     @commands.command()
     async def help(self, ctx):
         help_string = """
-`bot activity [{listening|playing|streaming|watching} <text: str>]`
+`bot activity [{listening|playing|watching} <text: str>]`
 `bot status [{dnd|idle|invisible|online}]`
 `jokes [add <trigger: str> <react: str>]`
 `jokes [remove [triggers...: str]]`
 `shiki users [{add|remove} [usernames...: str]]`
+`shiki notifchannel`
 `help`
 `version`
 `github`
@@ -44,6 +46,7 @@ Admin commands:
 `shiki daemon [{start|stop|restart}]`
 `shiki daemon interval [seconds: int]`
 `shiki request limit [count: int]`
+`shiki notifchannel this`
 `shiki users [truncate]`
 `shiki usechannel`
 """.strip()

@@ -162,10 +162,18 @@ class ShikiModule(ModuleBase):
         await ctx.send("Users truncated", reference=ctx.message)
 
     # shiki usechannel
-    @shiki.command()
-    async def usechannel(self, ctx: commands.Context):
+    @shiki.group(invoke_without_command=True)
+    async def notifchannel(self, ctx: commands.Context):
+        text = f"{G.CFG.notification_channel.guild}"
+        text += f" > {G.CFG.notification_channel.category}"
+        text += f" > {G.CFG.notification_channel.name}"
+        await ctx.send(text, reference=ctx.message)
+
+    @notifchannel.command()
+    async def this(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if ctx.channel.id != G.CFG.notification_channel.id:
             G.CFG.notification_channel = ctx.channel
         await ctx.send("This channel will be used for notifications",
                        reference=ctx.message)
+

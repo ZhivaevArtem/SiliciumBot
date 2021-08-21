@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 
-from silicium_bot.modules.module_base import ModuleBase
 from silicium_bot.globals import G
+from silicium_bot.modules.module_base import ModuleBase
 
 
 class BotModule(ModuleBase):
@@ -52,26 +52,24 @@ class BotModule(ModuleBase):
                 await G.BOT.change_presence(status=stat)
 
     # bot activity
-    @bot.command()
+    @bot.group(invoke_without_command=True)
     async def activity(self, ctx: commands.Context,
                        activity_type=None, *, activity_text=None):
         if activity_type is None and activity_text is None:
             type_str_map = {
                 discord.ActivityType.playing:   'playing',
                 discord.ActivityType.listening: 'listening',
-                discord.ActivityType.watching:  'watching',
-                discord.ActivityType.streaming: 'streaming',
+                discord.ActivityType.watching:  'watching'
             }
             if G.CFG.activity.type in type_str_map:
                 text = f"{type_str_map[G.CFG.activity.type]}:" \
-                       + " {G.CFG.activity.name}"
+                       + f" {G.CFG.activity.name}"
             else:
                 text = "There is no activity"
             await ctx.send(text, reference=ctx.message)
             return
         type_map = {
             'playing': discord.ActivityType.playing,
-            'streaming': discord.ActivityType.streaming,
             'listening': discord.ActivityType.listening,
             'watching': discord.ActivityType.watching,
         }
@@ -80,5 +78,5 @@ class BotModule(ModuleBase):
                                             type=type_map[activity_type])
             if new_activity != G.CFG.activity:
                 G.CFG.activity = new_activity
-                G.CFG.status = ""
+                G.CFG.status = discord.Status.online
                 await G.BOT.change_presence(activity=new_activity)
