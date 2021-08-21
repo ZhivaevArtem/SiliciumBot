@@ -18,7 +18,7 @@ class JokesModule(ModuleBase):
     async def jokes(self, ctx: commands.Context):
         text = "\n".join([f"{j} -> {r}" for j, r in G.CFG.jokes.items()])
         if text:
-            await ctx.send(text.replace("<@!", "<@ !"), reference=ctx.message)
+            await ctx.send(text.replace("<@", "<@ "), reference=ctx.message)
         else:
             await ctx.send("There are no jokes")
 
