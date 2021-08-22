@@ -65,7 +65,7 @@ class LoopRequestsTask(object):
                 for username in G.CFG.usernames:
                     logs = self._shiki_client.retrieve_user_logs(username)
                     for log in logs:
-                        message = log.get_embed_message() + "\n"
+                        message = log.get_embed_message() + "\n\n"
                         response += message
                         print(message)
                 if response:
