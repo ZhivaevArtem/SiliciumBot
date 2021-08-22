@@ -8,18 +8,18 @@ PostgreSQL 13.3
 
 Initialization SQL:
 ```
-CREATE TABLE arr_usernames_config_
+CREATE TABLE arr_str_usernames_botdata_
 (
-    usernames_ character varying(31),
+    val_ character varying(31),
     CONSTRAINT arr_usernames_config__pkey PRIMARY KEY (usernames_)
 );
-CREATE TABLE dic_jokes_config_
+CREATE TABLE dic_str_str_jokes_botdata_
 (
     key_ character varying(31),
     val_ character varying(255) NOT NULL,
     CONSTRAINT dic_jokes_config__pkey PRIMARY KEY (key_)
 );
-CREATE TABLE config_
+CREATE TABLE config_botdata_
 (
     key_       character varying(31),
     int_val_   numeric(31,0),
@@ -28,7 +28,7 @@ CREATE TABLE config_
     float_val_ real,
     CONSTRAINT config__pkey PRIMARY KEY (key_)
 );
-INSERT INTO config_(key_, int_val_, str_val_, bool_val_, float_val_)
+INSERT INTO config_botdata_(key_, int_val_, str_val_, bool_val_, float_val_)
 VALUES
 ('activity_text',            NULL, '',       NULL, NULL),
 ('activity_type',            -1,   NULL,     NULL, NULL),

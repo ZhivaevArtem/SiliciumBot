@@ -21,83 +21,100 @@ class Config(object):
         obj = {}
         tables = G.DB_ADAPTER.fetch_table_names()
         for table in tables:
-            if table == 'config_':
+            if not table.endswith('botdata_'):
+                continue
+            if table == 'config_botdata_':
                 columns = ['key_', 'int_val_', 'str_val_',
                            'bool_val_', 'float_val_']
                 data = G.DB_ADAPTER.fetch_data(table, columns)
                 for d in data:
-                    for i in range(1, len(d)):
-                        if d[i] is not None:
-                            obj[d[0]] = d[i]
+                    if d[1] is not None:
+                        obj[d[0]] = int(d[1])
+                    elif d[2] is not None:
+                        obj[d[0]] = str(d[2])
+                    elif d[3] is not None:
+                        obj[d[0]] = bool(d[3])
+                    elif d[4] is not None:
+                        obj[d[0]] = float(d[4])
             elif table.startswith('arr_'):
-                column = table[len('arr_'): len(table) - len('_config_')]
-                data = G.DB_ADAPTER.fetch_data(table, [f"{column}_"])
-                data_arr = [d[0] for d in data]
+                # arr_<val_type>_<prop_name>_botdata_
+                _, val_type, prop_name = table.split('_')
+                if val_type == 'int':
+                    val_type = int
+                elif val_type == 'str':
+                    val_type = str
+                elif val_type == 'bool':
+                    val_type = bool
+                elif val_type == 'float':
+                    val_type = float
+                column = 'val_'
+                data = G.DB_ADAPTER.fetch_data(table, [column])
+                data_arr = [val_type(d[0]) for d in data]
                 obj[column] = data_arr
             elif table.startswith('dic_'):
+                # dic_<key_type>_<val_type>_<prop name>_botdata_
+                _, key_type, val_type, prop_name = table.split('_')
+                if key_type == 'int':
+                    key_type = int
+                elif key_type == 'str':
+                    key_type = str
+                elif key_type == 'bool':
+                    key_type = bool
+                elif key_type == 'float':
+                    key_type = float
+                if val_type == 'int':
+                    val_type = int
+                elif val_type == 'str':
+                    val_type = str
+                elif val_type == 'bool':
+                    val_type = bool
+                elif val_type == 'float':
+                    val_type = float
                 columns = ['key_', 'val_']
                 data = G.DB_ADAPTER.fetch_data(table, columns)
-                data_dic = {d[0]: d[1] for d in data}
-                prop_name = table[len('dic_'): len(table) - len('_config_')]
+                data_dic = {key_type(d[0]): val_type(d[1]) for d in data}
                 obj[prop_name] = data_dic
         self._from_dict(obj)
-        return self
 
     def _to_dict(self) -> dict:
         return {
             'activity_text': self._activity.name,
-            'activity_type': int(self._activity.type),
+            'activity_type': self._activity.type,
             'calculator_timeout': self._calculator_timeout,
-            'history_request_limit': int(self._history_request_limit),
+            'history_request_limit': self._history_request_limit,
             'is_worker_running': self._is_worker_running,
             'jokes': self._jokes,
-            'loop_requests_interval': int(self._loop_requests_interval),
-            'notification_channel_id': int(self._notification_channel.id),
+            'loop_requests_interval': self._loop_requests_interval,
+            'notification_channel_id': self._notification_channel.id,
             'prefix': self._prefix,
             'status': str(self._status),
             'usernames': self._usernames
         }
 
     def _from_dict(self, obj):
-        if 'activity_text' in obj and obj['activity_text'] is not None \
-           and 'activity_type' in obj and obj['activity_type'] is not None:
-            activity_text = obj['activity_text']
-            activity_type = int(obj['activity_type'])
-            try:
-                activity_type = discord.ActivityType(activity_type)
-                self._activity = discord.Activity(name=activity_text,
-                                                  type=activity_type)
-            except ValueError:
-                self._activity = discord.Activity()
-        if 'calculator_timeout' in obj \
-           and obj['calculator_timeout'] is not None:
-            self._calculator_timeout = obj['calculator_timeout']
-        if 'history_request_limit' in obj \
-           and obj['history_request_limit'] is not None:
-            self._history_request_limit \
-                = int(obj['history_request_limit'])
-        if 'is_worker_running' in obj and obj['is_worker_running'] is not None:
-            self._is_worker_running = obj['is_worker_running']
-        if 'jokes' in obj and obj['jokes'] is not None:
-            self._jokes = obj['jokes']
-        if 'loop_requests_interval' in obj \
-           and obj['loop_requests_interval'] is not None:
-            self._loop_requests_interval = int(obj['loop_requests_interval'])
-        if 'notification_channel_id' in obj \
-           and obj['notification_channel_id'] is not None:
-            mcid = int(obj['notification_channel_id'])
-            if mcid == 0:
-                self._notification_channel = TextChannelStub()
-            else:
-                self._notification_channel = G.BOT.get_channel(mcid)
-            if self._notification_channel is None:
-                self._notification_channel = TextChannelStub()
-        if 'prefix' in obj and obj['prefix'] is not None:
-            self._prefix = obj['prefix']
-        if 'status' in obj and obj['status'] is not None:
-            self._status = discord.Status(obj['status'])
-        if 'usernames' in obj and obj['usernames'] is not None:
-            self._usernames = obj['usernames'][:]
+        activity_text = obj['activity_text']
+        activity_type = int(obj['activity_type'])
+        activity_type = discord.ActivityType(activity_type)
+        self._activity = discord.Activity(name=activity_text,
+                                          type=activity_type)
+
+        self._calculator_timeout = obj['calculator_timeout']
+        self._history_request_limit = obj['history_request_limit']
+        self._is_worker_running = obj['is_worker_running']
+        self._jokes = obj['jokes']
+        self._loop_requests_interval = int(obj['loop_requests_interval'])
+
+        mcid = obj['notification_channel_id']
+        if mcid == 0:
+            self._notification_channel = TextChannelStub()
+        else:
+            self._notification_channel = G.BOT.get_channel(mcid)
+        if self._notification_channel is None:
+            self._notification_channel = TextChannelStub()
+
+        self._prefix = obj['prefix']
+        self._status = discord.Status(obj['status'])
+        self._usernames = obj['usernames'][:]
 
     # region magic
 
