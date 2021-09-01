@@ -49,4 +49,4 @@ URL format:
 ```postgres://<username>:<password>@<address>:<port>/<database>```
 
 # How to run
-```python src/shiki_bot/__main__.py```
+```python src/silicium_bot/__main__.py```
