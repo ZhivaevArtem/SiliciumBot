@@ -79,20 +79,20 @@ CREATE TABLE IF NOT EXISTS {self.name} (
 
 
 class MultiValueTable(Table):
-    COL_FMT = '{}_value'
-    VAL_NAME_FMT = 'name'
+    VAL_COLNAME_FMT = '{}_value'
+    NAME_COLNAME = 'name'
 
     def __init__(self, name, additional_columns=[]):
         super().__init__(name, [
-            Column(MultiValueTable.VAL_NAME_FMT, DB_TYPES[str], length=31,
+            Column(MultiValueTable.NAME_COLNAME, DB_TYPES[str], length=31,
                    primary=True),
-            Column(MultiValueTable.COL_FMT.format(int.__name__),
+            Column(MultiValueTable.VAL_COLNAME_FMT.format(int.__name__),
                    DB_TYPES[int], length=31),
-            Column(MultiValueTable.COL_FMT.format(str.__name__),
+            Column(MultiValueTable.VAL_COLNAME_FMT.format(str.__name__),
                    DB_TYPES[str], length=255),
-            Column(MultiValueTable.COL_FMT.format(bool.__name__),
+            Column(MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__),
                    DB_TYPES[bool]),
-            Column(MultiValueTable.COL_FMT.format(float.__name__),
+            Column(MultiValueTable.VAL_COLNAME_FMT.format(float.__name__),
                    DB_TYPES[float])
         ])
         for ac in additional_columns:
@@ -100,17 +100,17 @@ class MultiValueTable(Table):
 
 
 class DictTable(MultiValueTable):
-    NAME_FMT = 'dic_{}'
-    KEY_COL_NAME = 'key'
+    TABLE_NAME_FMT = 'dic_{}'
+    KEY_COLNAME = 'key'
 
     def __init__(self, key_type):
-        column = Column(DictTable.KEY_COL_NAME,
+        column = Column(DictTable.KEY_COLNAME,
                         DB_TYPES[key_type], primary=True)
         if key_type is int:
             column.length = 31
         elif key_type is str:
             column.length = 255
-        super().__init__(DictTable.NAME_FMT.format(key_type.__name__),
+        super().__init__(DictTable.TABLE_NAME_FMT.format(key_type.__name__),
                          [column])
 
 
@@ -140,6 +140,8 @@ class PostgresAdapter(DatabaseAdapterBase):
         with psycopg2.connect(self._url) as conn:
             with conn.cursor() as cur:
                 for sql in args:
+                    print("Execute sql:")
+                    print(sql)
                     cur.execute(sql)
                 conn.commit()
                 try:
@@ -153,13 +155,13 @@ class PostgresAdapter(DatabaseAdapterBase):
         self._execute_sql(*init_sqls)
 
     def _get_type(self, value):
-        if value is list and len(value) > 0:
+        if type(value) is list and len(value) > 0:
             for v in value:
                 return type(v)
-        elif value is dict and len(value) > 0:
+        elif type(value) is dict and len(value) > 0:
             for k, v in value.items():
                 return type(k), type(v)
-        else:
+        elif type(value) in (int, float, str, bool):
             return type(value)
 
     def _insert_distinct_script(self, table, columns, data,
@@ -168,12 +170,12 @@ class PostgresAdapter(DatabaseAdapterBase):
             conflict_columns = [columns[0]]
         values = [', '.join([self._to_sql_value(f) for f in d]) for d in data]
         values = ',\n'.join([f"({v})" for v in values])
-        on_conflict = [f"{c.name} = excluded.{c.name}" for c in columns]
+        on_conflict = [f"{c} = excluded.{c}" for c in columns]
         on_conflict = ',\n'.join(on_conflict)
         sql = f"""
 INSERT INTO {table}({', '.join(columns)}) VALUES
 {values}
-ON CONFLICT {', '.join(conflict_columns)} DO UPDATE SET
+ON CONFLICT ({', '.join(conflict_columns)}) DO UPDATE SET
 {on_conflict};
 """.strip()
         return sql
@@ -181,14 +183,14 @@ ON CONFLICT {', '.join(conflict_columns)} DO UPDATE SET
     def _delete_by_key_script(self, name):
         return '\n'.join([f"""
 DELETE FROM {table.name}
-WHERE {MultiValueTable.VAL_NAME_FMT} = {name};
+WHERE {MultiValueTable.NAME_COLNAME} = '{name}';
 """ for table in TABLES])
 
     def _to_sql_value(self, value):
-        if value is str:
+        if type(value) is str:
             s = value.replace("'", "''")
-            return f"'{value.s}'"
-        elif value in (int, float, bool):
+            return f"'{s}'"
+        elif type(value) in (int, float, bool):
             return f"{value}"
         elif value is None:
             return "NULL"
@@ -196,28 +198,56 @@ WHERE {MultiValueTable.VAL_NAME_FMT} = {name};
     def _prepare_data(self, name, value):
         if type(value) is dict:
             key_type, val_type = self._get_type(value)
-            table = DictTable.NAME_FMT.format(key_type.__name__)
-            columns = [MultiValueTable.VAL_NAME_FMT, DictTable.KEY_COL_NAME,
-                       DictTable.COL_FMT.format(val_type.__name__)]
-            data = [[self._to_sql_value(name), self._to_sql_value(k),
-                     self._to_sql_value(v)] for k, v in value.items()]
-            conflict_columns = [MultiValueTable.VAL_NAME_FMT,
-                                DictTable.KEY_COL_NAME]
+            table = DICT_TABLES[key_type].name
+            columns = [MultiValueTable.NAME_COLNAME, DictTable.KEY_COLNAME,
+                       MultiValueTable.VAL_COLNAME_FMT.format(int.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(float.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(str.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)]
+            data = [[name, k, None, None, None, None] for k, v in value.items()]
+            if val_type is int:
+                for i in range(len(value)):
+                    data[i][2] = value.items()[i][1]
+            if val_type is float:
+                for i in range(len(value)):
+                    data[i][3] = value.items()[i][1]
+            if val_type is str:
+                for i in range(len(value)):
+                    data[i][4] = value.items()[i][1]
+            if val_type is bool:
+                for i in range(len(value)):
+                    data[i][5] = value.items()[i][1]
+            data = [[name, k, v] for k, v in value.items()]
+            conflict_columns = [MultiValueTable.NAME_COLNAME,
+                                DictTable.KEY_COLNAME]
         elif type(value) is list:
             val_type = self._get_type(value)
-            table = DictTable.NAME_FMT.format(val_type.__name__)
-            columns = [MultiValueTable.VAL_NAME_FMT, DictTable.KEY_COL_NAME]
-            data = [[self._to_sql_value(name),
-                     self._to_sql_value(v)] for v in value]
-            conflict_columns = [MultiValueTable.VAL_NAME_FMT,
-                                DictTable.KEY_COL_NAME]
-        elif type(value) in (int, float, bool):
-            val_type = self._get_type(value)
+            table = DICT_TABLES[val_type].name
+            columns = [MultiValueTable.NAME_COLNAME, DictTable.KEY_COLNAME,
+                       MultiValueTable.VAL_COLNAME_FMT.format(int.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(float.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(str.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)]
+            data = [[name, v, None, None, None, None] for v in value]
+            conflict_columns = [MultiValueTable.NAME_COLNAME,
+                                DictTable.KEY_COLNAME]
+        elif type(value) in (int, float, bool, str):
             table = ATOMIC_TABLE.name
-            columns = [MultiValueTable.VAL_NAME_FMT,
-                       MultiValueTable.COL_FMT.format(val_type.__name__)]
-            data = [[self._to_sql_value(name), self._to_sql_value(value)]]
-            conflict_columns = [MultiValueTable.VAL_NAME_FMT]
+            columns = [MultiValueTable.NAME_COLNAME,
+                       MultiValueTable.VAL_COLNAME_FMT.format(int.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(float.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(str.__name__),
+                       MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)]
+            data = [[name, None, None, None, None]]
+            if type(value) is int:
+                data[0][1] = value
+            elif type(value) is float:
+                data[0][2] = value
+            elif type(value) is str:
+                data[0][3] = value
+            elif type(value) is bool:
+                data[0][4] = value
+            conflict_columns = [MultiValueTable.NAME_COLNAME]
         else:
             raise Exception(UNSUPPORTED_TYPE_MESSAGE)
         return table, columns, data, conflict_columns
@@ -242,14 +272,19 @@ WHERE {MultiValueTable.VAL_NAME_FMT} = {name};
         if values is None:
             sql = f"""
 DELETE FROM {ATOMIC_TABLE.name}
-WHERE {MultiValueTable.VAL_NAME_FMT} = {name};
+WHERE {MultiValueTable.NAME_COLNAME} = '{name}';
+"""
+            for t in DICT_TABLES.values():
+                sql += f"""
+DELETE FROM {t.name}
+WHERE {MultiValueTable.NAME_COLNAME} = '{name}';
 """
         elif type(values) is list:
             val_type = self._get_type(values)
             sql = f"""
 DELETE FROM {DICT_TABLES[val_type].name}
-WHERE {MultiValueTable.VAL_NAME_FMT} = {name}
-AND {DictTable.KEY_COL_NAME}
+WHERE {MultiValueTable.NAME_COLNAME} = '{name}'
+AND {DictTable.KEY_COLNAME}
 IN ({', '.join([self._to_sql_value(v) for v in values])});
 """
         else:
@@ -257,10 +292,144 @@ IN ({', '.join([self._to_sql_value(v) for v in values])});
         self._execute_sql(sql)
 
     def find_all(self):
-        pass
+        atomic_sql = f"""
+SELECT {MultiValueTable.NAME_COLNAME}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(int.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(float.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(str.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)}
+FROM {ATOMIC_TABLE.name};
+"""
+        int_sql = f"""
+SELECT {MultiValueTable.NAME_COLNAME}, \
+{DictTable.KEY_COLNAME}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(int.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(float.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(str.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)}
+FROM {DICT_TABLES[int].name}
+"""
+        float_sql = f"""
+SELECT {MultiValueTable.NAME_COLNAME}, \
+{DictTable.KEY_COLNAME}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(int.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(float.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(str.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)}
+FROM {DICT_TABLES[float].name}
+"""
+        str_sql = f"""
+SELECT {MultiValueTable.NAME_COLNAME}, \
+{DictTable.KEY_COLNAME}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(int.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(float.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(str.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)}
+FROM {DICT_TABLES[str].name}
+"""
+        bool_sql = f"""
+SELECT {MultiValueTable.NAME_COLNAME}, \
+{DictTable.KEY_COLNAME}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(int.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(float.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(str.__name__)}, \
+{MultiValueTable.VAL_COLNAME_FMT.format(bool.__name__)}
+FROM {DICT_TABLES[bool].name}
+"""
+        atomic_data = self._execute_sql(atomic_sql)
+        int_data = self._execute_sql(int_sql)
+        float_data = self._execute_sql(float_sql)
+        str_data = self._execute_sql(str_sql)
+        bool_data = self._execute_sql(bool_sql)
+        obj = {}
+        for d in atomic_data:
+            if d[1] is not None:
+                obj[d[0]] = int(d[1])
+            elif d[2] is not None:
+                obj[d[0]] = float(d[2])
+            elif d[3] is not None:
+                obj[d[0]] = str(d[3])
+            elif d[4] is not None:
+                obj[d[0]] = bool(d[4])
+        for d in int_data:
+            key = int(d[1])
+            val = None
+            if d[2] is not None:
+                val = int(d[2])
+            elif d[3] is not None:
+                val = float(d[3])
+            elif d[4] is not None:
+                val = str(d[4])
+            elif d[5] is not None:
+                val = bool(d[5])
+            if d[0] not in obj:
+                obj[d[0]] = [] if val is None else {}
+            if val is None:
+                obj[d[0]].append(key)
+            else:
+                obj[d[0]][key] = val
+        for d in float_data:
+            key = float(d[1])
+            val = None
+            if d[2] is not None:
+                val = int(d[2])
+            elif d[3] is not None:
+                val = float(d[3])
+            elif d[4] is not None:
+                val = str(d[4])
+            elif d[5] is not None:
+                val = bool(d[5])
+            if d[0] not in obj:
+                obj[d[0]] = [] if val is None else {}
+            if val is None:
+                obj[d[0]].append(key)
+            else:
+                obj[d[0]][key] = val
+        for d in str_data:
+            key = str(d[1])
+            val = None
+            if d[2] is not None:
+                val = int(d[2])
+            elif d[3] is not None:
+                val = float(d[3])
+            elif d[4] is not None:
+                val = str(d[4])
+            elif d[5] is not None:
+                val = bool(d[5])
+            if d[0] not in obj:
+                obj[d[0]] = [] if val is None else {}
+            if val is None:
+                obj[d[0]].append(key)
+            else:
+                obj[d[0]][key] = val
+        for d in bool_data:
+            key = bool(d[1])
+            val = None
+            if d[2] is not None:
+                val = int(d[2])
+            elif d[3] is not None:
+                val = float(d[3])
+            elif d[4] is not None:
+                val = str(d[4])
+            elif d[5] is not None:
+                val = bool(d[5])
+            if d[0] not in obj:
+                obj[d[0]] = [] if val is None else {}
+            if val is None:
+                obj[d[0]].append(key)
+            else:
+                obj[d[0]][key] = val
+        return obj
 
 
 if __name__ == '__main__':
+    # TODO: refactor, already tested
     for tab in TABLES:
         print(tab.create_script())
-    # adapter = PostgresAdapter()
+    adapter = PostgresAdapter()
+    # adapter.save('timeout_arr', [1, 2, 3, 4, 5])
+    # adapter.patch('timeout_arr', [1.2, 2.3, 4.5])
+    # adapter.remove('timeout_arr')
+    adapter.remove('timeout_arr', [3, 5])
+    data = (adapter.find_all())
+    print(data)
