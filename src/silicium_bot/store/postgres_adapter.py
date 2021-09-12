@@ -1,91 +1,286 @@
-import json
+import decimal
 import os
-import sys
 
 import psycopg2
 
 from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
 
 
-RECONNECT_MAX_ATTEMPTS = 5
-STORE_TABLE = 'json_data_'
-STORE_KEY = 'key_'
-STORE_VALUE = 'value_'
+class Column(object):
+    def __init__(self, name, type, *, nullable=True, primary=False):
+        self.name = name
+        self.type = type
+        self.primary = primary
+        self.nullable = nullable
+        if self.primary:
+            self.nullable = False
+
+    def create_script(self):
+        db_types = {
+            int: 'numeric(31)',
+            str: 'character varying(255)',
+            bool: 'boolean',
+            float: 'real'
+        }
+        sql = f"{self.name} {db_types[self.type]}"
+        if not self.nullable:
+            sql += " NOT NULL"
+        return sql
+
+
+class Table(object):
+    def __init__(self, name, columns):
+        self.name = "silbot_" + name
+        self.columns = columns
+
+    def create_script(self):
+        id_columns = [c.name for c in self.columns if c.primary]
+        newline = ',\n'
+        sql = f"""
+CREATE TABLE IF NOT EXISTS {self.name} (
+{newline.join([c.create_script() for c in self.columns])}
+CONSTRAINT {self.name}_pkey PRIMARY KEY ({', '.join(id_columns)})
+);
+""".strip()
+        return sql
+
+
+class MultiValueTable(Table):
+    ID_COLUMN = Column("value_id", str, primary=True)
+    VAL_COLUMNS = {
+        str: Column("str_value", str),
+        int: Column("int_value", int),
+        float: Column("float_value", float),
+        bool: Column("bool_value", bool)
+    }
+
+    def __init__(self, name="", columns=[]):
+        prefix = "heap_store"
+        if len(name) > 0:
+            prefix += "_"
+        mv_columns = [
+            MultiValueTable.ID_COLUMN
+        ] + list(MultiValueTable.VAL_COLUMNS.values())
+        super().__init__(prefix + name, columns + mv_columns)
+
+
+class DictTable(MultiValueTable):
+    KEY_COLUMN_NAME = "dict_key"
+
+    def __init__(self, type):
+        key_column = Column(DictTable.KEY_COLUMN_NAME, type,
+                            primary=True)
+        super().__init__(str(type), [key_column])
+
+
+ATOMIC_TABLE = MultiValueTable()
+DICT_TABLES = {
+    str: DictTable(str),
+    int: DictTable(int),
+    float: DictTable(float),
+    bool: DictTable(bool)
+}
+TABLES = [ATOMIC_TABLE] + list(DICT_TABLES.values())
 
 
 class PostgresAdapter(DatabaseAdapterBase):
     def __init__(self):
         self._url = os.getenv("DATABASE_URL")
-        self._init_and_validate_database()
+        self._init_db()
 
     # region private
-    def _execute_sql(self, sql, *args):
-        data = None
+    def _init_db(self):
+        init_sqls = [table.create_script() for table in TABLES]
+        self._execute_sql(*init_sqls)
+
+    def _execute_sql(self, *args):
+        data = []
         with psycopg2.connect(self._url) as conn:
             with conn.cursor() as cur:
-                cur.execute(sql)
-                for extra_sql in args:
-                    cur.execute(extra_sql)
+                for sql in args:
+                    cur.execute(sql)
                 conn.commit()
                 try:
-                    data = conn.fetchall()
+                    data.append(cur.fetchall())
                 except psycopg2.ProgrammingError:
-                    pass
+                    data.append(None)
         return data
 
-    def _init_and_validate_database(self):
-        init_sql = f"""
-CREATE TABLE IF NOT EXISTS {STORE_TABLE}
-(
-    {STORE_KEY} character varying(31) NOT NULL,
-    {STORE_VALUE} jsonb NOT NULL,
-    CONSTRAINT json_data__pkey PRIMARY KEY ({STORE_KEY})
-);
-""".strip()
-        patch_procedure_sql = f"""
+    def _to_sql_value(self, value):
+        if type(value) is str:
+            s = value.replace("'", "''")
+            return f"'{s}'"
+        elif value is None:
+            return "NULL"
+        elif type(value) in (str, int, float, bool):
+            return f"{value}"
+        raise Exception()
 
-""".strip()
-        remove_procedure_sql = f"""
+    def _from_sql_value(self, value):
+        if type(value) is decimal.Decimal:
+            return int(value)
+        elif type(value) in (str, int, float, bool):
+            return value
+        raise Exception()
 
-""".strip()
-        validate_sql = f"""
-SELECT column_name, data_type, is_nullable,
-       character_maximum_length, is_updatable
-FROM information_schema.columns
-WHERE table_name = '{STORE_TABLE}';
-""".strip()
-        data = self._execute_sql(init_sql, validate_sql)
-        assert_message = 'Failed to validate database'
-        for d in data:
-            if d[0] == 'data_':
-                assert d[1] == 'jsonb',             assert_message
-                assert d[2] == 'NO',                assert_message
-                assert d[3] is None,                assert_message
-                assert d[4] == 'YES',               assert_message
-            elif d[0] == 'key_':
-                assert d[1] == 'character varying', assert_message
-                assert d[2] == 'NO',                assert_message
-                assert d[3] >= 31,                  assert_message
-                assert d[4] == 'YES',               assert_message
-
-    def _to_json(self, value):
-        return json.dumps(value).replace(r"\'", "''")
-
-    def save(self, key, value):
+    def _insert_distinct_script(self, table, columns, data,
+                                conflict_columns=None):
+        if conflict_columns is None:
+            conflict_columns = [columns[0]]
+        values = [', '.join([self._to_sql_value(f) for f in d]) for d in data]
+        values = ',\n'.join([f"({v})" for v in values])
+        on_conflict = [f"{c} = excluded.{c}" for c in columns]
+        on_conflict = ',\n'.join(on_conflict)
         sql = f"""
-INSERT INTO {STORE_TABLE}({STORE_KEY}, {STORE_VALUE}) VALUES
-({key}, '{self._to_json(value)}');
+INSERT INTO {table}({', '.join(columns)}) VALUES
+{values}
+ON CONFLICT ({', '.join(conflict_columns)}) DO UPDATE SET
+{on_conflict};
 """.strip()
-        self._execute_sql(sql)
-
-    def patch(self, key, values):
-        super().patch(key, values)
-
-    def remove(self, key, values):
-        super().remove(key, values)
-
-    def find_all(self):
-        super().find_all()
+        return sql
     # endregion private
 
+    def find_all(self):
+        atomic_sql = f"""
+SELECT {MultiValueTable.ID_COLUMN.name},
+{MultiValueTable.VAL_COLUMNS[str].name},
+{MultiValueTable.VAL_COLUMNS[int].name},
+{MultiValueTable.VAL_COLUMNS[float].name},
+{MultiValueTable.VAL_COLUMNS[bool].name}
+FROM {ATOMIC_TABLE.name};
+""".strip()
 
+        def get_dict_select_sql(type):
+            sql = f"""
+SELECT {MultiValueTable.ID_COLUMN.name},
+{MultiValueTable.VAL_COLUMNS[str].name},
+{MultiValueTable.VAL_COLUMNS[int].name},
+{MultiValueTable.VAL_COLUMNS[float].name},
+{MultiValueTable.VAL_COLUMNS[bool].name},
+{DictTable.KEY_COLUMN_NAME}
+FROM {DICT_TABLES[type].name};
+""".strip()
+            return sql
+
+        dict_str_sql = get_dict_select_sql(str)
+        dict_int_sql = get_dict_select_sql(int)
+        dict_float_sql = get_dict_select_sql(float)
+        dict_bool_sql = get_dict_select_sql(bool)
+        sql_data = self._execute_sql(atomic_sql, dict_str_sql, dict_int_sql,
+                                 dict_float_sql, dict_bool_sql)
+        dict_data = {
+            str: sql_data[1],
+            int: sql_data[2],
+            float: sql_data[3],
+            bool: sql_data[4]
+        }
+        obj = {}
+        for d in sql_data[0]:
+            id = d[0]
+            value = None
+            for i in range(1, len(d)):
+                if d[i] is not None:
+                    value = self._from_sql_value(d[i])
+                    break
+            obj[id] = self._from_sql_value(value)
+        for t, data in dict_data.items():
+            for d in data:
+                id = d[0]
+                key = t(d[-1])
+                value = None
+                for i in range(1, len(d) - 1):
+                    if d[i] is not None:
+                        value = self._from_sql_value(d[i])
+                        break
+                if id not in obj:
+                    obj[id] = {}
+                obj[id][key] = value
+        res_obj = {}
+        for obj_k, obj_v in obj.items():
+            if type(obj_v) is dict \
+               and len([v for v in obj_v.values() if v is not None]) == 0:
+                res_obj[obj_k] = list[obj_v.keys()]
+            else:
+                res_obj[obj_k] = obj_v
+        return res_obj
+
+    def patch(self, id, value):
+        if type(value) in (str, int, float, bool):
+            table = ATOMIC_TABLE.name
+            columns = [
+                MultiValueTable.ID_COLUMN.name,
+                MultiValueTable.VAL_COLUMNS[str].name,
+                MultiValueTable.VAL_COLUMNS[int].name,
+                MultiValueTable.VAL_COLUMNS[float].name,
+                MultiValueTable.VAL_COLUMNS[bool].name,
+            ]
+            conflict_columns = [MultiValueTable.ID_COLUMN.name]
+            data = [[id, None, None, None, None]]
+            if type(value) is str:
+                data[0][1] = value
+            elif type(value) is int:
+                data[0][2] = value
+            elif type(value) is float:
+                data[0][3] = value
+            elif type(value) is bool:
+                data[0][4] = value
+        elif type(value) is dict or type(value) is list:
+            key_type = None
+            val_type = None
+            if type(value) is dict:
+                key_type = type(list(value.keys())[0])
+                val_type = type(list(value.values())[0])
+            elif type(value) is list:
+                key_type = type(value[0])
+            table = DICT_TABLES[key_type].name
+            columns = [
+                MultiValueTable.ID_COLUMN.name,
+                MultiValueTable.VAL_COLUMNS[str].name,
+                MultiValueTable.VAL_COLUMNS[int].name,
+                MultiValueTable.VAL_COLUMNS[float].name,
+                MultiValueTable.VAL_COLUMNS[bool].name,
+                DictTable.KEY_COLUMN_NAME
+            ]
+            conflict_columns = [MultiValueTable.ID_COLUMN.name,
+                                DictTable.KEY_COLUMN_NAME]
+            data = [[id, None, None, None, None, k] for k in value]
+            if type(value) is dict:
+                i = None
+                if val_type is str:
+                    i = 1
+                elif value is int:
+                    i = 2
+                elif value is float:
+                    i = 3
+                elif value is bool:
+                    i = 4
+                if i is not None:
+                    for v in data:
+                        v[i] = value[v[-1]]
+        else:
+            raise Exception()
+        newline = ',\n'
+        sql = f"""
+INSERT INTO {table}({', '.join(columns)}) VALUES
+{newline.join([', '.join([self._to_sql_value(f) for f in d]) for d in data])}
+ON CONFLICT ({', '.join(conflict_columns)}) DO UPDATE SET
+{newline.join([f"{c} = excluded.{c}" for c in columns])};
+""".strip()
+        return sql
+
+    def remove(self, id, keys=None):
+        if keys is None:
+            sqls = [f"""
+DELETE FROM {t.name}
+WHERE {MultiValueTable.ID_COLUMN.name} = {self._to_sql_value(id)};
+""".strip() for t in TABLES]
+            self._execute_sql(*sqls)
+        elif len(keys) > 0:
+            table = DICT_TABLES[type(keys[0])]
+            sql = f"""
+DELETE FROM {table.name}
+WHERE {MultiValueTable.ID_COLUMN.name} = {self._to_sql_value(id)}
+AND {DictTable.KEY_COLUMN_NAME}
+IN ({', '.join([self._to_sql_value(k) for k in keys])});
+""".strip()
+            self._execute_sql(sql)

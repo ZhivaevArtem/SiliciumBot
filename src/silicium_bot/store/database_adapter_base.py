@@ -1,12 +1,9 @@
 class DatabaseAdapterBase(object):
-    def save(self, name, value):
-        pass
-
-    def patch(self, name, values):
-        pass
-
-    def remove(self, name, values):
-        pass
-
     def find_all(self):
+        pass
+
+    def patch(self, id, value):
+        pass
+
+    def remove(self, id, keys=None):
         pass
