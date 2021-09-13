@@ -38,7 +38,7 @@ class Table(object):
         newline = ',\n'
         sql = f"""
 CREATE TABLE IF NOT EXISTS {self.name} (
-{newline.join([c.create_script() for c in self.columns])}
+{newline.join([c.create_script() for c in self.columns])},
 CONSTRAINT {self.name}_pkey PRIMARY KEY ({', '.join(id_columns)})
 );
 """.strip()
@@ -55,7 +55,7 @@ class MultiValueTable(Table):
     }
 
     def __init__(self, name="", columns=[]):
-        prefix = "heap_store"
+        prefix = "store"
         if len(name) > 0:
             prefix += "_"
         mv_columns = [
@@ -70,7 +70,7 @@ class DictTable(MultiValueTable):
     def __init__(self, type):
         key_column = Column(DictTable.KEY_COLUMN_NAME, type,
                             primary=True)
-        super().__init__(str(type), [key_column])
+        super().__init__(type.__name__, [key_column])
 
 
 ATOMIC_TABLE = MultiValueTable()
@@ -99,11 +99,11 @@ class PostgresAdapter(DatabaseAdapterBase):
             with conn.cursor() as cur:
                 for sql in args:
                     cur.execute(sql)
+                    try:
+                        data.append(cur.fetchall())
+                    except psycopg2.ProgrammingError:
+                        data.append(None)
                 conn.commit()
-                try:
-                    data.append(cur.fetchall())
-                except psycopg2.ProgrammingError:
-                    data.append(None)
         return data
 
     def _to_sql_value(self, value):
@@ -167,7 +167,7 @@ FROM {DICT_TABLES[type].name};
         dict_float_sql = get_dict_select_sql(float)
         dict_bool_sql = get_dict_select_sql(bool)
         sql_data = self._execute_sql(atomic_sql, dict_str_sql, dict_int_sql,
-                                 dict_float_sql, dict_bool_sql)
+                                     dict_float_sql, dict_bool_sql)
         dict_data = {
             str: sql_data[1],
             int: sql_data[2],
@@ -182,7 +182,7 @@ FROM {DICT_TABLES[type].name};
                 if d[i] is not None:
                     value = self._from_sql_value(d[i])
                     break
-            obj[id] = self._from_sql_value(value)
+            obj[id] = value
         for t, data in dict_data.items():
             for d in data:
                 id = d[0]
@@ -199,7 +199,7 @@ FROM {DICT_TABLES[type].name};
         for obj_k, obj_v in obj.items():
             if type(obj_v) is dict \
                and len([v for v in obj_v.values() if v is not None]) == 0:
-                res_obj[obj_k] = list[obj_v.keys()]
+                res_obj[obj_k] = list(obj_v.keys())
             else:
                 res_obj[obj_k] = obj_v
         return res_obj
@@ -248,11 +248,11 @@ FROM {DICT_TABLES[type].name};
                 i = None
                 if val_type is str:
                     i = 1
-                elif value is int:
+                elif val_type is int:
                     i = 2
-                elif value is float:
+                elif val_type is float:
                     i = 3
-                elif value is bool:
+                elif val_type is bool:
                     i = 4
                 if i is not None:
                     for v in data:
@@ -262,11 +262,12 @@ FROM {DICT_TABLES[type].name};
         newline = ',\n'
         sql = f"""
 INSERT INTO {table}({', '.join(columns)}) VALUES
-{newline.join([', '.join([self._to_sql_value(f) for f in d]) for d in data])}
+{newline.join(['(' + ', '.join(
+            [self._to_sql_value(f) for f in d]) + ')' for d in data])}
 ON CONFLICT ({', '.join(conflict_columns)}) DO UPDATE SET
 {newline.join([f"{c} = excluded.{c}" for c in columns])};
 """.strip()
-        return sql
+        self._execute_sql(sql)
 
     def remove(self, id, keys=None):
         if keys is None:
