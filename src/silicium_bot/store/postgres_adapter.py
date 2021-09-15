@@ -3,6 +3,7 @@ import os
 
 import psycopg2
 
+from silicium_bot.store import StaticStore
 from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
 
 
@@ -85,7 +86,7 @@ TABLES = [ATOMIC_TABLE] + list(DICT_TABLES.values())
 
 class PostgresAdapter(DatabaseAdapterBase):
     def __init__(self):
-        self._url = os.getenv("DATABASE_URL")
+        self._url = StaticStore.database_url
         self._init_db()
 
     # region private

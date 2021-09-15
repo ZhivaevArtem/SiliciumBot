@@ -1,18 +1,23 @@
 import discord
 from discord.ext import commands
 
-from silicium_bot.globals import G
 from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.store import Store
 
 
 class BotModule(ModuleBase):
+    def __init__(self, bot):
+        super().__init__(bot)
+
     async def on_ready(self):
-        if G.CFG.activity.type != discord.ActivityType.unknown:
-            await G.BOT.change_presence(activity=G.CFG.activity)
-        elif G.CFG.status != discord.Status.online:
-            await G.BOT.change_presence(status=G.CFG.status)
-        if G.BOT.command_prefix != G.CFG.prefix:
-            G.BOT.command_prefix = G.CFG.prefix
+        if Store.bot_activity_type.value != discord.ActivityType.unknown:
+            activity = discord.Activity(type=Store.bot_activity_type.value,
+                                        name=Store.bot_activity_text.value)
+            await self.bot.change_presence(activity=activity)
+        elif Store.bot_status.value != discord.Status.online:
+            await self.bot.change_presence(status=Store.bot_status.value)
+        if self.bot.command_prefix != Store.bot_prefix.value:
+            self.bot.command_prefix = Store.bot_prefix.value
 
     @commands.group(invoke_without_command=True)
     async def bot(self, ctx: commands.Context):
@@ -23,12 +28,12 @@ class BotModule(ModuleBase):
     async def prefix(self, ctx: commands.Context, new_prefix=None):
         self.raise_if_not_me(ctx)
         if new_prefix is None:
-            await ctx.send(f'Current prefix: "{G.BOT.command_prefix}"',
+            await ctx.send(f'Current prefix: "{self.bot.command_prefix}"',
                            reference=ctx.message)
         else:
-            if G.CFG.prefix != new_prefix:
-                G.BOT.command_prefix = new_prefix
-                G.CFG.prefix = new_prefix
+            if Store.bot_prefix.value != new_prefix:
+                self.bot.command_prefix = new_prefix
+                Store.bot_prefix.value = new_prefix
             await ctx.send(f'New prefix: "{new_prefix}"',
                            reference=ctx.message)
 
@@ -36,7 +41,7 @@ class BotModule(ModuleBase):
     @bot.command()
     async def status(self, ctx: commands.Context, new_status=None):
         if new_status is None:
-            await ctx.send(f"{G.CFG.status}", reference=ctx.message)
+            await ctx.send(f"{Store.bot_status}", reference=ctx.message)
         status_map = {
             'online': discord.Status.online,
             'invisible': discord.Status.invisible,
@@ -44,12 +49,12 @@ class BotModule(ModuleBase):
             'dnd': discord.Status.dnd
         }
         if new_status in status_map:
-            stat = status_map[new_status]
-            if G.CFG.status != stat:
-                G.CFG.status = stat
-                G.CFG.activity = discord.Activity(
-                    name="", type=discord.ActivityType.unknown)
-                await G.BOT.change_presence(status=stat)
+            status = status_map[new_status]
+            if Store.bot_status.value != status:
+                Store.bot_status.value = status
+                Store.bot_activity_type = discord.ActivityType.unknown
+                Store.bot_activity_text = ""
+                await self.bot.change_presence(status=status)
 
     # bot activity
     @bot.group(invoke_without_command=True)
@@ -61,9 +66,9 @@ class BotModule(ModuleBase):
                 discord.ActivityType.listening: 'listening',
                 discord.ActivityType.watching:  'watching'
             }
-            if G.CFG.activity.type in type_str_map:
-                text = f"{type_str_map[G.CFG.activity.type]}:" \
-                       + f" {G.CFG.activity.name}"
+            if Store.bot_activity_type.value in type_str_map:
+                text = f"{type_str_map[Store.bot_activity_type.value]}:" \
+                       + f" {Store.bot_activity_text.value}"
             else:
                 text = "There is no activity"
             await ctx.send(text, reference=ctx.message)
@@ -74,9 +79,14 @@ class BotModule(ModuleBase):
             'watching': discord.ActivityType.watching,
         }
         if activity_type in type_map:
-            new_activity = discord.Activity(name=activity_text,
-                                            type=type_map[activity_type])
-            if new_activity != G.CFG.activity:
-                G.CFG.activity = new_activity
-                G.CFG.status = discord.Status.online
-                await G.BOT.change_presence(activity=new_activity)
+            update = False
+            if Store.bot_activity_type.value != type_map[activity_type]:
+                Store.bot_activity_type = type_map[activity_type]
+                update = True
+            if Store.bot_activity_text != activity_text:
+                Store.bot_activity_text = activity_text
+                update = True
+            if update:
+                activity = discord.Activity(type=Store.bot_activity_type.value,
+                                            name=Store.bot_activity_text.value)
+                await self.bot.change_presence(activity=activity)

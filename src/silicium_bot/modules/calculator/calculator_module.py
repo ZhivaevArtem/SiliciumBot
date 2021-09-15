@@ -3,16 +3,21 @@ import re
 from discord.ext import commands
 
 from silicium_bot.modules.module_base import ModuleBase
-from silicium_bot.globals import G
+from silicium_bot.store import Store
 
 
 class CalculatorModule(ModuleBase):
+    def __init__(self, bot):
+        super().__init__(bot)
+
     async def on_message(self, message) -> bool:
         content = message.content.strip()
         if re.match(r'^.*[0-9]+.*$', content) \
-           and re.match(r'^[0-9/*\-+. \t\n()]+$', content) \
+           and re.match(r'^[0-9/*^\-+. \t\n()]+$', content) \
            and not re.match(r'^[\-+]*[ \t]*[0-9]*\.?[0-9]*$', content):
-            n = self.invoke_timeout(eval, G.CFG.calculator_timeout, content)
+            content = content.replace('^', '**')
+            n = self.invoke_timeout(eval, Store.calculator_timeout.value,
+                                    content)
             if type(n) in (int, float):
                 await message.channel.send(n, reference=message)
             else:
@@ -31,15 +36,15 @@ class CalculatorModule(ModuleBase):
         self.raise_if_not_me(ctx)
         if seconds is None:
             text = f"Calculator timeout:" \
-                   + f" {G.CFG.calculator_timeout} seconds"
+                   + f" {Store.calculator_timeout.value} seconds"
             await ctx.send(text, reference=ctx.message)
         else:
             try:
                 secs = self.claim(float(seconds), 0.1, 5)
-                if secs != G.CFG.calculator_timeout:
-                    G.CFG.calculator_timeout = secs
+                if secs != Store.calculator_timeout.value:
+                    Store.calculator_timeout.value = secs
                 text = f"New calculator timeout:" \
-                       + f" {G.CFG.calculator_timeout} seconds"
+                       + f" {Store.calculator_timeout.value} seconds"
                 await ctx.send(text, reference=ctx.message)
             except ValueError:
                 pass

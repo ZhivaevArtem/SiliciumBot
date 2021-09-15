@@ -1,26 +1,22 @@
 from discord.ext import commands
 
-from silicium_bot.globals import G
 from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.store import StaticStore
 
 
 class InfoModule(ModuleBase):
+    def __init__(self, bot):
+        super().__init__(bot)
+
     # github
     @commands.command()
     async def github(self, ctx: commands.Context):
-        await ctx.send(G.GITHUB, reference=ctx.message)
+        await ctx.send(StaticStore.github, reference=ctx.message)
 
     # version
     @commands.command()
     async def version(self, ctx):
-        await ctx.send(G.VERSION, reference=ctx.message)
-
-    # config
-    @commands.command()
-    async def config(self, ctx):
-        self.raise_if_not_me(ctx)
-        await ctx.send(f'{str(G.CFG).replace("<@", "<@ ")}',
-                       reference=ctx.message)
+        await ctx.send(StaticStore.version, reference=ctx.message)
 
     # help
     @commands.command()

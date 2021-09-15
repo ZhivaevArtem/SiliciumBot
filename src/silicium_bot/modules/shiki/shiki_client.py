@@ -2,7 +2,7 @@ import re
 
 import requests
 
-from silicium_bot.globals import G
+from silicium_bot.store import StaticStore, Store
 
 
 class ShikiLog(object):
@@ -11,7 +11,7 @@ class ShikiLog(object):
         self.id: int = data['id']
         self.username = username
         self.data = data
-        self.url = f"{G.SHIKI_API}/{data['target']['url']}"
+        self.url = f"{StaticStore.shiki_url}/{data['target']['url']}"
         self.description: str = re.sub('</?\\w+>', '', data['description'])
         self.title: str = data['target']['name']
         self.russian_title: str = data['target']['russian']
@@ -22,7 +22,7 @@ class ShikiLog(object):
         return message
 
     def get_embed_message(self):
-        url = f"{G.SHIKI_API}/{self.username}"
+        url = f"{StaticStore.shiki_url}/{self.username}"
         message = f"[{self.username}]({url}): {self.description}:"
         message += f" [{self.russian_title} / {self.title}]({self.url})"
         return message
@@ -40,12 +40,12 @@ class ShikiClient(object):
     # region public
 
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
-        limit = G.CFG.history_request_limit
-        url = f"{G.SHIKI_API}/api/users/{username}" \
+        limit = Store.shiki_request_limit.value
+        url = f"{StaticStore.shiki_api}/users/{username}" \
               + f"/history?limit={limit}"
         res = requests.get(url=url, headers=self._headers)
         if not res.ok:
-            print(res.content.decode('utf-8'))
+            pass
         logs = {d['id']: ShikiLog(d, username) for d in res.json()}
         if username in self._cached_ids:
             for cached_id in self._cached_ids[username]:

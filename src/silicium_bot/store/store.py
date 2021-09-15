@@ -1,13 +1,19 @@
+import os
+
 import discord
 
-from silicium_bot.globals import G
 from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
 from silicium_bot.store.postgres_adapter import PostgresAdapter
 
 
-class NotificationChannelStub(discord.TextChannel):
+class NotificationChannelStub(object):
     def __init__(self):
         self.id = 0
+
+
+class BotStub(object):
+    def get_channel(self, id):
+        return NotificationChannelStub()
 
 
 class StoreField(object):
@@ -38,38 +44,71 @@ class StoreField(object):
     @value.setter
     def value(self, value):
         self._value = value
-        StoreField.db_adapter.save(self.key, self.serialize())
+        StoreField.db_adapter.patch(self.key, self.serialize())
+
+
+class ListStoreField(StoreField):
+    def __init__(self, value, key):
+        super().__init__(value, key)
+
+    def append(self, values):
+        for v in values:
+            if v not in self._value:
+                self._value.append(v)
+        StoreField.db_adapter.patch(self.key, values)
+
+    def remove(self, values):
+        for v in values:
+            if v in self._value:
+                self._value.remove(v)
+        StoreField.db_adapter.remove(self.key, values)
+
+
+class DictStoreField(StoreField):
+    def __init__(self, value, key):
+        super().__init__(value, key)
+
+    def append(self, values):
+        for k, v in values.items():
+            self._value[k] = v
+        StoreField.db_adapter.patch(self.key, values)
+
+    def remove(self, values):
+        for k in values:
+            if k in self._value:
+                self._value.pop(k)
+        StoreField.db_adapter.remove(self.key, values)
 
 
 class Store(object):
-    def __init__(self):
-        self.calculator_timeout = StoreField(10, 'calctimeout')
-        self.shiki_request_limit = StoreField(5, 'shikireqlimit')
-        self.bot_activity_text = StoreField('', 'botactivtext')
-        self.is_daemon_running = StoreField(False, 'daemonrun')
-        self.jokes = StoreField({}, 'jokes')
-        self.daemon_interval = StoreField(300, 'daemoninterval')
-        self.bot_prefix = StoreField(';', 'botprefix')
-        self.shiki_usernames = StoreField([], 'shikiusers')
-        self.notification_channel = StoreField(
-            NotificationChannelStub(), 'notifchannel', lambda v: v.id,
-            lambda v: G.BOT.get_channel(v) or NotificationChannelStub()
-        )
-        self.bot_activity_type = StoreField(
-            discord.Activity(name="", type=discord.ActivityType.unknown),
-            'botactivtype', lambda v: int(v), lambda v: discord.ActivityType(v)
-        )
-        self.bot_status = StoreField(
-            discord.Status.online, 'botstatus', lambda v: str(v),
-            lambda v: discord.Status(v)
-        )
+    _bot = BotStub()
+
+    calculator_timeout = StoreField(10, 'calctimeout')
+    shiki_request_limit = StoreField(5, 'shikireqlimit')
+    bot_activity_text = StoreField('', 'botactivtext')
+    is_daemon_running = StoreField(False, 'daemonrun')
+    jokes = DictStoreField({}, 'jokes')
+    daemon_interval = StoreField(300, 'daemoninterval')
+    bot_prefix = StoreField(';', 'botprefix')
+    shiki_usernames = ListStoreField([], 'shikiusers')
+    notification_channel = StoreField(
+        NotificationChannelStub(), 'notifchannel', lambda v: v.id,
+        lambda v: Store._bot.get_channel(v) or NotificationChannelStub()
+    )
+    bot_activity_type = StoreField(
+        discord.ActivityType.unknown, 'botactivtype',
+        lambda v: int(v), lambda v: discord.ActivityType(v)
+    )
+    bot_status = StoreField(
+        discord.Status.online, 'botstatus', lambda v: str(v),
+        lambda v: discord.Status(v)
+    )
+
+    @staticmethod
+    def init(bot):
+        Store.bot = bot
         StoreField.db_adapter = PostgresAdapter()
         dic = StoreField.db_adapter.find_all()
-        self._from_dict(dic)
-
-    def _from_dict(self, dic: dict):
-        fields_map = {}
-        for field in StoreField.fields:
-            fields_map[field.key] = field
+        fields_map = {f.key: f for f in StoreField.fields}
         for key, val in dic.items():
             fields_map[key].deserialize(val)

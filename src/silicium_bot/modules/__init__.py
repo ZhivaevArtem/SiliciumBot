@@ -6,10 +6,10 @@ from .info import InfoModule
 from .deprecated import DeprecatedModule
 
 cogs = [
-    JokesModule(),
-    CalculatorModule(),
-    BotModule(),
-    ShikiModule(),
-    InfoModule(),
-    DeprecatedModule()
+    JokesModule,
+    CalculatorModule,
+    BotModule,
+    ShikiModule,
+    InfoModule,
+    DeprecatedModule
 ]

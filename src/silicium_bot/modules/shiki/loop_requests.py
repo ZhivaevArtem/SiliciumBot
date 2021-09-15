@@ -1,17 +1,16 @@
 import asyncio
-import datetime
-import traceback
 from asyncio.tasks import Task
 
 import discord
 
-from silicium_bot.globals import G
 from silicium_bot.modules.shiki.shiki_client import ShikiClient
+from silicium_bot.store import Store
 
 
 class LoopRequestsTask(object):
-    def __init__(self):
+    def __init__(self, bot):
         super().__init__()
+        self._bot = bot
         self._task: Task or None = None
         self._is_running = False
         self._restart_attempts = 0
@@ -21,14 +20,13 @@ class LoopRequestsTask(object):
     def start(self, callback=None):
         if not self.is_running():
             self._is_running = True
-            self._task = G.BOT.loop.create_task(self._run())
+            self._task = self._bot.loop.create_task(self._run())
             self._restart_attempts = 0
-            print('Daemon started')
             if callback is not None:
                 try:
                     callback()
                 except Exception:
-                    print(traceback.format_exc())
+                    pass
 
     def stop(self, callback=None):
         if self.is_running():
@@ -37,10 +35,9 @@ class LoopRequestsTask(object):
                     try:
                         callback()
                     except Exception:
-                        print(traceback.format_exc())
+                        pass
                 self._task.add_done_callback(lambda e: cb())
             self._is_running = False
-            print('Daemon stopped')
 
     def restart(self, callback=None):
         if self.is_running():
@@ -50,7 +47,7 @@ class LoopRequestsTask(object):
                     try:
                         callback()
                     except Exception:
-                        print(traceback.format_exc())
+                        pass
                 self._task.add_done_callback(lambda e: cb())
             self.stop()
 
@@ -60,26 +57,22 @@ class LoopRequestsTask(object):
     async def _run(self):
         try:
             while self._is_running:
-                print(f'Daemon: {datetime.datetime.now()}')
                 response = ""
-                for username in G.CFG.usernames:
+                for username in Store.shiki_usernames.value:
                     logs = self._shiki_client.retrieve_user_logs(username)
                     for log in logs:
                         message = log.get_embed_message() + "\n\n"
                         response += message
-                        print(message)
                 if response:
                     embed = discord.Embed(description=response)
-                    await G.CFG.notification_channel.send(embed=embed)
-                for i in range(G.CFG.loop_requests_interval // 2):
+                    await Store.notification_channel.value.send(embed=embed)
+                for i in range(Store.daemon_interval.value // 2):
                     if not self._is_running:
                         return
                     await asyncio.sleep(2)
         except Exception:
-            print(traceback.format_exc())
             if self._restart_attempts < self._MAX_RESTART_ATTEMPTS:
                 self._restart_attempts += 1
                 self.restart()
             else:
-                print(f"Cannot restart shiki worker (attempts: "
-                      + f"{self._MAX_RESTART_ATTEMPTS})")
+                pass
