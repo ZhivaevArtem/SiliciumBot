@@ -1,8 +1,9 @@
 import datetime
 
+from silicium_bot.store import StaticStore
+
 
 class Logger(object):
-    print_time = True
     loggers = []
     prefix_len = 0
 
@@ -13,5 +14,8 @@ class Logger(object):
             Logger.prefix_len = len(name)
 
     def log(self, message):
-        print(f"{datetime.datetime.now()}"
-              + f"[{self._name.rjust(Logger.prefix_len)}]: {message}")
+        if StaticStore.log_print_time:
+            print(f"{datetime.datetime.now()}"
+                  + f"[{self._name.rjust(Logger.prefix_len)}]: {message}")
+        else:
+            print(f"[{self._name.rjust(Logger.prefix_len)}]: {message}")

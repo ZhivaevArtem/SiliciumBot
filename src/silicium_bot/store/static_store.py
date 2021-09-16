@@ -1,6 +1,13 @@
 import os
 
 
+def get_log_print_time(var_name):
+    var: str = os.getenv(var_name)
+    if var is not None:
+        return var.strip().lower() == "true"
+    return True
+
+
 class StaticStore(object):
     shiki_url = 'https://shikimori.one'
     shiki_api = f"{shiki_url}/api"
@@ -9,3 +16,4 @@ class StaticStore(object):
     my_discord_id = int(os.getenv("MY_USER_ID"))
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     database_url = os.getenv("DATABASE_URL")
+    log_print_time = get_log_print_time("LOG_PRINT_TIME")
