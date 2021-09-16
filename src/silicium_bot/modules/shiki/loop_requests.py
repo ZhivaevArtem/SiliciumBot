@@ -3,6 +3,7 @@ from asyncio.tasks import Task
 
 import discord
 
+from silicium_bot.logger import shiki_logger as logger
 from silicium_bot.modules.shiki.shiki_client import ShikiClient
 from silicium_bot.store import Store
 
@@ -57,6 +58,7 @@ class LoopRequestsTask(object):
     async def _run(self):
         try:
             while self._is_running:
+                logger.log("Daemon iteration")
                 response = ""
                 for username in Store.shiki_usernames.value:
                     logs = self._shiki_client.retrieve_user_logs(username)
@@ -64,6 +66,8 @@ class LoopRequestsTask(object):
                         message = log.get_embed_message() + "\n\n"
                         response += message
                 if response:
+                    logger.log(f"Found new logs:")
+                    logger.log(response)
                     embed = discord.Embed(description=response)
                     await Store.notification_channel.value.send(embed=embed)
                 for i in range(Store.daemon_interval.value // 2):
@@ -75,4 +79,5 @@ class LoopRequestsTask(object):
                 self._restart_attempts += 1
                 self.restart()
             else:
-                pass
+                logger.log("Cannot restart loop request with"
+                           + f" {self._MAX_RESTART_ATTEMPTS} attempts")

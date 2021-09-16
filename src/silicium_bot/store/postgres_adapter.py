@@ -1,10 +1,10 @@
 import decimal
-import os
 
 import psycopg2
 
 from silicium_bot.store import StaticStore
 from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
+from silicium_bot.logger import database_logger as logger
 
 
 class Column(object):
@@ -89,8 +89,8 @@ class PostgresAdapter(DatabaseAdapterBase):
         self._url = StaticStore.database_url
         self._init_db()
 
-    # region private
     def _init_db(self):
+        logger.log("Initialization database")
         init_sqls = [table.create_script() for table in TABLES]
         self._execute_sql(*init_sqls)
 
@@ -99,9 +99,13 @@ class PostgresAdapter(DatabaseAdapterBase):
         with psycopg2.connect(self._url) as conn:
             with conn.cursor() as cur:
                 for sql in args:
+                    logger.log("Executing sql:")
+                    logger.log(sql)
                     cur.execute(sql)
                     try:
                         data.append(cur.fetchall())
+                        logger.log("Result of sql execution:")
+                        logger.log(data[-1])
                     except psycopg2.ProgrammingError:
                         data.append(None)
                 conn.commit()
@@ -139,7 +143,6 @@ ON CONFLICT ({', '.join(conflict_columns)}) DO UPDATE SET
 {on_conflict};
 """.strip()
         return sql
-    # endregion private
 
     def find_all(self):
         atomic_sql = f"""

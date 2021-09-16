@@ -1,10 +1,10 @@
-from .module_base import ModuleBase
 from .bot import BotModule
-from .jokes import JokesModule
-from .shiki import ShikiModule
 from .calculator import CalculatorModule
-from .info import InfoModule
 from .deprecated import DeprecatedModule
+from .info import InfoModule
+from .jokes import JokesModule
+from .module_base import ModuleBase
+from .shiki import ShikiModule
 
 cogs = [
     JokesModule,

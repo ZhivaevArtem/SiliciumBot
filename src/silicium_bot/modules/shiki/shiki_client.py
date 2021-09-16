@@ -37,8 +37,6 @@ class ShikiClient(object):
                           ' bot for me and my friends'
         }
 
-    # region public
-
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
         limit = Store.shiki_request_limit.value
         url = f"{StaticStore.shiki_api}/users/{username}" \
@@ -57,5 +55,3 @@ class ShikiClient(object):
             self._cached_ids[username] = []
             self._cached_ids[username] += logs.keys()
             return []
-
-    # endregion public
