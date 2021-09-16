@@ -13,7 +13,7 @@ class StaticStore(object):
     shiki_api = f"{shiki_url}/api"
     version = '1.5.0'
     github = 'https://github.com/thisUsernameIsAlredyTaken/ShikimoriDiscordBot'
-    my_discord_id = int(os.getenv("MY_USER_ID"))
+    my_discord_id = int(os.getenv("MY_USER_ID") or "-1")
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     database_url = os.getenv("DATABASE_URL")
     log_print_time = get_log_print_time("LOG_PRINT_TIME")
