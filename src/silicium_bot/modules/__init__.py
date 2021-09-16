@@ -1,3 +1,4 @@
+from .module_base import ModuleBase
 from .bot import BotModule
 from .jokes import JokesModule
 from .shiki import ShikiModule

@@ -2,7 +2,7 @@ import re
 
 from discord.ext import commands
 
-from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.modules import ModuleBase
 from silicium_bot.store import Store
 
 
@@ -48,4 +48,3 @@ class CalculatorModule(ModuleBase):
                 await ctx.send(text, reference=ctx.message)
             except ValueError:
                 pass
-

@@ -2,7 +2,7 @@ import sys
 
 from discord.ext import commands
 
-from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.modules import ModuleBase
 
 
 class DeprecatedModule(ModuleBase):

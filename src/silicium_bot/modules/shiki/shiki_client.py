@@ -33,7 +33,7 @@ class ShikiClient(object):
         super().__init__()
         self._cached_ids: dict[str, list[int]] = {}
         self._headers = {
-            'User-Agent': 'SiliciumBotChan/0.1.0 Discord' +
+            'User-Agent': f'SiliciumBotChan/{StaticStore.version} Discord' +
                           ' bot for me and my friends'
         }
 

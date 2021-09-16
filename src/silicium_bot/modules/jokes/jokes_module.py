@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.modules import ModuleBase
 from silicium_bot.store import Store
 
 
@@ -58,6 +58,3 @@ class JokesModule(ModuleBase):
         if len(Store.jokes.value) != 0:
             Store.jokes.value = {}
         await ctx.send("Jokes truncated", reference=ctx.message)
-
-
-

@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from silicium_bot.modules.shiki.loop_requests import LoopRequestsTask
-from silicium_bot.modules.module_base import ModuleBase
+from silicium_bot.modules import ModuleBase
 from silicium_bot.store import Store
 
 
@@ -177,4 +177,3 @@ class ShikiModule(ModuleBase):
             Store.notification_channel.value = ctx.channel
         await ctx.send("This channel will be used for notifications",
                        reference=ctx.message)
-
