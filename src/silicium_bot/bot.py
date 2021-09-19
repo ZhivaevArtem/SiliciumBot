@@ -26,11 +26,13 @@ except Exception:
 @bot.event
 async def on_ready():
     try:
-        for cog in cogs:
-            await cog.on_ready(bot)
+        for cog in list(bot.cogs.values()):
+            await cog.on_ready()
     except Exception:
         log_traceback()
+        logger.log("Exit...")
         sys.exit(-1)
+    logger.log("Bot started...")
 
 
 @bot.event
@@ -38,8 +40,8 @@ async def on_message(message: discord.Message):
     try:
         if message.author == bot.user:
             return
-        for cog in cogs:
-            if await cog.on_message(message, bot):
+        for cog in list(bot.cogs.values()):
+            if await cog.on_message(message):
                 return
         await bot.process_commands(message)
     except Exception:

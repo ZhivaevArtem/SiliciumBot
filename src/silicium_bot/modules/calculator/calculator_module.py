@@ -2,8 +2,8 @@ import re
 
 from discord.ext import commands
 
-from silicium_bot.modules import ModuleBase
 from silicium_bot.store import Store
+from ..module_base import ModuleBase
 
 
 class CalculatorModule(ModuleBase):

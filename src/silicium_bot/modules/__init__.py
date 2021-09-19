@@ -3,7 +3,6 @@ from .calculator import CalculatorModule
 from .deprecated import DeprecatedModule
 from .info import InfoModule
 from .jokes import JokesModule
-from .module_base import ModuleBase
 from .shiki import ShikiModule
 
 cogs = [

@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from silicium_bot.modules import ModuleBase
-from silicium_bot.store import StaticStore
+from silicium_bot.constants import Constants
+from ..module_base import ModuleBase
 
 
 class InfoModule(ModuleBase):
@@ -11,12 +11,12 @@ class InfoModule(ModuleBase):
     # github
     @commands.command()
     async def github(self, ctx: commands.Context):
-        await ctx.send(StaticStore.github, reference=ctx.message)
+        await ctx.send(Constants.github, reference=ctx.message)
 
     # version
     @commands.command()
     async def version(self, ctx):
-        await ctx.send(StaticStore.version, reference=ctx.message)
+        await ctx.send(Constants.version, reference=ctx.message)
 
     # help
     @commands.command()
@@ -38,6 +38,7 @@ Admin commands:
 `calculator timeout [seconds: float]`
 `config`
 `jokes [truncate]`
+`shiki cache truncate`
 `shiki daemon [status]`
 `shiki daemon [{start|stop|restart}]`
 `shiki daemon interval [seconds: int]`

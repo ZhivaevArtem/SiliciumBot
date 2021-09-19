@@ -1,9 +1,11 @@
 import asyncio
 import multiprocessing
+import traceback
 
 from discord.ext import commands
 
-from silicium_bot.store import StaticStore
+from silicium_bot.constants import Constants
+from silicium_bot.logger import exception_logger as logger
 
 
 def _wrapper(func, dic, *args, **kwargs):
@@ -21,7 +23,7 @@ class ModuleBase(commands.Cog):
         pass
 
     def raise_if_not_me(self, ctx):
-        if StaticStore.my_discord_id != ctx.author.id:
+        if Constants.my_discord_id != ctx.author.id:
             raise Exception(f"ADMIN ONLY: {ctx.author}: {ctx.message.content}")
 
     def invoke_timeout(self, func, seconds, *args, **kwargs):
@@ -59,4 +61,4 @@ class ModuleBase(commands.Cog):
         try:
             raise error
         except Exception:
-            pass
+            logger.log(traceback.format_exc())

@@ -1,5 +1,3 @@
-import os
-
 import discord
 
 from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
@@ -9,6 +7,9 @@ from silicium_bot.store.postgres_adapter import PostgresAdapter
 class NotificationChannelStub(object):
     def __init__(self):
         self.id = 0
+        self.guild = "[BLANK_GUILD]"
+        self.category = "[BLANK_CATEGORY]"
+        self.name = "[BLANK_NAME]"
 
 
 class BotStub(object):

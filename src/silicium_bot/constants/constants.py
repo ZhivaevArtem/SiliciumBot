@@ -8,7 +8,7 @@ def get_log_print_time(var_name):
     return True
 
 
-class StaticStore(object):
+class Constants(object):
     shiki_url = 'https://shikimori.one'
     shiki_api = f"{shiki_url}/api"
     version = '1.5.0'

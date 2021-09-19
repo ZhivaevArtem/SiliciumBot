@@ -2,9 +2,9 @@ import decimal
 
 import psycopg2
 
-from silicium_bot.store import StaticStore
-from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
+from silicium_bot.constants import Constants
 from silicium_bot.logger import database_logger as logger
+from silicium_bot.store.database_adapter_base import DatabaseAdapterBase
 
 
 class Column(object):
@@ -86,7 +86,7 @@ TABLES = [ATOMIC_TABLE] + list(DICT_TABLES.values())
 
 class PostgresAdapter(DatabaseAdapterBase):
     def __init__(self):
-        self._url = StaticStore.database_url
+        self._url = Constants.database_url
         self._init_db()
 
     def _init_db(self):
@@ -229,6 +229,9 @@ FROM {DICT_TABLES[type].name};
             elif type(value) is bool:
                 data[0][4] = value
         elif type(value) is dict or type(value) is list:
+            if len(value) == 0:
+                self.remove(id)
+                return
             key_type = None
             val_type = None
             if type(value) is dict:

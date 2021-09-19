@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-from silicium_bot.modules import ModuleBase
 from silicium_bot.store import Store
+from ..module_base import ModuleBase
 
 
 class JokesModule(ModuleBase):
@@ -23,7 +23,7 @@ class JokesModule(ModuleBase):
         if text:
             await ctx.send(text.replace("<@", "<@ "), reference=ctx.message)
         else:
-            await ctx.send("There are no jokes")
+            await ctx.send("There are no jokes", reference=ctx.message)
 
     # jokes add
     @jokes.command()

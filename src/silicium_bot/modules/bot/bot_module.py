@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 
-from silicium_bot.modules import ModuleBase
 from silicium_bot.store import Store
+from ..module_base import ModuleBase
 
 
 class BotModule(ModuleBase):
@@ -41,7 +41,7 @@ class BotModule(ModuleBase):
     @bot.command()
     async def status(self, ctx: commands.Context, new_status=None):
         if new_status is None:
-            await ctx.send(f"{Store.bot_status}", reference=ctx.message)
+            await ctx.send(f"{Store.bot_status.value}", reference=ctx.message)
         status_map = {
             'online': discord.Status.online,
             'invisible': discord.Status.invisible,
@@ -52,8 +52,8 @@ class BotModule(ModuleBase):
             status = status_map[new_status]
             if Store.bot_status.value != status:
                 Store.bot_status.value = status
-                Store.bot_activity_type = discord.ActivityType.unknown
-                Store.bot_activity_text = ""
+                Store.bot_activity_type.value = discord.ActivityType.unknown
+                Store.bot_activity_text.value = ""
                 await self.bot.change_presence(status=status)
 
     # bot activity
@@ -76,15 +76,15 @@ class BotModule(ModuleBase):
         type_map = {
             'playing': discord.ActivityType.playing,
             'listening': discord.ActivityType.listening,
-            'watching': discord.ActivityType.watching,
+            'watching': discord.ActivityType.watching
         }
         if activity_type in type_map:
-            update = False
+            update = 0 == 1
             if Store.bot_activity_type.value != type_map[activity_type]:
-                Store.bot_activity_type = type_map[activity_type]
+                Store.bot_activity_type.value = type_map[activity_type]
                 update = True
-            if Store.bot_activity_text != activity_text:
-                Store.bot_activity_text = activity_text
+            if Store.bot_activity_text.value != activity_text:
+                Store.bot_activity_text.value = activity_text
                 update = True
             if update:
                 activity = discord.Activity(type=Store.bot_activity_type.value,

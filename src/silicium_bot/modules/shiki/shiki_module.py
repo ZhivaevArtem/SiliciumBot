@@ -1,17 +1,19 @@
 from discord.ext import commands
 
-from silicium_bot.modules import ModuleBase
 from silicium_bot.modules.shiki.loop_requests import LoopRequestsTask
 from silicium_bot.store import Store
+from ..module_base import ModuleBase
 
 
 class ShikiModule(ModuleBase):
     def __init__(self, bot):
         super().__init__(bot)
         self.loop_requests_task = None
+        self.shiki_client = None
 
     async def on_ready(self):
         self.loop_requests_task = LoopRequestsTask(self.bot)
+        self.shiki_client = self.loop_requests_task.shiki_client
         if Store.is_daemon_running.value:
             self.loop_requests_task.start()
 
@@ -47,6 +49,16 @@ class ShikiModule(ModuleBase):
         await ctx.send(
             "Daemon is running" if self.loop_requests_task.is_running()
             else "Daemon is not running", reference=ctx.message)
+
+    @shiki.group(invoke_without_command=True)
+    async def cache(self, ctx: commands.Context):
+        pass
+
+    # shiki cache truncate
+    @cache.command()
+    async def truncate_cache(self, ctx: commands.Context):
+        self.raise_if_not_me(ctx)
+        self.shiki_client.clear_cache()
 
     # shiki daemon status
     @daemon.command()
@@ -159,7 +171,7 @@ class ShikiModule(ModuleBase):
     async def truncate(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if len(Store.shiki_usernames.value) > 0:
-            Store.shiki_usernames = []
+            Store.shiki_usernames.value = []
         await ctx.send("Users truncated", reference=ctx.message)
 
     # shiki usechannel

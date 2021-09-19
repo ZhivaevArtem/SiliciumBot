@@ -18,6 +18,10 @@ class LoopRequestsTask(object):
         self._shiki_client = ShikiClient()
         self._MAX_RESTART_ATTEMPTS = 5
 
+    @property
+    def shiki_client(self):
+        return self._shiki_client
+
     def start(self, callback=None):
         if not self.is_running():
             self._is_running = True
