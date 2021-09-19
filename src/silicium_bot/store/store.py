@@ -107,7 +107,7 @@ class Store(object):
 
     @staticmethod
     def init(bot):
-        Store.bot = bot
+        Store._bot = bot
         StoreField.db_adapter = PostgresAdapter()
         dic = StoreField.db_adapter.find_all()
         fields_map = {f.key: f for f in StoreField.fields}

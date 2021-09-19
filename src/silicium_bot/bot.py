@@ -16,16 +16,10 @@ def log_traceback():
     logger.log(traceback.format_exc())
 
 
-try:
-    Store.init(bot)
-except Exception:
-    log_traceback()
-    sys.exit(-1)
-
-
 @bot.event
 async def on_ready():
     try:
+        Store.init(bot)
         for cog in list(bot.cogs.values()):
             await cog.on_ready()
     except Exception:
