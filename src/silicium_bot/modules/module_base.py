@@ -4,7 +4,8 @@ import traceback
 
 from discord.ext import commands
 
-from silicium_bot.globals import G
+from silicium_bot.constants import Constants
+from silicium_bot.logger import exception_logger as logger
 
 
 def _wrapper(func, dic, *args, **kwargs):
@@ -12,6 +13,9 @@ def _wrapper(func, dic, *args, **kwargs):
 
 
 class ModuleBase(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
     async def on_message(self, message) -> bool:
         return False
 
@@ -19,7 +23,7 @@ class ModuleBase(commands.Cog):
         pass
 
     def raise_if_not_me(self, ctx):
-        if G.MY_USER_ID != ctx.author.id:
+        if Constants.my_discord_id != ctx.author.id:
             raise Exception(f"ADMIN ONLY: {ctx.author}: {ctx.message.content}")
 
     def invoke_timeout(self, func, seconds, *args, **kwargs):
@@ -53,11 +57,8 @@ class ModuleBase(commands.Cog):
         ignored = (commands.CommandNotFound,
                    commands.MissingRequiredArgument)
         if type(error) in ignored:
-            print(f'Ignored exception caused by {ctx.author}')
-            print(type(error))
-            print(error)
             return
         try:
             raise error
         except Exception:
-            print(traceback.format_exc())
+            logger.log(traceback.format_exc())

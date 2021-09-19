@@ -2,7 +2,9 @@ import re
 
 import requests
 
-from silicium_bot.globals import G
+from silicium_bot.constants import Constants
+from silicium_bot.store import Store
+from silicium_bot.logger import shiki_logger as logger
 
 
 class ShikiLog(object):
@@ -11,7 +13,7 @@ class ShikiLog(object):
         self.id: int = data['id']
         self.username = username
         self.data = data
-        self.url = f"{G.SHIKI_API}/{data['target']['url']}"
+        self.url = f"{Constants.shiki_url}/{data['target']['url']}"
         self.description: str = re.sub('</?\\w+>', '', data['description'])
         self.title: str = data['target']['name']
         self.russian_title: str = data['target']['russian']
@@ -22,7 +24,7 @@ class ShikiLog(object):
         return message
 
     def get_embed_message(self):
-        url = f"{G.SHIKI_API}/{self.username}"
+        url = f"{Constants.shiki_url}/{self.username}"
         message = f"[{self.username}]({url}): {self.description}:"
         message += f" [{self.russian_title} / {self.title}]({self.url})"
         return message
@@ -33,19 +35,22 @@ class ShikiClient(object):
         super().__init__()
         self._cached_ids: dict[str, list[int]] = {}
         self._headers = {
-            'User-Agent': 'SiliciumBotChan/0.1.0 Discord' +
+            'User-Agent': f'SiliciumBotChan/{Constants.version} Discord' +
                           ' bot for me and my friends'
         }
 
-    # region public
+    def clear_cache(self):
+        self._cached_ids = {}
+        self.retrieve_user_logs()
 
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
-        limit = G.CFG.history_request_limit
-        url = f"{G.SHIKI_API}/api/users/{username}" \
+        limit = Store.shiki_request_limit.value
+        url = f"{Constants.shiki_api}/users/{username}" \
               + f"/history?limit={limit}"
         res = requests.get(url=url, headers=self._headers)
         if not res.ok:
-            print(res.content.decode('utf-8'))
+            logger.log(res)
+            return []
         logs = {d['id']: ShikiLog(d, username) for d in res.json()}
         if username in self._cached_ids:
             for cached_id in self._cached_ids[username]:
@@ -57,5 +62,3 @@ class ShikiClient(object):
             self._cached_ids[username] = []
             self._cached_ids[username] += logs.keys()
             return []
-
-    # endregion public

@@ -1,15 +1,15 @@
 from .bot import BotModule
+from .calculator import CalculatorModule
+from .deprecated import DeprecatedModule
+from .info import InfoModule
 from .jokes import JokesModule
 from .shiki import ShikiModule
-from .calculator import CalculatorModule
-from .info import InfoModule
-from .deprecated import DeprecatedModule
 
 cogs = [
-    JokesModule(),
-    CalculatorModule(),
-    BotModule(),
-    ShikiModule(),
-    InfoModule(),
-    DeprecatedModule()
+    JokesModule,
+    CalculatorModule,
+    BotModule,
+    ShikiModule,
+    InfoModule,
+    DeprecatedModule
 ]
