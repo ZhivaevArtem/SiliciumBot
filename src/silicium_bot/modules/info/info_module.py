@@ -39,6 +39,7 @@ Admin commands:
 `config`
 `jokes [truncate]`
 `shiki cache truncate`
+`shiki cache size`
 `shiki daemon [status]`
 `shiki daemon [{start|stop|restart}]`
 `shiki daemon interval [seconds: int]`

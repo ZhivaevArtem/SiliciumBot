@@ -1,4 +1,5 @@
 import re
+import sys
 
 import requests
 
@@ -41,7 +42,9 @@ class ShikiClient(object):
 
     def clear_cache(self):
         self._cached_ids = {}
-        self.retrieve_user_logs()
+
+    def cache_size(self):
+        return sys.getsizeof(self._cached_ids)
 
     def retrieve_user_logs(self, username: str) -> list[ShikiLog]:
         limit = Store.shiki_request_limit.value

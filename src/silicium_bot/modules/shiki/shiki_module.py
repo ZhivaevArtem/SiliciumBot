@@ -55,10 +55,16 @@ class ShikiModule(ModuleBase):
         pass
 
     # shiki cache truncate
-    @cache.command()
-    async def truncate_cache(self, ctx: commands.Context):
+    @cache.command("truncate")
+    async def cache_truncate(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         self.shiki_client.clear_cache()
+
+    @cache.command("size")
+    async def cache_size(self, ctx: commands.Context):
+        in_bytes = self.shiki_client.cache_size()
+        in_kbytes = in_bytes // 1024
+        await ctx.send(f"{in_kbytes} KB", reference=ctx.message)
 
     # shiki daemon status
     @daemon.command()
@@ -167,8 +173,8 @@ class ShikiModule(ModuleBase):
             await ctx.send("There are no users", reference=ctx.message)
 
     # shiki users truncate
-    @users.command()
-    async def truncate(self, ctx: commands.Context):
+    @users.command("truncate")
+    async def users_truncate(self, ctx: commands.Context):
         self.raise_if_not_me(ctx)
         if len(Store.shiki_usernames.value) > 0:
             Store.shiki_usernames.value = []

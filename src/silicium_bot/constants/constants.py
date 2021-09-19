@@ -11,7 +11,7 @@ def get_log_print_time(var_name):
 class Constants(object):
     shiki_url = 'https://shikimori.one'
     shiki_api = f"{shiki_url}/api"
-    version = '1.5.0'
+    version = '1.5.1'
     github = 'https://github.com/thisUsernameIsAlredyTaken/ShikimoriDiscordBot'
     my_discord_id = int(os.getenv("MY_USER_ID") or "-1")
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
