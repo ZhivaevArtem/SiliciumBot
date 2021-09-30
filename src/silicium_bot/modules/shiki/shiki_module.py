@@ -63,6 +63,7 @@ class ShikiModule(ModuleBase):
     @cache.command("size")
     async def cache_size(self, ctx: commands.Context):
         in_bytes = self.shiki_client.cache_size()
+        print(f"cache: {in_bytes} bytes")
         in_kbytes = in_bytes // 1024
         await ctx.send(f"{in_kbytes} KB", reference=ctx.message)
 
