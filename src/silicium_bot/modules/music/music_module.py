@@ -89,7 +89,7 @@ class MusicModule(ModuleBase):
         """play music from youtube (url or search query)"""
         voice = get(self.bot.voice_clients, guild=ctx.guild)
         if not voice:
-            await join(ctx)
+            await self.join(ctx)
             voice = get(self.bot.voice_clients, guild=ctx.guild)
 
         if request.startswith('http://') or request.startswith('https://'):
@@ -165,25 +165,25 @@ class MusicModule(ModuleBase):
     @commands.command()
     async def phonk(self, ctx):
         """5 hours full of quality phonk"""
-        await clear(ctx)
-        await skip(ctx)
-        await play(ctx, request="https://www.youtube.com/watch?v=yLsyTX5mNTk")
-        await play(ctx, request="https://www.youtube.com/watch?v=cjAO7Y5WmwM")
-        await play(ctx, request="https://www.youtube.com/watch?v=YxXTQg-vuJ4")
-        await play(ctx, request="https://www.youtube.com/watch?v=vpkHAwhUIzY")
-        await play(ctx, request="https://www.youtube.com/watch?v=leAJI9-sFug")
+        await self.clear(ctx)
+        await self.skip(ctx)
+        await self.play(ctx, request="https://www.youtube.com/watch?v=yLsyTX5mNTk")
+        await self.play(ctx, request="https://www.youtube.com/watch?v=cjAO7Y5WmwM")
+        await self.play(ctx, request="https://www.youtube.com/watch?v=YxXTQg-vuJ4")
+        await self.play(ctx, request="https://www.youtube.com/watch?v=vpkHAwhUIzY")
+        await self.play(ctx, request="https://www.youtube.com/watch?v=leAJI9-sFug")
 
     @commands.command()
     async def mantra(self, ctx):
         """Most powerful mantra of Shiva"""
-        await pidor(ctx)
-        await play(ctx, request="https://www.youtube.com/watch?v=GBq_OgFf9YA")
+        await self.pidor(ctx)
+        await self.play(ctx, request="https://www.youtube.com/watch?v=GBq_OgFf9YA")
 
     @commands.command()
     async def kish(self, ctx):
         """top 50 Korol + Joker tracks"""
-        await pidor(ctx)
-        await play(ctx, request="https://www.youtube.com/watch?v=0-C0lCPFTj8")
+        await self.pidor(ctx)
+        await self.play(ctx, request="https://www.youtube.com/watch?v=0-C0lCPFTj8")
 
     @commands.command()
     async def reset(self, ctx):
@@ -222,25 +222,25 @@ class MusicModule(ModuleBase):
     @commands.command(aliases=['stop'])
     async def pidor(self, ctx):
         """= clear + skip"""
-        await clear(ctx)
-        await skip(ctx)
+        await self.clear(ctx)
+        await self.skip(ctx)
 
 
     async def force_playlist(self, ctx, urls):
-        await pidor(ctx)
+        await self.pidor(ctx)
         for url in urls:
-            await play(ctx, request=url)
+            await self.play(ctx, request=url)
 
     @commands.command()
     async def majula(self, ctx):
-        await force_playlist(ctx, ["https://www.youtube.com/watch?v=z0nZAXyF2BU"])
+        await self.force_playlist(ctx, ["https://www.youtube.com/watch?v=z0nZAXyF2BU"])
 
     @commands.command(aliases=["pvk"])
     async def playvk(self, ctx, *, request):
         """Play music from vk (search query or id (format: <owner_id>_<audio_id>))"""
         voice = get(self.bot.voice_clients, guild=ctx.guild)
         if not voice:
-            await join(ctx)
+            await self.join(ctx)
             voice = get(self.bot.voice_clients, guild=ctx.guild)
         global vk_session
         global vk_audio
