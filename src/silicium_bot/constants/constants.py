@@ -17,3 +17,7 @@ class Constants(object):
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     database_url = os.getenv("DATABASE_URL")
     log_print_time = get_log_print_time("LOG_PRINT_TIME")
+    vk_login = os.getenv('LOGIN')
+    vk_password = os.getenv('PASSWORD')
+    youtube_token = os.getenv('YTTOKEN')
+

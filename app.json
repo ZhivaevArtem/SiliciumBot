@@ -7,11 +7,33 @@
     "MY_USER_ID": {
       "description": "Your discord user id",
       "required": false
+    },
+    "LOGIN": {
+      "description": "VK login",
+      "required": true
+    },
+    "PASSWORD": {
+      "description": "VK password",
+      "required": true
+    },
+    "YTTOKEN": {
+      "description": "Youtube token",
+      "required": true
+    },
+    "FFMPEG_DOWNLOAD_URL": {
+      "value": "https://www.johnvansickle.com/ffmpeg/old-releases/ffmpeg-4.2.2-amd64-static.tar.xz",
+      "required": false
     }
   },
   "buildpacks": [
     {
       "url": "heroku/python"
+    },
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+    },
+    {
+      "url": "https://github.com/xrisk/heroku-opus.git"
     }
   ],
   "addons": [
