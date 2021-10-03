@@ -1,5 +1,7 @@
 from discord.ext import commands, tasks
 from queue import Queue
+import re
+import time
 
 from vk_api.audio import VkAudio
 from youtube_dl import YoutubeDL
@@ -71,8 +73,8 @@ class MusicModule(ModuleBase):
             await voice.move_to(channel)
         else:
             voice = await channel.connect()
-        if not queue_loop.is_running():
-            queue_loop.start()
+        if not self.queue_loop.is_running():
+            self.queue_loop.start()
 
 
     @commands.command()
@@ -209,7 +211,7 @@ class MusicModule(ModuleBase):
     @commands.command()
     async def leave(self, ctx):
         """Leave from voice channel"""
-        queue_loop.stop()
+        self.queue_loop.stop()
         voice = get(self.bot.voice_clients, guild=ctx.guild)
         while not music_queue.empty():
             music_queue.get_nowait()
