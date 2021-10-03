@@ -56,7 +56,7 @@ class MusicModule(ModuleBase):
             return
         if not music_queue.empty() and not voice.is_playing() and not voice.is_paused():
             track_url = music_queue.get_nowait()
-            play_music(voice, track_url)
+            self.play_music(voice, track_url)
 
     # command for bot to join the channel of the user, if the bot has already joined and is in a different channel, it will move to the channel the user is in
     @commands.command()
@@ -109,7 +109,7 @@ class MusicModule(ModuleBase):
             url = f"https://www.youtube.com/watch?v={video_id}"
         if not voice.is_playing():
             try:
-                play_music(voice, url)
+                self.play_music(voice, url)
             except Exception:
                 await ctx.send("Not found")
                 return
@@ -258,7 +258,7 @@ class MusicModule(ModuleBase):
 
         if not voice.is_playing():
             try:
-                play_music(voice, aud)
+                self.play_music(voice, aud)
             except Exception:
                 await ctx.send("Not found")
                 return
