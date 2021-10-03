@@ -10,6 +10,7 @@ import requests
 from discord.utils import get
 from discord import FFmpegPCMAudio
 from discord import TextChannel
+import traceback
 
 from silicium_bot.store import Store
 from silicium_bot.constants import Constants
@@ -245,9 +246,13 @@ class MusicModule(ModuleBase):
         global vk_session
         global vk_audio
         if not vk_session or not vk_audio:
-            vk_session = vk_api.VkApi(Constants.vk_login, Constants.vk_password)
-            vk_session.auth()
-            vk_audio = VkAudio(vk_session)
+            try:
+                vk_session = vk_api.VkApi(Constants.vk_login, Constants.vk_password)
+                vk_session.auth()
+                vk_audio = VkAudio(vk_session)
+            except Exception:
+                print("vk login error")
+                traceback.format_exc()                
         if re.match(r"-?[0-9]+_-?[0-9]+", request):
             ownerid, songid = request.split('_')
             aud = vk_audio.get_audio_by_id(ownerid, songid)
