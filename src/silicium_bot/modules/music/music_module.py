@@ -7,6 +7,7 @@ from vk_api.audio import VkAudio
 from youtube_dl import YoutubeDL
 import vk_api
 import requests
+import discord
 from discord.utils import get
 from discord import FFmpegPCMAudio
 from discord import TextChannel
