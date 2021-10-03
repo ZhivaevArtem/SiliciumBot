@@ -1,4 +1,10 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
+from queue import Queue
+
+from vk_api.audio import VkAudio
+from youtube_dl import YoutubeDL
+import vk_api
+import requests
 
 from silicium_bot.store import Store
 from silicium_bot.constants import Constants
