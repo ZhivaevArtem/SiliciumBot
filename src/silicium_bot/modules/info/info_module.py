@@ -22,6 +22,7 @@ class InfoModule(ModuleBase):
     @commands.command()
     async def help(self, ctx):
         help_string = """
+`anek`
 `bot activity [{listening|playing|watching} <text: str>]`
 `bot status [{dnd|idle|invisible|online}]`
 `jokes [add <trigger: str> <react: str>]`

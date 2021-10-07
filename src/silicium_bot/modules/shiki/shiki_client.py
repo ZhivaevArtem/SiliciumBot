@@ -35,10 +35,6 @@ class ShikiClient(object):
     def __init__(self):
         super().__init__()
         self._cached_ids: dict[str, list[int]] = {}
-        self._headers = {
-            'User-Agent': f'SiliciumBotChan/{Constants.version} Discord' +
-                          ' bot for me and my friends'
-        }
 
     def clear_cache(self):
         self._cached_ids = {}
@@ -50,7 +46,7 @@ class ShikiClient(object):
         limit = Store.shiki_request_limit.value
         url = f"{Constants.shiki_api}/users/{username}" \
               + f"/history?limit={limit}"
-        res = requests.get(url=url, headers=self._headers)
+        res = requests.get(url=url, headers=Constants.request_headers)
         if not res.ok:
             logger.log(res)
             return []
