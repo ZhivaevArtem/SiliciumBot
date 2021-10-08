@@ -14,4 +14,6 @@ class AnekModule(ModuleBase):
             soup = BeautifulSoup(response.content, 'html.parser')
             tag = soup.find('section', class_='anek-view') \
                 .find('article').find('p')
+            print(soup.find('section', class_='anek-view').find('article')
+                  .get_text())
             await ctx.send(tag.get_text(), reference=ctx.message)
