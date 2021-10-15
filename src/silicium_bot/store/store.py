@@ -92,6 +92,8 @@ class Store(object):
     daemon_interval = StoreField(300, 'daemoninterval')
     bot_prefix = StoreField(';', 'botprefix')
     shiki_usernames = ListStoreField([], 'shikiusers')
+    active_voice_channel_id = StoreField(0, 'joinedvoicechannel')
+    active_guild_id = StoreField(0, 'joinedguildid')
     notification_channel = StoreField(
         NotificationChannelStub(), 'notifchannel', lambda v: v.id,
         lambda v: Store._bot.get_channel(v) or NotificationChannelStub()
