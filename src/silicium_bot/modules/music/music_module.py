@@ -16,7 +16,7 @@ import traceback
 from silicium_bot.store import Store
 from silicium_bot.constants import Constants
 from ..module_base import ModuleBase
-        
+
 guild = None
 
 music_queue = Queue()
@@ -24,7 +24,25 @@ now_playing = None
 vk_session = None
 vk_audio = None
 
+
 class MusicModule(ModuleBase):
+    async def on_ready(self):
+        channel_id = Store.active_voice_channel_id.value
+        guild_id = Store.active_guild_id.value
+        if channel_id != 0 and guild_id != 0:
+            global guild
+            guild = self.bot.get_guild(guild_id)
+            Store.active_guild_id.value = guild.id
+            channel = self.bot.get_channel(channel_id)
+            voice = get(self.bot.voice_clients, guild=guild)
+            if voice and voice.is_connected():
+                await voice.move_to(channel)
+            else:
+                voice = await channel.connect()
+            if not self.queue_loop.is_running():
+                self.queue_loop.start()
+
+
     def __init__(self, bot):
         super().__init__(bot)
 
@@ -77,6 +95,7 @@ class MusicModule(ModuleBase):
             voice = await channel.connect()
         if not self.queue_loop.is_running():
             self.queue_loop.start()
+        Store.active_guild_id.value = guild.id
 
 
     @commands.command()
@@ -208,7 +227,17 @@ class MusicModule(ModuleBase):
             pass
         players = {}
         guild = None
+        Store.active_guild_id.value = 0
         music_queue = Queue()
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if member.id == self.bot.user.id:
+            channel = after.channel
+            if channel:
+                Store.active_voice_channel_id.value = channel.id
+            else:
+                Store.active_voice_channel_id.value = 0
 
     @commands.command()
     async def leave(self, ctx):
@@ -253,7 +282,7 @@ class MusicModule(ModuleBase):
                 vk_audio = VkAudio(vk_session)
             except Exception:
                 print("vk login error")
-                traceback.format_exc()                
+                traceback.format_exc()
         if re.match(r"-?[0-9]+_-?[0-9]+", request):
             ownerid, songid = request.split('_')
             aud = vk_audio.get_audio_by_id(ownerid, songid)
