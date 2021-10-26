@@ -35,8 +35,11 @@ async def on_message(message: discord.Message):
         if message.author == bot.user:
             return
         for cog in list(bot.cogs.values()):
-            if await cog.on_message(message):
-                return
+            try:
+                if await cog.on_message(message):
+                    return
+            except Exception:
+                log_traceback()
         await bot.process_commands(message)
     except Exception:
         log_traceback()

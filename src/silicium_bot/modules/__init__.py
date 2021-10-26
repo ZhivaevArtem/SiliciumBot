@@ -6,6 +6,7 @@ from .jokes import JokesModule
 from .shiki import ShikiModule
 from .music import MusicModule
 from .anek import AnekModule
+from .balaboba import BalabobaModule
 
 cogs = [
     JokesModule,
@@ -15,5 +16,6 @@ cogs = [
     InfoModule,
     DeprecatedModule,
     MusicModule,
-    AnekModule
+    AnekModule,
+    BalabobaModule
 ]
