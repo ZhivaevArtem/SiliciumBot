@@ -14,6 +14,7 @@ class Constants(object):
     version = '1.7.0'
     anek_api = 'https://baneks.ru/random'
     github = 'https://github.com/thisUsernameIsAlredyTaken/ShikimoriDiscordBot'
+    deploy = 'https://dashboard.heroku.com/apps/silicium-bot/resources'
     my_discord_id = int(os.getenv("MY_USER_ID") or "-1")
     discord_token = os.getenv("DISCORD_BOT_TOKEN")
     database_url = os.getenv("DATABASE_URL")
@@ -26,3 +27,6 @@ class Constants(object):
         'User-Agent': f'SiliciumBotChan/{version} Discord' +
                       ' bot for me and my friends'
     }
+    readycheck_embed_title = '============ READY CHECK ============'
+    accept_emoji = '✅'
+    decline_emoji = '❌'

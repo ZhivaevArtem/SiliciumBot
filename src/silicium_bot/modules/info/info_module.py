@@ -13,6 +13,11 @@ class InfoModule(ModuleBase):
     async def github(self, ctx: commands.Context):
         await ctx.send(Constants.github, reference=ctx.message)
 
+    # deploy
+    @commands.command()
+    async def deploy(self, ctx: commands.Context):
+        await ctx.send(Constants.deploy, reference=ctx.message)
+
     # version
     @commands.command()
     async def version(self, ctx):

@@ -8,6 +8,8 @@ from ...constants import Constants
 
 class BalabobaModule(ModuleBase):
     async def on_message(self, message) -> bool:
+        if message.author == self.bot.user:
+            return False
         if message.content.startswith(self.bot.command_prefix):
             return False
         if message.mentions[0].id != self.bot.user.id:

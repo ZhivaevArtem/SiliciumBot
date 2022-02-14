@@ -11,6 +11,8 @@ class CalculatorModule(ModuleBase):
         super().__init__(bot)
 
     async def on_message(self, message) -> bool:
+        if message.author == self.bot.user:
+            return False
         content = message.content.strip()
         if re.match(r'^.*[0-9]+.*$', content) \
            and re.match(r'^[0-9/*^\-+. \t\n()]+$', content) \

@@ -13,13 +13,22 @@ def _wrapper(func, dic, *args, **kwargs):
 
 
 class ModuleBase(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     async def on_message(self, message) -> bool:
         return False
 
     async def on_ready(self):
+        pass
+
+    async def on_reaction_add(self, reaction, user):
+        pass
+
+    async def on_raw_reaction_remove(self, payload):
+        pass
+
+    async def on_reaction_remove(self, reaction, user):
         pass
 
     def raise_if_not_me(self, ctx):

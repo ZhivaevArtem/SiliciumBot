@@ -9,6 +9,8 @@ class JokesModule(ModuleBase):
         super().__init__(bot)
 
     async def on_message(self, message) -> bool:
+        if message.author == self.bot.user:
+            return False
         content = message.content.strip()
         if content in Store.jokes.value and len(Store.jokes.value) > 0:
             await message.channel.send(Store.jokes.value[content],
