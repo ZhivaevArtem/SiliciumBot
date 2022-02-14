@@ -26,6 +26,11 @@ class ReadyCheckModule(ModuleBase):
         return False
 
     async def _update_message(self, message: discord.Message):
+        if message.author != self.bot.user or len(message.embeds) == 0:
+            return
+        embed: discord.Embed = message.embeds[0]
+        if embed.title != Constants.readycheck_embed_title:
+            return
         reactions = message.reactions
         accept_reacts = [r for r in reactions if r.emoji == Constants.accept_emoji]
         decline_reacts = [r for r in reactions if r.emoji == Constants.decline_emoji]
@@ -39,7 +44,6 @@ class ReadyCheckModule(ModuleBase):
             async for user in react.users():
                 if user != self.bot.user:
                     decline_users.add(user)
-        embed: discord.Embed = message.embeds[0]
         embed.clear_fields()
         accept_value = '<empty>'
         decline_value = '<empty>'
