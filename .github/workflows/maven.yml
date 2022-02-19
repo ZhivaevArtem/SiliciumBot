@@ -15,6 +15,9 @@ jobs:
           date +%s > report.txt
           git status
       - name: Commit report
+        uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
         run: |
           git add ./report.txt
           git -c "user.name=Github Actions" -c "user.email=zhivaev993@gmail.com" commit -m "Automated report"
