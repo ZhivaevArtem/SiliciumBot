@@ -2,13 +2,12 @@ name: Java CI with Maven
 
 on:
   pull_request:
-    branches: [dev]
+    branches:
+      - dev
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17
@@ -20,4 +19,5 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Update build number
-        run: ./script/bash/ci_increment_build_number.sh
+        shell: bash
+        run: ./.github/scripts/bash/ci_increment_build_number.sh
