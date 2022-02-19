@@ -18,8 +18,3 @@ jobs:
           distribution: 'temurin'
       - name: Build jar
         run: mvn package
-      - name: Increment build number
-        run: |
-          mvn build-helper:parse-version versions:set "-DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}" versions:commit
-          git add ./pom.xml
-          git push
