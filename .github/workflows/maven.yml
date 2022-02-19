@@ -22,4 +22,4 @@ jobs:
         run: ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
       - name: Update build number
         shell: bash
-        run: ./.github/scripts/bash/ci_increment_build_number.sh
+        run: ./scripts/bash/ci_increment_build_number.sh
