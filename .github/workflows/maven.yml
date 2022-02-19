@@ -15,7 +15,6 @@ jobs:
           date +%s > report.txt
           git status
       - name: Commit report
-        uses: actions/checkout@v2
         with:
           ref: ${{github.event.pull_request.head.ref}}
         run: |
