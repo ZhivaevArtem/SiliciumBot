@@ -1,0 +1,19 @@
+name: Increment build number
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Increment build number
+        run: |
+          mvn build-helper:parse-version versions:set "-DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}" versions:commit
+          git add ./pom.xml
+          git commit -c "user.name=Github Actions" -c "user.email=zhivaev993@gmail.com" commit -m "Increment build number"
+          git push
