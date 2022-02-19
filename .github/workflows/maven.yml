@@ -15,12 +15,12 @@ jobs:
           date +%s > report.txt
           git status
       - name: Commit report
-        with:
-          ref: ${{github.event.pull_request.head.ref}}
         run: |
           git add ./report.txt
           git -c "user.name=Github Actions" -c "user.email=zhivaev993@gmail.com" commit -m "Automated report"
           git push
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
 #      - name: Set up JDK 17
 #        uses: actions/setup-java@v2
 #        with:
