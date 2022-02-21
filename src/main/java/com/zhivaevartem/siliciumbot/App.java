@@ -8,11 +8,25 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 
+/**
+ * Startup class.
+ */
 public class App {
-  public static void main(String[] args) throws LoginException {
+  /**
+   * Startup method.
+   *
+   * @param args Command line arguments.
+   */
+  public static void main(String[] args) {
     String token = ConfigUtils.getProp("token");
     JDABuilder builder = JDABuilder.createDefault(token);
-    JDA jda = builder.build();
+    JDA jda = null;
+    try {
+      jda = builder.build();
+    } catch (LoginException e) {
+      e.printStackTrace();
+      return;
+    }
     jda.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
     jda.getPresence().setActivity(Activity.listening("Музыка мясокомбината"));
 
