@@ -6,6 +6,9 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
+/**
+ * Utility class contains methods provide access to properties.
+ */
 public class ConfigUtils {
   private static Configuration properties;
   private static final Configurations configurations = new Configurations();
@@ -24,6 +27,12 @@ public class ConfigUtils {
     }
   }
 
+  /**
+   * Get property from application.properties file
+   *
+   * @param prop Property name.
+   * @return Property value.
+   */
   public static String getProp(String prop) {
     ConfigUtils.loadProperties();
     if (null != ConfigUtils.properties) {
