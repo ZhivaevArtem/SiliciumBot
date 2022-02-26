@@ -1,0 +1,11 @@
+* text=auto
+
+*.java        eol=lf
+*.xml         eol=lf
+*.properties  eol=lf
+*.yml         eol=lf
+.git*         eol=lf
+.editorconfig eol=lf
+
+*.class       binary
+*.jar         binary
