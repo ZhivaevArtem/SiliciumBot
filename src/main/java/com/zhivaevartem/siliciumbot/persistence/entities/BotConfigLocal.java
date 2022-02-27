@@ -11,9 +11,13 @@ public class BotConfigLocal {
   @Id
   private String guildId;
 
-  private String prefix;
+  private String prefix = "D";
 
   public BotConfigLocal() { }
+
+  public BotConfigLocal(String guildId) {
+    this.guildId = guildId;
+  }
 
   public String getGuildId() {
     return this.guildId;
