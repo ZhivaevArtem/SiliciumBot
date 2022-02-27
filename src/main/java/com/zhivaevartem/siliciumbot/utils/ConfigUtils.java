@@ -1,6 +1,5 @@
 package com.zhivaevartem.siliciumbot.utils;
 
-import java.net.URISyntaxException;
 import java.net.URL;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
