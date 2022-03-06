@@ -1,4 +1,4 @@
-name: Build and test
+name: Checks and tests
 
 on:
   pull_request:
@@ -21,12 +21,33 @@ jobs:
           IFS=$'\n'
           FAILURE_FILES=''
           RETURN_CODE=0
-          FILES=`find ./src -name '*.java' -or -name '*.xml'`
-          echo
+          FILES=`find ./src -name '*.*'`
+          FILES="$FILES"$'\n'"./pom.xml"
           for f in $FILES
           do
-            echo check $f
-            cat -e $f | grep -E '\^M\$?$' > /dev/null && FAILURE_FILES="${FAILURE_FILES} ${f}"
+            echo Check $f
+            cat -e $f | grep -E '\^M\$?$' > /dev/null && FAILURE_FILES="$FAILURE_FILES"$'\n'"$f"
+          done
+          for f in $FAILURE_FILES
+          do
+            printf [ER
+            echo ROR] $f
+            RETURN_CODE=-1
+          done
+          IFS=$OIFS
+          exit $RETURN_CODE
+      - name: Check encoding
+        run: |
+          OIFS="$IFS"
+          IFS=$'\n'
+          FAILURE_FILES=''
+          RETURN_CODE=0
+          FILES=`find ./src -name '*.*'`
+          FILES="$FILES"$'\n'"./pom.xml"
+          for f in $FILES
+          do
+            echo Check $f
+            file -bi $f | grep -iE 'charset=(utf-8)|(us-ascii)' > /dev/null || FAILURE_FILES="$FAILURE_FILES"$'\n'"$f"
           done
           for f in $FAILURE_FILES
           do
