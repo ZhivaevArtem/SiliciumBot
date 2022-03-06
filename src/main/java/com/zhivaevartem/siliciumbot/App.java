@@ -1,11 +1,12 @@
 package com.zhivaevartem.siliciumbot;
 
-import com.zhivaevartem.siliciumbot.persistence.entities.BotConfigLocal;
-import com.zhivaevartem.siliciumbot.persistence.services.BotConfigLocalService;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Startup class.
  */
+@SpringBootApplication
 public class App {
   /**
    * Startup method.
@@ -13,9 +14,6 @@ public class App {
    * @param args Command line arguments.
    */
   public static void main(String[] args) {
-    BotConfigLocalService service = new BotConfigLocalService();
-    BotConfigLocal cfg = service.getBotConfigLocal("123");
-    System.out.println(cfg.getGuildId());
-    System.out.println(cfg.getPrefix());
+    SpringApplication.run(App.class, args);
   }
 }
