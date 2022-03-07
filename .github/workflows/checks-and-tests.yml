@@ -4,9 +4,24 @@ on:
   pull_request:
     branches: [dev]
 
+env:
+  APP_MONGO_USER: test
+  APP_MONGO_PASS: password
+  APP_MONGO_DB: test
+  MONGODB_URI: mongodb://test:password@localhost:27017/test
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ${APP_MONGO_USER}
+          MONGO_INITDB_ROOT_PASSWORD: ${APP_MONGO_PASS}
+          MONGO_INITDB_DATABASE: ${APP_MONGO_DB}
+        ports:
+          - 27017:27017
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17
@@ -59,5 +74,7 @@ jobs:
           exit $RETURN_CODE
       - name: Check codestyle
         run: mvn checkstyle:check
-      - name: Pack jar with tests
-        run: mvn package
+      - name: Build jar
+        run: mvn package -Dmaven.test.skip
+      - name: Run tests
+        run: mvn test
