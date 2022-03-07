@@ -9,9 +9,6 @@ env:
 jobs:
   tests:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        mongodb-version: ['5.0.6']
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -24,7 +21,7 @@ jobs:
       - name: Start MongoDB 5.0.6
         uses: supercharge/mongodb-github-action@1.7.0
         with:
-          mongodb-version: ${{matrix.mongodb-version}}
+          mongodb-version: 5.0.6
           mongodb-username: mongodb_ci_user
           mongodb-password: KlMUi1t78tYuty40
           mongodb-db: mongodb_ci_db
