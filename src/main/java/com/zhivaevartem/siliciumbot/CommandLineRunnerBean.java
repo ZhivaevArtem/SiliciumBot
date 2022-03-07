@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Profile("!test")
 @Component
-public class CommandLineRunnerBotstrap implements CommandLineRunner {
+public class CommandLineRunnerBean implements CommandLineRunner {
   @Autowired
   private BotGuildConfigService botGuildConfigService;
 
