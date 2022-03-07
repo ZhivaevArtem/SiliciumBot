@@ -4,12 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Startup class.
+ * Entry point class.
  */
 @SpringBootApplication
 public class ApplicationStartup {
   /**
-   * Startup method.
+   * Entry point method.
    *
    * @param args Command line arguments.
    */

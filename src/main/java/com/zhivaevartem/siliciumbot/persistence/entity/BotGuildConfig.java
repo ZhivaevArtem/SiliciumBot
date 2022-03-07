@@ -2,6 +2,7 @@ package com.zhivaevartem.siliciumbot.persistence.entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.lang.NonNull;
 
 /**
  * Guild scoped bot config.
@@ -29,6 +30,7 @@ public class BotGuildConfig {
     this.guildId = guildId;
   }
 
+  @NonNull
   public String getGuildId() {
     return this.guildId;
   }

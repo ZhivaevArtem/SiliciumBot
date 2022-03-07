@@ -46,29 +46,6 @@
         <version>2.6.4</version>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <id>default-cli</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>java</executable>
-              <arguments>
-                <argument>--add-opens</argument>
-                <argument>java.base/java.lang=ALL-UNNAMED</argument>
-                <argument>-classpath</argument>
-                <classpath/>
-                <argument>com.zhivaevartem.siliciumbot.App</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.1.2</version>
@@ -76,7 +53,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>9.3</version>
+            <version>10.0</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -84,59 +61,6 @@
           <violationSeverity>warning</violationSeverity>
           <failOnViolation>true</failOnViolation>
         </configuration>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>com.zhivaevartem.siliciumbot.App</mainClass>
-              <addClasspath>true</addClasspath>
-              <classpathPrefix>dependency</classpathPrefix>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-        <configuration>
-          <resources>
-            <resource>
-              <directory>src/main/resources</directory>
-              <filtering>true</filtering>
-              <excludes>
-                <exclude>google_checks.xml</exclude>
-                <exclude>sun_checks.xml</exclude>
-              </excludes>
-            </resource>
-          </resources>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
