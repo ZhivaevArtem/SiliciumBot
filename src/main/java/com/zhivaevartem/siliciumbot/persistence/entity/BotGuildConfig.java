@@ -1,5 +1,7 @@
 package com.zhivaevartem.siliciumbot.persistence.entity;
 
+import static com.zhivaevartem.siliciumbot.constants.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.lang.NonNull;
@@ -12,7 +14,7 @@ public class BotGuildConfig {
   @Id
   private String guildId;
 
-  private String prefix = "D";
+  private String prefix = DEFAULT_BOT_COMMAND_PREFIX;
 
   private String notificationChannelId;
 

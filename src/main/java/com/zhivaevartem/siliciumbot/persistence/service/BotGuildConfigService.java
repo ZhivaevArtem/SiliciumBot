@@ -4,6 +4,7 @@ import com.zhivaevartem.siliciumbot.persistence.dao.BotGuildConfigRepository;
 import com.zhivaevartem.siliciumbot.persistence.entity.BotGuildConfig;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -75,9 +76,8 @@ public class BotGuildConfigService {
    */
   public void setNotificationChannelId(String guildId, String notificationChannelId) {
     BotGuildConfig cfg = this.getBotGuildConfig(guildId);
-    if (!notificationChannelId.equals(cfg.getNotificationChannelId())) {
+    if (!Objects.equals(notificationChannelId, cfg.getNotificationChannelId())) {
       cfg.setNotificationChannelId(notificationChannelId);
-      this.saveBotGuildConfig(cfg);
     }
   }
 }

@@ -5,7 +5,7 @@ on:
     branches: [dev]
 
 env:
-  MONGODB_URI: mongodb+srv://mongodb_ci_user:KlMUi1t78tYuty40@localhost/mongodb_ci_db
+  MONGODB_URI: mongodb://localhost/mongodb_ci_db
 jobs:
   tests:
     runs-on: ubuntu-20.04
@@ -22,8 +22,6 @@ jobs:
         uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: 5.0.6
-          mongodb-username: mongodb_ci_user
-          mongodb-password: KlMUi1t78tYuty40
           mongodb-db: mongodb_ci_db
       - name: Check encoding (UTF-8)
         run: |
