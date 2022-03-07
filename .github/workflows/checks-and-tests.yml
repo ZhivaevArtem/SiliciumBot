@@ -5,32 +5,30 @@ on:
     branches: [dev]
 
 env:
-  APP_MONGO_USER: test
-  APP_MONGO_PASS: password
-  APP_MONGO_DB: test
-  MONGODB_URI: mongodb://test:password@localhost:27017/test
-
+  MONGODB_URI: mongodb+srv://mongodb_ci_user:KlMUi1t78tYuty40@localhost/mongodb_ci_db
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    services:
-      mongo:
-        image: mongo
-        env:
-          MONGO_INITDB_ROOT_USERNAME: ${APP_MONGO_USER}
-          MONGO_INITDB_ROOT_PASSWORD: ${APP_MONGO_PASS}
-          MONGO_INITDB_DATABASE: ${APP_MONGO_DB}
-        ports:
-          - 27017:27017
+  tests:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        mongodb-version: ['5.0.6']
     steps:
-      - uses: actions/checkout@v2
+      - name: Git checkout
+        uses: actions/checkout@v2
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Check encoding
+      - name: Start MongoDB 5.0.6
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: ${{matrix.mongodb-version}}
+          mongodb-username: mongodb_ci_user
+          mongodb-password: KlMUi1t78tYuty40
+          mongodb-db: mongodb_ci_db
+      - name: Check encoding (UTF-8)
         run: |
           OIFS="$IFS"
           IFS=$'\n'
@@ -51,7 +49,7 @@ jobs:
           done
           IFS=$OIFS
           exit $RETURN_CODE
-      - name: Check line separators
+      - name: Check line separators (LF)
         run: |
           OIFS="$IFS"
           IFS=$'\n'
@@ -72,7 +70,7 @@ jobs:
           done
           IFS=$OIFS
           exit $RETURN_CODE
-      - name: Check codestyle
+      - name: Check codestyle (google style)
         run: mvn checkstyle:check
       - name: Build jar
         run: mvn package -Dmaven.test.skip
