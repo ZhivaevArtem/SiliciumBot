@@ -15,8 +15,8 @@ public class AdminCommandListener extends AbstractCommandListener {
   /**
    * Change bot status (online, dnd, invisible, offline, idle).
    */
-  @CommandHandler(aliases = "bot status")
-  public void changeBotStatus(MessageReceivedEvent event, List<String> args) {
+  @CommandHandler(aliases = {"bot status"}, argumentsCount = 2)
+  public void changeBotStatus(MessageReceivedEvent event, List<String> args, String freeArgument) {
     if (args.size() == 1) {
       OnlineStatus status = switch (args.get(0).toLowerCase()) {
         case "online" -> OnlineStatus.ONLINE;

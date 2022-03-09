@@ -5,6 +5,7 @@ import com.zhivaevartem.siliciumbot.persistence.service.BotGuildConfigService;
 import com.zhivaevartem.siliciumbot.util.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Base class for all command listeners.
  */
 public abstract class AbstractCommandListener extends ListenerAdapter {
+  private class Handler {
+    private Method method;
+    private int argumentsCount;
+  }
+
   private BotGuildConfigService botGuildConfigService;
 
-  private final Map<String, Method> commandHandlers = new HashMap<>();
+  private final Map<String, Handler> commandHandlers = new HashMap<>();
 
   @Autowired
   private void setBotGuildConfigService(BotGuildConfigService botGuildConfigService) {
@@ -37,12 +43,14 @@ public abstract class AbstractCommandListener extends ListenerAdapter {
     return null;
   }
 
-  private void invokeCommandHandler(List<String> args, MessageReceivedEvent event) {
+  private void invokeCommandHandler(String content, MessageReceivedEvent event) {
+    List<String> args = new ArrayList<>();
+    StringUtils.parseArguments(content, args);
     String command = this.matchCommand(args);
     if (null != command) {
-      Method method = this.commandHandlers.get(command);
+      Handler handler = this.commandHandlers.get(command);
       try {
-        method.invoke(this, event, args);
+        handler.method.invoke(this, event, args);
       } catch (IllegalAccessException | InvocationTargetException e) {
         e.printStackTrace();
       }
@@ -56,8 +64,7 @@ public abstract class AbstractCommandListener extends ListenerAdapter {
       String content = event.getMessage().getContentDisplay();
       if (content.startsWith(prefix)) {
         content = content.substring(prefix.length());
-        List<String> args = StringUtils.parseArguments(content);
-        this.invokeCommandHandler(args, event);
+        this.invokeCommandHandler(content, event);
       }
     }
   }
@@ -68,7 +75,10 @@ public abstract class AbstractCommandListener extends ListenerAdapter {
    * @param command Associated command.
    * @param method Command handler.
    */
-  public void registerCommandHandler(String command, Method method) {
-    this.commandHandlers.put(command, method);
+  public void registerCommandHandler(String command, Method method, int argumentsCount) {
+    Handler handler = new Handler();
+    handler.method = method;
+    handler.argumentsCount = argumentsCount;
+    this.commandHandlers.put(command, handler);
   }
 }

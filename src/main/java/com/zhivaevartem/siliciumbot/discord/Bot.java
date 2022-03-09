@@ -32,8 +32,10 @@ public class Bot {
     for (AbstractCommandListener commandListener : this.commandListeners) {
       for (Method method : commandListener.getClass().getMethods()) {
         if (method.isAnnotationPresent(CommandHandler.class)) {
-          for (String alias : method.getAnnotation(CommandHandler.class).aliases()) {
-            commandListener.registerCommandHandler(alias, method);
+          CommandHandler handlerAnnotation = method.getAnnotation(CommandHandler.class);
+          for (String alias : handlerAnnotation.aliases()) {
+            commandListener
+              .registerCommandHandler(alias, method, handlerAnnotation.argumentsCount());
           }
         }
       }

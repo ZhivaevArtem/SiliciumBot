@@ -15,4 +15,12 @@ public @interface CommandHandler {
    * Possible commands to invoke the handler.
    */
   String[] aliases();
+
+  /**
+   * How many arguments to parse.
+   * The remaining arguments will fall into the "free argument".
+   * If count is negative all remaining arguments will fall into the "free argument".
+   * Default value is -1.
+   */
+  int argumentsCount() default -1;
 }
