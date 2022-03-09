@@ -30,3 +30,4 @@ class Constants(object):
     readycheck_embed_title = '============ READY CHECK ============'
     accept_emoji = '✅'
     decline_emoji = '❌'
+    undecide_emoji = '⌚'
