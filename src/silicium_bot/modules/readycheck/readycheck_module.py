@@ -60,7 +60,7 @@ class ReadyCheckModule(ModuleBase):
         if len(decline_users) > 0:
             decline_value = '\n'.join([u.mention for u in list(decline_users)])
         if len(decline_users) > 0:
-            undecide_value = '\n'.join([u.mention for u in list(undecide_value)])
+            undecide_value = '\n'.join([u.mention for u in list(undecide_users)])
         embed.add_field(name='Ready', inline=False, value=accept_value)
         embed.add_field(name='Not ready', inline=False, value=decline_value)
         embed.add_field(name='A bit later', inline=False, value=undecide_value)
