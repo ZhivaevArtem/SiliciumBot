@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [dev]
 
-env:
-  MONGODB_URI: mongodb://localhost/mongodb_ci_db
 jobs:
   tests:
     runs-on: ubuntu-20.04
@@ -22,7 +20,7 @@ jobs:
         uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: 5.0.6
-          mongodb-db: mongodb_ci_db
+          mongodb-db: siliciumdb
       - name: Check encoding (UTF-8)
         run: |
           OIFS="$IFS"

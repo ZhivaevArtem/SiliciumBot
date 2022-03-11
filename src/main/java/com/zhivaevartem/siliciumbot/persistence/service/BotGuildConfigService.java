@@ -5,8 +5,8 @@ import com.zhivaevartem.siliciumbot.persistence.entity.BotGuildConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,9 +18,8 @@ public class BotGuildConfigService {
   @Autowired
   private BotGuildConfigRepository repository;
 
-  private Map<String, BotGuildConfig> cache = new HashMap<>();
+  private final Map<String, BotGuildConfig> cache = new HashMap<>();
 
-  @NonNull
   private BotGuildConfig getBotGuildConfig(String guildId) {
     if (cache.containsKey(guildId)) {
       return cache.get(guildId);
@@ -39,8 +38,8 @@ public class BotGuildConfigService {
    * Get prefix for specified guild.
    *
    * @param guildId Guild id.
+   * @return Prefix.
    */
-  @NonNull
   public String getPrefix(String guildId) {
     return this.getBotGuildConfig(guildId).getPrefix();
   }
@@ -63,7 +62,9 @@ public class BotGuildConfigService {
    * Get notification channel id of specified guild.
    *
    * @param guildId Guild id.
+   * @return Notification channel id.
    */
+  @Nullable
   public String getNotificationChannelId(String guildId) {
     return this.getBotGuildConfig(guildId).getNotificationChannelId();
   }
@@ -74,7 +75,7 @@ public class BotGuildConfigService {
    * @param guildId Guild id.
    * @param notificationChannelId Id of channel notifications will be sent to.
    */
-  public void setNotificationChannelId(String guildId, String notificationChannelId) {
+  public void setNotificationChannelId(String guildId, @Nullable String notificationChannelId) {
     BotGuildConfig cfg = this.getBotGuildConfig(guildId);
     if (!Objects.equals(notificationChannelId, cfg.getNotificationChannelId())) {
       cfg.setNotificationChannelId(notificationChannelId);

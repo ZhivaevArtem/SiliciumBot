@@ -1,6 +1,6 @@
 package com.zhivaevartem.siliciumbot;
 
-import static com.zhivaevartem.siliciumbot.constants.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
+import static com.zhivaevartem.siliciumbot.constant.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import com.zhivaevartem.siliciumbot.persistence.service.BotGuildConfigService;

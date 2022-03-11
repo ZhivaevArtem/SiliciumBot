@@ -36,6 +36,11 @@
       <version>2.6.4</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>net.dv8tion</groupId>
+      <artifactId>JDA</artifactId>
+      <version>5.0.0-alpha.9</version>
+    </dependency>
   </dependencies>
 
   <build>

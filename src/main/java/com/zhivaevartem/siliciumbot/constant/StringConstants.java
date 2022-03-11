@@ -1,8 +1,10 @@
-package com.zhivaevartem.siliciumbot.constants;
+package com.zhivaevartem.siliciumbot.constant;
 
 /**
- * All string constants should be placed here.
+ * Constant strings.
  */
 public class StringConstants {
   public static final String DEFAULT_BOT_COMMAND_PREFIX = "D";
+
+  private StringConstants() {}
 }
