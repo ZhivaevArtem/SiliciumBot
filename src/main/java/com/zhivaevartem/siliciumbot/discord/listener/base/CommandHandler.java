@@ -17,10 +17,9 @@ public @interface CommandHandler {
   String[] aliases();
 
   /**
-   * How many arguments to parse.
-   * The remaining arguments will fall into the "free argument".
-   * If count is negative all remaining arguments will fall into the "free argument".
-   * Default value is -1.
+   * If true remaining string will be passed in last argument
+   * which must be {@link java.lang.String}.
+   * Default: {@code false}.
    */
-  int argumentsCount() default -1;
+  boolean lastFreeArgument() default false;
 }

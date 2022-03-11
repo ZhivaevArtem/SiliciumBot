@@ -32,11 +32,7 @@ public class Bot {
     for (AbstractCommandListener commandListener : this.commandListeners) {
       for (Method method : commandListener.getClass().getMethods()) {
         if (method.isAnnotationPresent(CommandHandler.class)) {
-          CommandHandler handlerAnnotation = method.getAnnotation(CommandHandler.class);
-          for (String alias : handlerAnnotation.aliases()) {
-            commandListener
-              .registerCommandHandler(alias, method, handlerAnnotation.argumentsCount());
-          }
+          commandListener.registerCommandHandler(method);
         }
       }
       jda.addEventListener(commandListener);
