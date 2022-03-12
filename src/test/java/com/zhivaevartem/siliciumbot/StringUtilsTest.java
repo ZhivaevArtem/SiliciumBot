@@ -80,4 +80,13 @@ public class StringUtilsTest {
     String result = StringUtils.prettifyString(command);
     assertEquals(expected, result);
   }
+
+  @Test
+  public void parseEmptyQuotes() {
+    String command = "     \"\"    asdf     \"\"    ";
+    List<String> expected = List.of(new String[]{"", "asdf", ""});
+    List<String> result = new ArrayList<>();
+    StringUtils.splitArguments(command, result);
+    assertEquals(expected, result);
+  }
 }
