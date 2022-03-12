@@ -322,6 +322,7 @@ public abstract class BaseEventListener {
           .subscribe(this::onReconnectStartEvent);
         case "onReconnectFailEvent" -> gateway.on(ReconnectFailEvent.class)
           .subscribe(this::onReconnectFailEvent);
+        default -> System.out.println("Unknown handler");
       }
     }
   }
