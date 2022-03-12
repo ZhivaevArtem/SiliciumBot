@@ -37,9 +37,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>net.dv8tion</groupId>
-      <artifactId>JDA</artifactId>
-      <version>5.0.0-alpha.9</version>
+      <groupId>com.discord4j</groupId>
+      <artifactId>discord4j-core</artifactId>
+      <version>3.2.2</version>
     </dependency>
   </dependencies>
 

@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation for command handlers. All command handlers must be annotated.
@@ -14,7 +15,7 @@ public @interface CommandHandler {
   /**
    * Possible commands to invoke the handler.
    */
-  String[] aliases();
+  String[] aliases() default {};
 
   /**
    * If true remaining string will be passed in last argument

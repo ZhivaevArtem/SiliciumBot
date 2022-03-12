@@ -5,8 +5,8 @@ import com.zhivaevartem.siliciumbot.persistence.entity.BotGuildConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 /**

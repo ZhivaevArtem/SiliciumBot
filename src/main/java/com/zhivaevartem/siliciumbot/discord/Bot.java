@@ -1,12 +1,10 @@
 package com.zhivaevartem.siliciumbot.discord;
 
-import com.zhivaevartem.siliciumbot.discord.listener.base.AbstractCommandListener;
-import com.zhivaevartem.siliciumbot.discord.listener.base.CommandHandler;
-import java.lang.reflect.Method;
+import com.zhivaevartem.siliciumbot.constant.ExitCodeConstants;
+import com.zhivaevartem.siliciumbot.discord.listener.base.BaseEventListener;
+import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import java.util.List;
-import javax.security.auth.login.LoginException;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,22 +18,27 @@ public class Bot {
   private String token;
 
   @Autowired
-  private List<? extends AbstractCommandListener> commandListeners;
+  private List<BaseEventListener> listeners;
+
+  private void initGateway(GatewayDiscordClient gateway) {
+    for (BaseEventListener listener : this.listeners) {
+      listener.register(gateway);
+    }
+    gateway.onDisconnect().block();
+  }
 
   /**
    * Starts bot.
-   *
-   * @throws LoginException Thrown if invalid token passed.
    */
-  public void start() throws LoginException {
-    JDA jda = JDABuilder.createDefault(this.token).build();
-    for (AbstractCommandListener commandListener : this.commandListeners) {
-      for (Method method : commandListener.getClass().getMethods()) {
-        if (method.isAnnotationPresent(CommandHandler.class)) {
-          commandListener.registerCommandHandler(method);
-        }
-      }
-      jda.addEventListener(commandListener);
+  public void start() {
+    final String token = this.token;
+    final DiscordClient client = DiscordClient.create(token);
+    final GatewayDiscordClient gateway = client.login().block();
+
+    if (null != gateway) {
+      this.initGateway(gateway);
+    } else {
+      System.exit(ExitCodeConstants.COULD_NOT_START_BOT);
     }
   }
 }

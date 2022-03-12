@@ -1,9 +1,10 @@
 package com.zhivaevartem.siliciumbot.util;
 
+import com.zhivaevartem.siliciumbot.constant.RegularExpressionConstants;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
+import org.springframework.lang.Nullable;
 
 /**
  * Utils to work with strings.
@@ -25,8 +26,7 @@ public class StringUtils {
       args.clear();
     }
     command = command.trim();
-    // (?<=")(\\"|[^"])+(?=")|(\\"|[^\s"])+
-    Pattern p = Pattern.compile("\"(\\\\\"|[^\"])+\"|(\\\\\"|[^\\s\"])+");
+    Pattern p = Pattern.compile(RegularExpressionConstants.SPLIT_ARGUMENTS);
     Matcher m = p.matcher(command);
     int i = 0;
     while (m.find()) {
@@ -37,7 +37,7 @@ public class StringUtils {
       s = s
         .replace("\\\"", "\"")
         .replace("\\\\", "\\")
-        .replaceAll("^\"|\"$", "");
+        .replaceAll(RegularExpressionConstants.FIRST_AND_LAST_DOUBLE_QUOTES, "");
       if (args != null) {
         args.add(s);
       }
