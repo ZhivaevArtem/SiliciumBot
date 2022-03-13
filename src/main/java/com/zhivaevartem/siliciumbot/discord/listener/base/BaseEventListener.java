@@ -84,9 +84,6 @@ public abstract class BaseEventListener {
     }
   }
 
-  @Autowired
-  private BotGuildConfigService configService;
-
   private final Map<String, Handler> commandHandlers = new HashMap<>();
 
   private Object getArgument(Class<?> parameterType, @Nullable String rawArgument) {
@@ -326,6 +323,9 @@ public abstract class BaseEventListener {
       }
     }
   }
+
+  @Autowired
+  protected BotGuildConfigService configService;
 
   // region: events
   public void onReadyEvent(ReadyEvent event) {}
