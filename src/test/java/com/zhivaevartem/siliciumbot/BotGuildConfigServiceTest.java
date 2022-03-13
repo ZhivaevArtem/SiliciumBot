@@ -2,7 +2,7 @@ package com.zhivaevartem.siliciumbot;
 
 import static com.zhivaevartem.siliciumbot.constant.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.zhivaevartem.siliciumbot.persistence.service.BotGuildConfigService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -14,40 +14,24 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 public class BotGuildConfigServiceTest {
   @Autowired
-  private BotGuildConfigService botGuildConfigService;
+  private BotGuildConfigService service;
 
   private final String guildId = "test_entity_" + UUID.randomUUID();
 
   @Test
   public void defaultPrefixExistTest() {
-    final String prefix = this.botGuildConfigService.getPrefix(this.guildId);
+    String prefix = this.service.getPrefix(this.guildId);
 
     assertEquals(DEFAULT_BOT_COMMAND_PREFIX, prefix);
   }
 
   @Test
   public void canChangePrefixTest() {
-    final String oldPrefix = this.botGuildConfigService.getPrefix(this.guildId);
-    final String newPrefix = "!!!!" + oldPrefix;
+    String oldPrefix = this.service.getPrefix(this.guildId);
+    String newPrefix = "!!!!" + oldPrefix;
 
-    this.botGuildConfigService.setPrefix(this.guildId, newPrefix);
+    this.service.setPrefix(this.guildId, newPrefix);
 
-    assertEquals(newPrefix, this.botGuildConfigService.getPrefix(this.guildId));
-  }
-
-  @Test
-  public void canSetNotificationChannelIdNonNullTest() {
-    final String notificationChannelId = "68bvr568778b89ny";
-
-    this.botGuildConfigService.setNotificationChannelId(this.guildId, notificationChannelId);
-
-    assertEquals(notificationChannelId, this.botGuildConfigService.getNotificationChannelId(this.guildId));
-  }
-
-  @Test
-  public void canSetNotificationChannelIdNullTest() {
-    this.botGuildConfigService.setNotificationChannelId(this.guildId, null);
-
-    assertNull(this.botGuildConfigService.getNotificationChannelId(this.guildId));
+    assertEquals(newPrefix, this.service.getPrefix(this.guildId));
   }
 }

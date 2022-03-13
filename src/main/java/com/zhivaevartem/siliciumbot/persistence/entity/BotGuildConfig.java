@@ -2,44 +2,32 @@ package com.zhivaevartem.siliciumbot.persistence.entity;
 
 import static com.zhivaevartem.siliciumbot.constant.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
 
-import org.springframework.data.annotation.Id;
+import com.zhivaevartem.siliciumbot.constant.StringConstants;
+import com.zhivaevartem.siliciumbot.persistence.entity.base.AbstractGuildEntity;
+import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.lang.Nullable;
 
 /**
  * Guild scoped bot config.
  */
 @Document
-public class BotGuildConfig {
-  @Id
-  private String guildId;
-
+public class BotGuildConfig extends AbstractGuildEntity {
   private String prefix = DEFAULT_BOT_COMMAND_PREFIX;
 
-  @Nullable
-  private String notificationChannelId;
-
-  public BotGuildConfig() { }
-
-  @Nullable
-  public String getNotificationChannelId() {
-    return notificationChannelId;
-  }
-
-  public void setNotificationChannelId(@Nullable String notificationChannelId) {
-    this.notificationChannelId = notificationChannelId;
+  public BotGuildConfig() {
+    super(StringConstants.UNKNOWN_GUILD_ID);
   }
 
   public BotGuildConfig(String guildId) {
-    this.guildId = guildId;
+    super(guildId);
   }
 
-  public String getGuildId() {
-    return this.guildId;
-  }
-
-  public void setGuildId(String guildId) {
-    this.guildId = guildId;
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof BotGuildConfig cfg) {
+      return Objects.equals(cfg.prefix, this.prefix) && Objects.equals(cfg.guildId, this.guildId);
+    }
+    return false;
   }
 
   public String getPrefix() {
