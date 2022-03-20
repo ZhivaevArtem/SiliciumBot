@@ -63,6 +63,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 
@@ -85,6 +86,19 @@ public abstract class BaseEventListener {
   }
 
   private final Map<String, Handler> commandHandlers = new HashMap<>();
+
+  @Autowired
+  private GatewayDiscordClient gateway;
+
+  @PostConstruct
+  private void init() {
+    this.register(this.gateway);
+  }
+
+  private void register(GatewayDiscordClient gateway) {
+    this.registerCommandHandlers(gateway);
+    this.registerEventHandlers(gateway);
+  }
 
   private Object getArgument(Class<?> parameterType, @Nullable String rawArgument) {
     if (null == rawArgument) {
@@ -434,9 +448,4 @@ public abstract class BaseEventListener {
 
   public void onReconnectFailEvent(ReconnectFailEvent event) {}
   // endregion: events
-
-  public final void register(GatewayDiscordClient gateway) {
-    this.registerCommandHandlers(gateway);
-    this.registerEventHandlers(gateway);
-  }
 }
