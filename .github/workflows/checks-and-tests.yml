@@ -5,22 +5,12 @@ on:
     branches: [dev]
 
 jobs:
-  tests:
+  checks:
+    name: Code checks
     runs-on: ubuntu-20.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-      - name: Start MongoDB 5.0.6
-        uses: supercharge/mongodb-github-action@1.7.0
-        with:
-          mongodb-version: 5.0.6
-          mongodb-db: siliciumdb
       - name: Check encoding (UTF-8)
         run: |
           OIFS="$IFS"
@@ -65,7 +55,30 @@ jobs:
           exit $RETURN_CODE
       - name: Check codestyle (google style)
         run: mvn checkstyle:check
+  build:
+    name: Build jar
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
       - name: Build jar
         run: mvn package -Dmaven.test.skip
+  test:
+    name: Run tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Start MongoDB 5.0.6
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: 5.0.6
+          mongodb-db: siliciumdb
       - name: Run tests
         run: mvn test

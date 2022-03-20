@@ -6,6 +6,7 @@ on:
 
 jobs:
   increment:
+    name: Increment build number
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
