@@ -70,7 +70,7 @@ import org.springframework.lang.Nullable;
 /**
  * Base class for all listeners. Each listener must extend this.
  */
-public abstract class BaseEventListener {
+public abstract class AbstractEventListener {
   private static class Handler {
     private Method method;
     private boolean lastArgumentFree;
@@ -179,13 +179,21 @@ public abstract class BaseEventListener {
   private String matchCommandHandler(String command) {
     List<String> args = new ArrayList<>();
     StringUtils.splitArguments(command, args);
+    Handler matched = null;
     for (int i = 0, size = args.size(); i < size; i++) {
       String s = StringUtils.prettifyString(String.join(" ", args.subList(0, i + 1)));
       if (this.commandHandlers.containsKey(s)) {
-        return s;
+        Handler current = this.commandHandlers.get(s);
+        if (null == matched || current.commandSize > matched.commandSize) {
+          matched = current;
+        }
       }
     }
-    return "";
+    if (null == matched) {
+      return "";
+    } else {
+      return matched.command;
+    }
   }
 
   private void registerCommandHandler(Method method) {
