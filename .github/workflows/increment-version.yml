@@ -2,7 +2,7 @@ name: Increment build number
 
 on:
   push:
-    branches: [dev]
+    branches: [develop]
 
 jobs:
   increment:
