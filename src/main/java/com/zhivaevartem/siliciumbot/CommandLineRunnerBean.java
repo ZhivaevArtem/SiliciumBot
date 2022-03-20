@@ -19,7 +19,7 @@ public class CommandLineRunnerBean implements CommandLineRunner {
    * {@inheritDoc}
    */
   @Override
-  public void run(String... args) throws Exception {
+  public void run(String... args) {
     this.bot.start();
   }
 }

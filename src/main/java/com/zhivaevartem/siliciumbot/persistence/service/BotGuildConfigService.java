@@ -1,21 +1,21 @@
 package com.zhivaevartem.siliciumbot.persistence.service;
 
-import com.zhivaevartem.siliciumbot.persistence.dao.BotGuildConfigRepository;
-import com.zhivaevartem.siliciumbot.persistence.entity.BotGuildConfig;
-import com.zhivaevartem.siliciumbot.persistence.service.base.AbstractGuildService;
+import com.zhivaevartem.siliciumbot.persistence.dao.BotGuildConfigDao;
+import com.zhivaevartem.siliciumbot.persistence.dto.BotGuildConfigDto;
+import com.zhivaevartem.siliciumbot.persistence.service.base.AbstractGuildConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * Provide access to
- * {@link com.zhivaevartem.siliciumbot.persistence.entity.BotGuildConfig} entities.
+ * {@link BotGuildConfigDto} entities.
  */
 @Service
 public class BotGuildConfigService
-    extends AbstractGuildService<BotGuildConfig, BotGuildConfigRepository> {
+    extends AbstractGuildConfigService<BotGuildConfigDto, BotGuildConfigDao> {
   @Autowired
-  public BotGuildConfigService(BotGuildConfigRepository repository) {
-    super(repository, BotGuildConfig.class);
+  public BotGuildConfigService(BotGuildConfigDao repository) {
+    super(repository, BotGuildConfigDto.class);
   }
 
   /**
@@ -25,7 +25,7 @@ public class BotGuildConfigService
    * @return Prefix.
    */
   public String getPrefix(String guildId) {
-    return this.getEntity(guildId).getPrefix();
+    return this.getDto(guildId).getPrefix();
   }
 
   /**
@@ -35,8 +35,8 @@ public class BotGuildConfigService
    * @param prefix New prefix.
    */
   public void setPrefix(String guildId, String prefix) {
-    BotGuildConfig cfg = this.getEntity(guildId);
+    BotGuildConfigDto cfg = this.getDto(guildId);
     cfg.setPrefix(prefix);
-    this.updateEntity(cfg);
+    this.updateDto(cfg);
   }
 }

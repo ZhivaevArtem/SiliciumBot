@@ -1,9 +1,9 @@
-package com.zhivaevartem.siliciumbot.persistence.entity;
+package com.zhivaevartem.siliciumbot.persistence.dto;
 
 import static com.zhivaevartem.siliciumbot.constant.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
 
 import com.zhivaevartem.siliciumbot.constant.StringConstants;
-import com.zhivaevartem.siliciumbot.persistence.entity.base.AbstractGuildEntity;
+import com.zhivaevartem.siliciumbot.persistence.dto.base.AbstractGuildConfigDto;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,20 +11,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Guild scoped bot config.
  */
 @Document
-public class BotGuildConfig extends AbstractGuildEntity {
+public class BotGuildConfigDto extends AbstractGuildConfigDto {
   private String prefix = DEFAULT_BOT_COMMAND_PREFIX;
 
-  public BotGuildConfig() {
+  public BotGuildConfigDto() {
     super(StringConstants.UNKNOWN_GUILD_ID);
   }
 
-  public BotGuildConfig(String guildId) {
+  public BotGuildConfigDto(String guildId) {
     super(guildId);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof BotGuildConfig cfg) {
+    if (obj instanceof BotGuildConfigDto cfg) {
       return Objects.equals(cfg.prefix, this.prefix) && Objects.equals(cfg.guildId, this.guildId);
     }
     return false;
