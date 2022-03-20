@@ -8,12 +8,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+/**
+ * Configuration creates {@link GatewayDiscordClient} bean.
+ */
 @Profile("!test")
 @Configuration
 public class BotConfiguration {
   @Value("${discord.bot.token}")
   private String token;
 
+  /**
+   * Discord4j gateway bean. It wraps discord API.
+   */
   @Bean
   public GatewayDiscordClient gateway() {
     DiscordClient client = DiscordClient.create(this.token);
@@ -21,6 +27,7 @@ public class BotConfiguration {
     if (null == gateway) {
       System.exit(ExitCodeConstants.COULD_NOT_START_BOT);
     }
+    new Thread(() -> gateway.onDisconnect().block()).start();  // Do not block main thread
     return gateway;
   }
 }

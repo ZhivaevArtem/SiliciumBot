@@ -87,12 +87,14 @@ public abstract class BaseEventListener {
 
   private final Map<String, Handler> commandHandlers = new HashMap<>();
 
-  @Autowired
-  private GatewayDiscordClient gateway;
+  @Autowired(required = false)
+  private GatewayDiscordClient gateway;  // null if we run tests
 
   @PostConstruct
   private void init() {
-    this.register(this.gateway);
+    if (null != this.gateway) {
+      this.register(this.gateway);
+    }
   }
 
   private void register(GatewayDiscordClient gateway) {
