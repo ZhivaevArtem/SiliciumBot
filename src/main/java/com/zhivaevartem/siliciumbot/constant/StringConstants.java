@@ -1,6 +1,6 @@
 package com.zhivaevartem.siliciumbot.constant;
 
-import com.zhivaevartem.siliciumbot.persistence.entity.ReadyCheckGuildConfig.ReadyCheckOption;
+import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyCheckOption;
 import java.util.List;
 
 /**
@@ -9,12 +9,6 @@ import java.util.List;
 public class StringConstants {
   public static final String DEFAULT_BOT_COMMAND_PREFIX = "D";
 
-  public static final String[][] DEFAULT_READY_CHECK_OPTIONS_ = new String[][] {
-    {"✅", "Ready"},
-    {"⌚", "Later"},
-    {"❌", "Not ready"}
-  };
-
   public static final List<ReadyCheckOption> DEFAULT_READY_CHECK_OPTIONS
       = List.of(new ReadyCheckOption[] {
         new ReadyCheckOption("✅", "Ready"),
@@ -22,7 +16,7 @@ public class StringConstants {
         new ReadyCheckOption("❌", "Not ready")
       });
 
-  public static final String EMPTY_READY_CHECK_VALUE = "No votes...";
+  public static final String EMPTY_READY_CHECK_VALUE = "*No votes...*";
 
   public static final String READY_CHECK_EMBED_TITLE = "==== Ready check ====";
 

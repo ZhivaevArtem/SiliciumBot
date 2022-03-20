@@ -1,7 +1,7 @@
-package com.zhivaevartem.siliciumbot.persistence.entity;
+package com.zhivaevartem.siliciumbot.persistence.dto;
 
 import com.zhivaevartem.siliciumbot.constant.StringConstants;
-import com.zhivaevartem.siliciumbot.persistence.entity.base.AbstractGuildEntity;
+import com.zhivaevartem.siliciumbot.persistence.dto.base.AbstractGuildConfigDto;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Guild scoped ready check feature configuration.
  */
 @Document
-public class ReadyCheckGuildConfig extends AbstractGuildEntity {
+public class ReadyCheckGuildDto extends AbstractGuildConfigDto {
   /**
    * Ready check option. Includes emoji unicode and option name.
    */
@@ -40,17 +40,17 @@ public class ReadyCheckGuildConfig extends AbstractGuildEntity {
 
   private String emptyValue = StringConstants.EMPTY_READY_CHECK_VALUE;
 
-  public ReadyCheckGuildConfig() {
+  public ReadyCheckGuildDto() {
     super(StringConstants.UNKNOWN_GUILD_ID);
   }
 
-  public ReadyCheckGuildConfig(String guildId) {
+  public ReadyCheckGuildDto(String guildId) {
     super(guildId);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof ReadyCheckGuildConfig cfg) {
+    if (obj instanceof ReadyCheckGuildDto cfg) {
       return Objects.equals(cfg.options, this.options)
         && Objects.equals(cfg.title, this.title)
         && Objects.equals(cfg.emptyValue, this.emptyValue);

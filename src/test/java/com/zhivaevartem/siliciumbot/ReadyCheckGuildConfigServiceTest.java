@@ -4,7 +4,7 @@ package com.zhivaevartem.siliciumbot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.zhivaevartem.siliciumbot.constant.StringConstants;
-import com.zhivaevartem.siliciumbot.persistence.entity.ReadyCheckGuildConfig.ReadyCheckOption;
+import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyCheckOption;
 import com.zhivaevartem.siliciumbot.persistence.service.ReadyCheckGuildConfigService;
 import java.util.List;
 import java.util.UUID;
