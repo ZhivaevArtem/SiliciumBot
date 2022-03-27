@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /**
  * Spring scheduling configuration.
  */
-@Configuration
 @Profile("!test")
+@Configuration
 @EnableScheduling
 public class SchedulingConfiguration {}

@@ -4,7 +4,7 @@ import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyChec
 import java.util.List;
 
 /**
- * Constant strings.
+ * String constants.
  */
 public class StringConstants {
   public static final String DEFAULT_BOT_COMMAND_PREFIX = "D";

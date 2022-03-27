@@ -1,8 +1,12 @@
 package com.zhivaevartem.siliciumbot.discord.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.zhivaevartem.siliciumbot.constant.NumberConstants;
 import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyCheckOption;
 import com.zhivaevartem.siliciumbot.persistence.service.ReadyCheckGuildConfigService;
 import discord4j.core.object.Embed;
+import discord4j.core.object.Embed.Field;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -15,7 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,10 +33,10 @@ import org.springframework.stereotype.Service;
 public class ReadyCheckService {
   private static class CachedMessage {
     private Message message;
-    private Map<String, List<User>> reactions;
+    private Map<String, List<String>> reactions;
     private boolean shouldUpdate = false;
 
-    public CachedMessage(Message message, Map<String, List<User>> reactions) {
+    public CachedMessage(Message message, Map<String, List<String>> reactions) {
       this.message = message;
       this.reactions = reactions;
     }
@@ -38,40 +44,36 @@ public class ReadyCheckService {
 
   private boolean shouldUpdate = false;
 
-  private final Map<String, Map<String, CachedMessage>> cachedMessages = new HashMap<>();
+//  private final Map<String, Map<String, CachedMessage>> cachedMessages = new HashMap<>();
+  private final Cache<String, CachedMessage> cachedMessages = Caffeine.newBuilder()
+    .expireAfterWrite(NumberConstants.READYCHECK_LIFETIME_MINUTES, TimeUnit.MINUTES)
+    .build();
 
   @Autowired
   private ReadyCheckGuildConfigService service;
 
-  @Scheduled(fixedDelay = 2500)
+  @Scheduled(fixedDelayString = "${silicium.readycheck-update-interval}")
   private void updateEmbeds() {
     if (this.shouldUpdate) {
       synchronized (this.cachedMessages) {
         this.shouldUpdate = false;
-        this.cachedMessages.forEach((guildId, messages) -> {
-          messages.forEach((messageId, message) -> {
-            if (message.shouldUpdate) {
-              message.shouldUpdate = false;
-              this.updateMessage(guildId, message);
-            }
-          });
+        this.cachedMessages.asMap().forEach((guildIdAndMessageId, cachedMessage) -> {
+          String[] split = guildIdAndMessageId.split(":");
+          String guildId = split[0];
+          String messageId = split[1];
+          if (cachedMessage.shouldUpdate) {
+            cachedMessage.shouldUpdate = false;
+            this.updateMessage(guildId, cachedMessage);
+          }
         });
       }
     }
   }
 
-  @Scheduled(cron = "0 0 3 * * *")
-  private void cleanCache() {
-    synchronized (this.cachedMessages) {
-      this.cachedMessages.clear();
-      this.shouldUpdate = false;
-    }
-  }
-
-  private String joinUserMentions(List<User> users, String guildId) {
-    return users.size() == 0
+  private String joinUserMentions(List<String> mentions, String guildId) {
+    return mentions.size() == 0
       ? this.service.getEmptyValue(guildId)
-      : String.join("\n", users.stream().map(User::getMention).toList());
+      : String.join("\n", mentions);
   }
 
   private void updateMessage(String guildId, CachedMessage cachedMessage) {
@@ -81,11 +83,11 @@ public class ReadyCheckService {
       builder.description(description);
     }
     for (ReadyCheckOption option : this.service.getOptions(guildId)) {
-      List<User> reactors = new ArrayList<>();
+      List<String> mentions = new ArrayList<>();
       if (cachedMessage.reactions.containsKey(option.emoji)) {
-        reactors = cachedMessage.reactions.get(option.emoji);
+        mentions = cachedMessage.reactions.get(option.emoji);
       }
-      builder.addField(option.name, this.joinUserMentions(reactors, guildId), false);
+      builder.addField(option.name, this.joinUserMentions(mentions, guildId), false);
     }
     cachedMessage.message.edit(MessageEditSpec.create().withEmbeds(builder.build())).subscribe();
   }
@@ -163,22 +165,21 @@ public class ReadyCheckService {
         Embed embed = this.getReadyCheckEmbed(guildId, message, botUser);
         if (null != embed) {
           String messageId = message.getId().asString();
-          if (!this.cachedMessages.containsKey(guildId)) {
-            this.cachedMessages.put(guildId, new HashMap<>());
+          String guildIdAndMessageId = guildId + ":" + messageId;
+          CachedMessage cachedMessage = this.cachedMessages.getIfPresent(guildIdAndMessageId);
+          if (null == cachedMessage) {
+            cachedMessage = this.embedToCachedMessage(guildId, message, embed);
+            this.cachedMessages.put(guildIdAndMessageId, cachedMessage);
           }
-          Map<String, CachedMessage> cachedGuild = this.cachedMessages.get(guildId);
-          if (!cachedGuild.containsKey(messageId)) {
-            cachedGuild.put(messageId, new CachedMessage(message, new HashMap<>()));
-          }
-          CachedMessage cachedMessage = cachedGuild.get(messageId);
           ReadyCheckOption option = this.getReadyCheckOption(guildId, emoji);
           if (null != option) {
             if (!cachedMessage.reactions.containsKey(option.emoji)) {
               cachedMessage.reactions.put(option.emoji, new ArrayList<>());
             }
-            List<User> reactors = cachedMessage.reactions.get(option.emoji);
-            if (reactors.stream().filter(user -> user.equals(author)).toList().size() == 0) {
-              reactors.add(author);
+            List<String> mentions = cachedMessage.reactions.get(option.emoji);
+            String authorMention = author.getMention();
+            if (mentions.stream().filter(user -> user.equals(authorMention)).toList().size() == 0) {
+              mentions.add(authorMention);
               cachedMessage.shouldUpdate = true;
               this.shouldUpdate = true;
             }
@@ -201,25 +202,49 @@ public class ReadyCheckService {
         Embed embed = this.getReadyCheckEmbed(guildId, message, botUser);
         if (null != embed) {
           String messageId = message.getId().asString();
-          if (this.cachedMessages.containsKey(guildId)) {
-            Map<String, CachedMessage> cachedGuild = this.cachedMessages.get(guildId);
-            if (cachedGuild.containsKey(messageId)) {
-              CachedMessage cachedMessage = cachedGuild.get(messageId);
-              if (emoji.asUnicodeEmoji().isPresent()) {
-                String rawEmoji = emoji.asUnicodeEmoji().get().getRaw();
-                if (cachedMessage.reactions.containsKey(rawEmoji)) {
-                  List<User> reactors = cachedMessage.reactions.get(rawEmoji);
-                  if (reactors.removeIf(user -> user.equals(author))) {
-                    cachedMessage.shouldUpdate = true;
-                    this.shouldUpdate = true;
-                  }
-                }
+          String guildIdAndMessageId = guildId + ":" + messageId;
+          CachedMessage cachedMessage = this.cachedMessages.getIfPresent(guildIdAndMessageId);
+          if (null == cachedMessage) {
+            cachedMessage = this.embedToCachedMessage(guildId, message, embed);
+            this.cachedMessages.put(guildIdAndMessageId, cachedMessage);
+          }
+          if (emoji.asUnicodeEmoji().isPresent()) {
+            String rawEmoji = emoji.asUnicodeEmoji().get().getRaw();
+            if (cachedMessage.reactions.containsKey(rawEmoji)) {
+              List<String> mentions = cachedMessage.reactions.get(rawEmoji);
+              String authorMention = author.getMention();
+              if (mentions.removeIf(user -> user.equals(authorMention))) {
+                cachedMessage.shouldUpdate = true;
+                this.shouldUpdate = true;
               }
             }
           }
         }
       }
     }
+  }
+
+  private CachedMessage embedToCachedMessage(String guildId, Message message, Embed embed) {
+    List<ReadyCheckOption> options = this.service.getOptions(guildId);
+    List<String> optionNames = options.stream().map(opt -> opt.name).toList();
+    List<Field> fields = embed.getFields();
+    Map<String, List<String>> reactions = new HashMap<>();
+    for (int i = 0; i < fields.size(); i++) {
+      Field field = fields.get(i);
+      if (optionNames.contains(field.getName())) {
+        ReadyCheckOption option = options.get(i);
+        if (!reactions.containsKey(option.emoji)) {
+          reactions.put(option.emoji, new ArrayList<>());
+        }
+        List<String> mentions = reactions.get(option.emoji);
+        String value = field.getValue();
+        String[] rawMentions = value.split("\n");
+        if (rawMentions[0].startsWith("<") && rawMentions[0].endsWith(">")) {
+          mentions.addAll(List.of(rawMentions));
+        }
+      }
+    }
+    return new CachedMessage(message, reactions);
   }
 
   /**
