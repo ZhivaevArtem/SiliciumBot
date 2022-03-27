@@ -44,10 +44,9 @@ public class ReadyCheckService {
 
   private boolean shouldUpdate = false;
 
-//  private final Map<String, Map<String, CachedMessage>> cachedMessages = new HashMap<>();
   private final Cache<String, CachedMessage> cachedMessages = Caffeine.newBuilder()
-    .expireAfterWrite(NumberConstants.READYCHECK_LIFETIME_MINUTES, TimeUnit.MINUTES)
-    .build();
+      .expireAfterWrite(NumberConstants.READYCHECK_LIFETIME_MINUTES, TimeUnit.MINUTES)
+      .build();
 
   @Autowired
   private ReadyCheckGuildConfigService service;
