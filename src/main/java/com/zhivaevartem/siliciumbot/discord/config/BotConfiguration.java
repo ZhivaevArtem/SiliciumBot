@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("!test")
 @Configuration
 public class BotConfiguration {
-  @Value("${discord.bot.token}")
+  @Value("${silicium.token}")
   private String token;
 
   /**

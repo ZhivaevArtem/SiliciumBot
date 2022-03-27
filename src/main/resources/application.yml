@@ -2,6 +2,6 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/siliciumdb}
-discord:
-  bot:
-    token: ${SILICIUMBOT_TOKEN:}
+silicium:
+  token: ${SILICIUMBOT_TOKEN:}
+  readycheck-update-interval: 2500
