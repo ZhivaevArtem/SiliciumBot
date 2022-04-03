@@ -5,3 +5,4 @@ spring:
 silicium:
   token: ${SILICIUMBOT_TOKEN:}
   readycheck-update-interval: 2500
+  shikimori-check-interval: 45000

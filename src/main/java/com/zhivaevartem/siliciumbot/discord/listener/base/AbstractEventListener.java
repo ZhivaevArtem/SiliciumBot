@@ -1,6 +1,6 @@
 package com.zhivaevartem.siliciumbot.discord.listener.base;
 
-import com.zhivaevartem.siliciumbot.persistence.service.BotGuildConfigService;
+import com.zhivaevartem.siliciumbot.persistence.guild.service.BotConfigGuildEntityService;
 import com.zhivaevartem.siliciumbot.util.StringUtils;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.InviteCreateEvent;
@@ -70,7 +70,7 @@ import org.springframework.lang.Nullable;
 /**
  * Base class for all listeners. Each listener must extend this.
  */
-public abstract class BaseEventListener {
+public abstract class AbstractEventListener {
   private static class Handler {
     private Method method;
     private boolean lastArgumentFree;
@@ -341,7 +341,7 @@ public abstract class BaseEventListener {
   }
 
   @Autowired
-  protected BotGuildConfigService configService;
+  protected BotConfigGuildEntityService configService;
 
   // region: events
   public void onReadyEvent(ReadyEvent event) {}

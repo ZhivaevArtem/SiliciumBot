@@ -3,8 +3,8 @@ package com.zhivaevartem.siliciumbot.discord.service;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zhivaevartem.siliciumbot.constant.NumberConstants;
-import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyCheckOption;
-import com.zhivaevartem.siliciumbot.persistence.service.ReadyCheckGuildConfigService;
+import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGuildEntity.ReadyCheckOption;
+import com.zhivaevartem.siliciumbot.persistence.guild.service.ReadyCheckConfigGuildEntityService;
 import discord4j.core.object.Embed;
 import discord4j.core.object.Embed.Field;
 import discord4j.core.object.entity.Message;
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -49,7 +48,7 @@ public class ReadyCheckService {
       .build();
 
   @Autowired
-  private ReadyCheckGuildConfigService service;
+  private ReadyCheckConfigGuildEntityService service;
 
   @Scheduled(fixedDelayString = "${silicium.readycheck-update-interval}")
   private void updateEmbeds() {

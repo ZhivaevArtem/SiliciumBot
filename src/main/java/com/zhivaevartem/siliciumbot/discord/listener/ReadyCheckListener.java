@@ -1,6 +1,6 @@
 package com.zhivaevartem.siliciumbot.discord.listener;
 
-import com.zhivaevartem.siliciumbot.discord.listener.base.BaseEventListener;
+import com.zhivaevartem.siliciumbot.discord.listener.base.AbstractEventListener;
 import com.zhivaevartem.siliciumbot.discord.listener.base.CommandHandler;
 import com.zhivaevartem.siliciumbot.discord.service.ReadyCheckService;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -22,7 +22,7 @@ import reactor.util.function.Tuple2;
  * Ready check listener.
  */
 @Component
-public class ReadyCheckListener extends BaseEventListener {
+public class ReadyCheckListener extends AbstractEventListener {
   private final Logger logger = LoggerFactory.getLogger(ReadyCheckListener.class);
 
   @Autowired

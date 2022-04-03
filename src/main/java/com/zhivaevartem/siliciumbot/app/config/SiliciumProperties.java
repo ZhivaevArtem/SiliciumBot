@@ -13,6 +13,15 @@ import org.springframework.context.annotation.Configuration;
 public class SiliciumProperties {
   private String token;
   private int readycheckUpdateInterval;
+  private int shikimoriCheckInterval;
+
+  public int getShikimoriCheckInterval() {
+    return shikimoriCheckInterval;
+  }
+
+  public void setShikimoriCheckInterval(int shikimoriCheckInterval) {
+    this.shikimoriCheckInterval = shikimoriCheckInterval;
+  }
 
   public String getToken() {
     return token;

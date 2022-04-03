@@ -1,7 +1,7 @@
-package com.zhivaevartem.siliciumbot.persistence.dto;
+package com.zhivaevartem.siliciumbot.persistence.guild.entity;
 
 import com.zhivaevartem.siliciumbot.constant.StringConstants;
-import com.zhivaevartem.siliciumbot.persistence.dto.base.AbstractGuildConfigDto;
+import com.zhivaevartem.siliciumbot.persistence.guild.base.AbstractGuildEntity;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Guild scoped ready check feature configuration.
  */
 @Document
-public class ReadyCheckGuildDto extends AbstractGuildConfigDto {
+public class ReadyCheckConfigGuildEntity extends AbstractGuildEntity {
   /**
    * Ready check option. Includes emoji unicode and option name.
    */
@@ -32,6 +32,14 @@ public class ReadyCheckGuildDto extends AbstractGuildConfigDto {
       }
       return false;
     }
+
+    @Override
+    public int hashCode() {
+      int hash = 1;
+      hash = 31 * hash + this.emoji.hashCode();
+      hash = 31 * hash + this.name.hashCode();
+      return hash;
+    }
   }
 
   private List<ReadyCheckOption> options = StringConstants.DEFAULT_READY_CHECK_OPTIONS;
@@ -40,22 +48,31 @@ public class ReadyCheckGuildDto extends AbstractGuildConfigDto {
 
   private String emptyValue = StringConstants.EMPTY_READY_CHECK_VALUE;
 
-  public ReadyCheckGuildDto() {
+  public ReadyCheckConfigGuildEntity() {
     super(StringConstants.UNKNOWN_GUILD_ID);
   }
 
-  public ReadyCheckGuildDto(String guildId) {
+  public ReadyCheckConfigGuildEntity(String guildId) {
     super(guildId);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof ReadyCheckGuildDto cfg) {
+    if (obj instanceof ReadyCheckConfigGuildEntity cfg) {
       return Objects.equals(cfg.options, this.options)
         && Objects.equals(cfg.title, this.title)
         && Objects.equals(cfg.emptyValue, this.emptyValue);
     }
     return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 1;
+    hash = 31 * hash + this.emptyValue.hashCode();
+    hash = 31 * hash + this.options.hashCode();
+    hash = 31 * hash + this.title.hashCode();
+    return hash;
   }
 
   public List<ReadyCheckOption> getOptions() {

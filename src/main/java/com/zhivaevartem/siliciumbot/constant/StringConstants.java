@@ -1,6 +1,6 @@
 package com.zhivaevartem.siliciumbot.constant;
 
-import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyCheckOption;
+import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGuildEntity.ReadyCheckOption;
 import java.util.List;
 
 /**
