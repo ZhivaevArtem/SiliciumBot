@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class ShikimoriConfigGuildEntity extends AbstractGuildEntity {
   private List<String> usernames = new ArrayList<>();
-  private String notificationChannel = "";
+  private String notificationChannelId = "";
 
   public ShikimoriConfigGuildEntity() {
     super(StringConstants.UNKNOWN_GUILD_ID);
@@ -29,7 +29,7 @@ public class ShikimoriConfigGuildEntity extends AbstractGuildEntity {
   public boolean equals(Object obj) {
     if (obj instanceof ShikimoriConfigGuildEntity dto) {
       return this.usernames.equals(dto.usernames)
-        && this.notificationChannel.equals(dto.notificationChannel);
+        && this.notificationChannelId.equals(dto.notificationChannelId);
     }
     return false;
   }
@@ -38,7 +38,7 @@ public class ShikimoriConfigGuildEntity extends AbstractGuildEntity {
   public int hashCode() {
     int hash = 1;
     hash = 31 * hash + usernames.hashCode();
-    hash = 31 * hash + notificationChannel.hashCode();
+    hash = 31 * hash + notificationChannelId.hashCode();
     return hash;
   }
 
@@ -50,11 +50,11 @@ public class ShikimoriConfigGuildEntity extends AbstractGuildEntity {
     this.usernames = usernames;
   }
 
-  public String getNotificationChannel() {
-    return notificationChannel;
+  public String getNotificationChannelId() {
+    return notificationChannelId;
   }
 
-  public void setNotificationChannel(String notificationChannel) {
-    this.notificationChannel = notificationChannel;
+  public void setNotificationChannelId(String notificationChannelId) {
+    this.notificationChannelId = notificationChannelId;
   }
 }

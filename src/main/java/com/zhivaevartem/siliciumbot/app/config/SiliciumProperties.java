@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(SiliciumProperties.class)
 public class SiliciumProperties {
-  private String token;
-  private int readycheckUpdateInterval;
-  private int shikimoriCheckInterval;
+  private String token = "";
+  private int readycheckUpdateInterval = 2500;
+  private int shikimoriCheckInterval = 45000;
 
   public int getShikimoriCheckInterval() {
     return shikimoriCheckInterval;

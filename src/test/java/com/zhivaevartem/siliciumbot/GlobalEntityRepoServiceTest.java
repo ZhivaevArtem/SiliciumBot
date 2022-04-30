@@ -2,8 +2,8 @@ package com.zhivaevartem.siliciumbot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.zhivaevartem.siliciumbot.persistence.global.GlobalEntityService;
-import com.zhivaevartem.siliciumbot.persistence.global.entity.ShikimoriGlobalEntity;
+import com.zhivaevartem.siliciumbot.persistence.global.base.GlobalEntityService;
+import com.zhivaevartem.siliciumbot.persistence.global.entity.ShikimoriConfigGlobalEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,31 +17,31 @@ public class GlobalEntityRepoServiceTest {
 
   @Test
   public void canSaveShikimoriConfigTest() {
-    ShikimoriGlobalEntity dto = new ShikimoriGlobalEntity();
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
+    ShikimoriConfigGlobalEntity dto = new ShikimoriConfigGlobalEntity();
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
     service.saveEntity(dto);
   }
 
   @Test
   public void getShikimoriConfigTest() {
-    ShikimoriGlobalEntity dto = new ShikimoriGlobalEntity();
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
-    dto.getGuilds().add("42532534534");
+    ShikimoriConfigGlobalEntity dto = new ShikimoriConfigGlobalEntity();
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
+    dto.getGuildsIds().add("42532534534");
     service.saveEntity(dto);
-    ShikimoriGlobalEntity entity = service.getEntity(ShikimoriGlobalEntity.class);
+    ShikimoriConfigGlobalEntity entity = service.getEntity(ShikimoriConfigGlobalEntity.class);
     assertEquals(dto, entity);
   }
 }

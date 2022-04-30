@@ -1,4 +1,4 @@
-package com.zhivaevartem.siliciumbot.persistence.global;
+package com.zhivaevartem.siliciumbot.persistence.global.base;
 
 import static com.zhivaevartem.siliciumbot.constant.NumberConstants.CACHE_GLOBAL_CONFIG_MAX_SIZE;
 import static com.zhivaevartem.siliciumbot.constant.NumberConstants.CACHE_LIFETIME_MINUTES;
@@ -44,6 +44,7 @@ public class GlobalEntityService {
   }
 
   public <E extends AbstractGlobalEntity> void saveEntity(E entity) {
+    this.cache.put(entity.getClass().getName(), entity);
     this.repo.save(entity);
   }
 }

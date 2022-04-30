@@ -38,7 +38,7 @@ public class BotConfigGuildEntityService
     BotConfigGuildEntity cfg = this.getEntity(guildId);
     if (!prefix.equals(cfg.getPrefix())) {
       cfg.setPrefix(prefix);
-      this.saveDto(cfg);
+      this.saveEntity(cfg);
     }
   }
 }

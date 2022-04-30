@@ -10,7 +10,7 @@ public abstract class AbstractGlobalEntity {
     this.className = className;
   }
 
-  public final String getClassName() {
+  public String getClassName() {
     return this.className;
   }
 

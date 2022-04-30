@@ -47,7 +47,7 @@ public abstract class AbstractGuildEntityService<E extends AbstractGuildEntity,
     });
   }
 
-  protected void saveDto(E entity) {
+  protected void saveEntity(E entity) {
     this.cache.put(entity.getGuildId(), entity);
     this.repo.save(entity);
   }

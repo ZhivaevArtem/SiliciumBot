@@ -40,7 +40,7 @@ public class ReadyCheckConfigGuildEntityService
     ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
     if (!title.equals(cfg.getTitle())) {
       cfg.setTitle(title);
-      this.saveDto(cfg);
+      this.saveEntity(cfg);
     }
   }
 
@@ -64,7 +64,7 @@ public class ReadyCheckConfigGuildEntityService
     ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
     if (!emptyValue.equals(cfg.getEmptyValue())) {
       cfg.setEmptyValue(emptyValue);
-      this.saveDto(cfg);
+      this.saveEntity(cfg);
     }
   }
 
@@ -90,7 +90,7 @@ public class ReadyCheckConfigGuildEntityService
     ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
     if (!options.equals(cfg.getOptions())) {
       cfg.setOptions(options);
-      this.saveDto(cfg);
+      this.saveEntity(cfg);
     }
   }
 }
