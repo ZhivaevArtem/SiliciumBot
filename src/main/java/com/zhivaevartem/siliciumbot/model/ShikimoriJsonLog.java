@@ -27,9 +27,12 @@ public class ShikimoriJsonLog {
   @Nullable
   private List<Integer> score;
 
+  private String raw;
+
   public static ShikimoriJsonLog create(String rawJson) {
     JsonObject json = JsonParser.parseString(rawJson).getAsJsonObject();
     ShikimoriJsonLog log = new ShikimoriJsonLog();
+    log.setRaw(rawJson);
     if (json.has("id")) {
       final List<Long> idArray = new ArrayList<>(2);
       json.getAsJsonArray("id").forEach(elem -> idArray.add(elem.isJsonNull() ? null : elem.getAsLong()));
@@ -51,5 +54,10 @@ public class ShikimoriJsonLog {
       log.setScore(scoreArray);
     }
     return log;
+  }
+
+  @Override
+  public String toString() {
+    return raw;
   }
 }
