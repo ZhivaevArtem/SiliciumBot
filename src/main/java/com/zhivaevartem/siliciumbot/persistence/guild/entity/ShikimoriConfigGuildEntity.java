@@ -1,8 +1,8 @@
 package com.zhivaevartem.siliciumbot.persistence.guild.entity;
 
 import com.zhivaevartem.siliciumbot.constant.StringConstants;
-import com.zhivaevartem.siliciumbot.persistence.guild.repo.ShikimoriConfigGuildEntityRepo;
 import com.zhivaevartem.siliciumbot.persistence.guild.base.AbstractGuildEntity;
+import com.zhivaevartem.siliciumbot.persistence.guild.repo.ShikimoriConfigGuildEntityRepo;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,7 +29,7 @@ public class ShikimoriConfigGuildEntity extends AbstractGuildEntity {
   public boolean equals(Object obj) {
     if (obj instanceof ShikimoriConfigGuildEntity dto) {
       return this.usernames.equals(dto.usernames)
-        && this.notificationChannelId.equals(dto.notificationChannelId);
+          && this.notificationChannelId.equals(dto.notificationChannelId);
     }
     return false;
   }

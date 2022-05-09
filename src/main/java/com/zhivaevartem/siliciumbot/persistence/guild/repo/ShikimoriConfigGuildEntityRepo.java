@@ -7,4 +7,4 @@ import com.zhivaevartem.siliciumbot.persistence.guild.entity.ShikimoriConfigGuil
  * DAO for {@link ShikimoriConfigGuildEntity}.
  */
 public interface ShikimoriConfigGuildEntityRepo extends
-  AbstractGuildEntityRepo<ShikimoriConfigGuildEntity> {}
+    AbstractGuildEntityRepo<ShikimoriConfigGuildEntity> {}

@@ -94,7 +94,7 @@
           </dependency>
         </dependencies>
         <configuration>
-          <configLocation>google_checks.xml</configLocation>
+          <configLocation>custom_google_checks.xml</configLocation>
           <violationSeverity>warning</violationSeverity>
           <failOnViolation>true</failOnViolation>
         </configuration>

@@ -1,9 +1,9 @@
 package com.zhivaevartem.siliciumbot.persistence.guild.service;
 
-import com.zhivaevartem.siliciumbot.persistence.guild.repo.ReadyCheckConfigGuildEntityRepo;
+import com.zhivaevartem.siliciumbot.persistence.guild.base.AbstractGuildEntityService;
 import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGuildEntity;
 import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGuildEntity.ReadyCheckOption;
-import com.zhivaevartem.siliciumbot.persistence.guild.base.AbstractGuildEntityService;
+import com.zhivaevartem.siliciumbot.persistence.guild.repo.ReadyCheckConfigGuildEntityRepo;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
  * {@link ReadyCheckConfigGuildEntity} entities.
  */
 @Service
-public class ReadyCheckConfigGuildEntityService
-    extends AbstractGuildEntityService<ReadyCheckConfigGuildEntity, ReadyCheckConfigGuildEntityRepo> {
+public class ReadyCheckConfigGuildEntityService extends
+    AbstractGuildEntityService<ReadyCheckConfigGuildEntity, ReadyCheckConfigGuildEntityRepo> {
   @Autowired
   public ReadyCheckConfigGuildEntityService(ReadyCheckConfigGuildEntityRepo repository) {
     super(repository, ReadyCheckConfigGuildEntity.class);

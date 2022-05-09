@@ -7,4 +7,4 @@ import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGui
  * {@link ReadyCheckConfigGuildEntity} repository.
  */
 public interface ReadyCheckConfigGuildEntityRepo extends
-  AbstractGuildEntityRepo<ReadyCheckConfigGuildEntity> {}
+    AbstractGuildEntityRepo<ReadyCheckConfigGuildEntity> {}

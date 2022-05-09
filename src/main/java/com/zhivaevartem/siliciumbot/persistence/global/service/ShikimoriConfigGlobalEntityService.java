@@ -2,12 +2,15 @@ package com.zhivaevartem.siliciumbot.persistence.global.service;
 
 import com.zhivaevartem.siliciumbot.persistence.global.base.GlobalEntityService;
 import com.zhivaevartem.siliciumbot.persistence.global.entity.ShikimoriConfigGlobalEntity;
+import java.util.LinkedList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.List;
-
+/**
+ * Service for manipulating {@link ShikimoriConfigGlobalEntity}
+ * entity.
+ */
 @Service
 public class ShikimoriConfigGlobalEntityService {
   @Autowired

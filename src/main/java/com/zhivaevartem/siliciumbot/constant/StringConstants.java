@@ -22,9 +22,5 @@ public class StringConstants {
 
   public static final String UNKNOWN_GUILD_ID = "<UNKNOWN GUILD ID>";
 
-  public static final String SHIKIMORI_BASE_URI = "https://shikimori.one";
-
-  public static final String SHIKIMORI_USER_HISTORY_URI = SHIKIMORI_BASE_URI + "/api/users/:id/history";
-
   private StringConstants() {}
 }

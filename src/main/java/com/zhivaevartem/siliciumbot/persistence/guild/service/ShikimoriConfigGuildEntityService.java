@@ -1,14 +1,12 @@
 package com.zhivaevartem.siliciumbot.persistence.guild.service;
 
-import com.zhivaevartem.siliciumbot.persistence.guild.repo.ShikimoriConfigGuildEntityRepo;
-import com.zhivaevartem.siliciumbot.persistence.guild.entity.ShikimoriConfigGuildEntity;
 import com.zhivaevartem.siliciumbot.persistence.guild.base.AbstractGuildEntityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
+import com.zhivaevartem.siliciumbot.persistence.guild.entity.ShikimoriConfigGuildEntity;
+import com.zhivaevartem.siliciumbot.persistence.guild.repo.ShikimoriConfigGuildEntityRepo;
 import java.util.LinkedList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for manipulating {@link ShikimoriConfigGuildEntity}.

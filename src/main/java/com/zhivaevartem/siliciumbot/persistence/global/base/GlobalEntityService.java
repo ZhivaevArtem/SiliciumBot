@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for manipulating with {@link AbstractGlobalEntity} children.
+ */
 @Service
 public class GlobalEntityService {
   @Autowired
@@ -21,6 +24,9 @@ public class GlobalEntityService {
       .maximumSize(CACHE_GLOBAL_CONFIG_MAX_SIZE)
       .build();
 
+  /**
+   * Get global entity by class.
+   */
   public <E extends AbstractGlobalEntity> E getEntity(Class<E> clazz) {
     String className = clazz.getName();
     AbstractGlobalEntity ret = this.cache.get(className, id -> {
@@ -43,6 +49,9 @@ public class GlobalEntityService {
     return null;
   }
 
+  /**
+   * Save global entity.
+   */
   public <E extends AbstractGlobalEntity> void saveEntity(E entity) {
     this.cache.put(entity.getClass().getName(), entity);
     this.repo.save(entity);

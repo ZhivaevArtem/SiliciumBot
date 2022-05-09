@@ -89,4 +89,12 @@ public class StringUtilsTest {
     StringUtils.splitArguments(command, result);
     assertEquals(expected, result);
   }
+
+  @Test
+  public void capitalizeWithSymbols() {
+    String str = "gSJHDFGhjgD@$%$%JHSFGSHJD@#%KGFh5456&^5467$@462sd";
+    String expected = "Gsjhdfghjgd@$%$%jhsfgshjd@#%kgfh5456&^5467$@462sd";
+    String result = StringUtils.capitalize(str);
+    assertEquals(expected, result);
+  }
 }

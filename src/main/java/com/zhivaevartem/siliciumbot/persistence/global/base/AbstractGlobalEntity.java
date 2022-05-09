@@ -2,6 +2,10 @@ package com.zhivaevartem.siliciumbot.persistence.global.base;
 
 import org.springframework.data.annotation.Id;
 
+/**
+ * Abstract class for those entities which not belong to
+ * any discord guilds.
+ */
 public abstract class AbstractGlobalEntity {
   @Id
   private String className = this.getClass().getName();

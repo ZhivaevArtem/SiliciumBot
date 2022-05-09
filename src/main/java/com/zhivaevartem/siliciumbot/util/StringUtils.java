@@ -79,5 +79,13 @@ public class StringUtils {
     return rawString.replaceAll("\\s+", " ").toLowerCase().trim();
   }
 
+  public static String capitalize(String str) {
+    return String.valueOf(str.toCharArray()[0]).toUpperCase() + str.substring(1).toLowerCase();
+  }
+
+  public static int colorFromString(String str) {
+    return str.hashCode() % (256 * 256 * 256);
+  }
+
   private StringUtils() {}
 }

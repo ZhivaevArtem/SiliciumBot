@@ -6,4 +6,5 @@ import com.zhivaevartem.siliciumbot.persistence.guild.entity.BotConfigGuildEntit
 /**
  * {@link BotConfigGuildEntity} repository.
  */
-public interface BotConfigGuildEntityRepo extends AbstractGuildEntityRepo<BotConfigGuildEntity> {}
+public interface BotConfigGuildEntityRepo extends
+    AbstractGuildEntityRepo<BotConfigGuildEntity> {}

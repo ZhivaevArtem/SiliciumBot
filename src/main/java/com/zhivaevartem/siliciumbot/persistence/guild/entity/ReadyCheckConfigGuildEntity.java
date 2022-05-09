@@ -60,8 +60,8 @@ public class ReadyCheckConfigGuildEntity extends AbstractGuildEntity {
   public boolean equals(Object obj) {
     if (obj instanceof ReadyCheckConfigGuildEntity cfg) {
       return Objects.equals(cfg.options, this.options)
-        && Objects.equals(cfg.title, this.title)
-        && Objects.equals(cfg.emptyValue, this.emptyValue);
+          && Objects.equals(cfg.title, this.title)
+          && Objects.equals(cfg.emptyValue, this.emptyValue);
     }
     return false;
   }
