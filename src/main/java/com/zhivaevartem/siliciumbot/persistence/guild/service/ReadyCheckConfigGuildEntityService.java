@@ -1,23 +1,23 @@
-package com.zhivaevartem.siliciumbot.persistence.service;
+package com.zhivaevartem.siliciumbot.persistence.guild.service;
 
-import com.zhivaevartem.siliciumbot.persistence.dao.ReadyCheckGuildConfigDao;
-import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto;
-import com.zhivaevartem.siliciumbot.persistence.dto.ReadyCheckGuildDto.ReadyCheckOption;
-import com.zhivaevartem.siliciumbot.persistence.service.base.AbstractGuildConfigService;
+import com.zhivaevartem.siliciumbot.persistence.guild.base.AbstractGuildEntityService;
+import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGuildEntity;
+import com.zhivaevartem.siliciumbot.persistence.guild.entity.ReadyCheckConfigGuildEntity.ReadyCheckOption;
+import com.zhivaevartem.siliciumbot.persistence.guild.repo.ReadyCheckConfigGuildEntityRepo;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * Provide access to
- * {@link ReadyCheckGuildDto} entities.
+ * {@link ReadyCheckConfigGuildEntity} entities.
  */
 @Service
-public class ReadyCheckGuildConfigService
-    extends AbstractGuildConfigService<ReadyCheckGuildDto, ReadyCheckGuildConfigDao> {
+public class ReadyCheckConfigGuildEntityService extends
+    AbstractGuildEntityService<ReadyCheckConfigGuildEntity, ReadyCheckConfigGuildEntityRepo> {
   @Autowired
-  public ReadyCheckGuildConfigService(ReadyCheckGuildConfigDao repository) {
-    super(repository, ReadyCheckGuildDto.class);
+  public ReadyCheckConfigGuildEntityService(ReadyCheckConfigGuildEntityRepo repository) {
+    super(repository, ReadyCheckConfigGuildEntity.class);
   }
 
   /**
@@ -27,7 +27,7 @@ public class ReadyCheckGuildConfigService
    * @return Title of ready check message.
    */
   public String getTitle(String guildId) {
-    return this.getDto(guildId).getTitle();
+    return this.getEntity(guildId).getTitle();
   }
 
   /**
@@ -37,9 +37,11 @@ public class ReadyCheckGuildConfigService
    * @param title Title of ready check message.
    */
   public void setTitle(String guildId, String title) {
-    ReadyCheckGuildDto cfg = this.getDto(guildId);
-    cfg.setTitle(title);
-    this.updateDto(cfg);
+    ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
+    if (!title.equals(cfg.getTitle())) {
+      cfg.setTitle(title);
+      this.saveEntity(cfg);
+    }
   }
 
   /**
@@ -49,7 +51,7 @@ public class ReadyCheckGuildConfigService
    * @return Text for options without any votes.
    */
   public String getEmptyValue(String guildId) {
-    return this.getDto(guildId).getEmptyValue();
+    return this.getEntity(guildId).getEmptyValue();
   }
 
   /**
@@ -59,9 +61,11 @@ public class ReadyCheckGuildConfigService
    * @param emptyValue Text for options without any votes.
    */
   public void setEmptyValue(String guildId, String emptyValue) {
-    ReadyCheckGuildDto cfg = this.getDto(guildId);
-    cfg.setEmptyValue(emptyValue);
-    this.updateDto(cfg);
+    ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
+    if (!emptyValue.equals(cfg.getEmptyValue())) {
+      cfg.setEmptyValue(emptyValue);
+      this.saveEntity(cfg);
+    }
   }
 
   /**
@@ -72,7 +76,7 @@ public class ReadyCheckGuildConfigService
    * @return Ready check options.
    */
   public List<ReadyCheckOption> getOptions(String guildId) {
-    return this.getDto(guildId).getOptions();
+    return this.getEntity(guildId).getOptions();
   }
 
   /**
@@ -83,8 +87,10 @@ public class ReadyCheckGuildConfigService
    * @param options Ready check options.
    */
   public void setOptions(String guildId, List<ReadyCheckOption> options) {
-    ReadyCheckGuildDto cfg = this.getDto(guildId);
-    cfg.setOptions(options);
-    this.updateDto(cfg);
+    ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
+    if (!options.equals(cfg.getOptions())) {
+      cfg.setOptions(options);
+      this.saveEntity(cfg);
+    }
   }
 }

@@ -1,7 +1,8 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/siliciumdb}
+      uri: ${SILICIUMBOT_MONGODB_URI:mongodb://localhost:27017/siliciumdb}
 silicium:
   token: ${SILICIUMBOT_TOKEN:}
-  readycheck-update-interval: 2500
+  readycheck-update-interval: ${SILICIUMBOT_RC_UPDATE_INTERVAL:2500}
+  shikimori-check-interval: ${SILICIUMBOT_SHIKI_CHECK_INTERVAL:10000}

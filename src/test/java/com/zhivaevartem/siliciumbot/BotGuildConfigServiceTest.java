@@ -3,7 +3,7 @@ package com.zhivaevartem.siliciumbot;
 import static com.zhivaevartem.siliciumbot.constant.StringConstants.DEFAULT_BOT_COMMAND_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.zhivaevartem.siliciumbot.persistence.service.BotGuildConfigService;
+import com.zhivaevartem.siliciumbot.persistence.guild.service.BotConfigGuildEntityService;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 public class BotGuildConfigServiceTest {
   @Autowired
-  private BotGuildConfigService service;
+  private BotConfigGuildEntityService service;
 
   private final String guildId = "test_entity_" + UUID.randomUUID();
 

@@ -1,4 +1,4 @@
-package com.zhivaevartem.siliciumbot.persistence.dto.base;
+package com.zhivaevartem.siliciumbot.persistence.guild.base;
 
 import org.springframework.data.annotation.Id;
 
@@ -7,11 +7,11 @@ import org.springframework.data.annotation.Id;
  * Extending this you <b>MUST declare constructor with
  * single {@link String} parameter</b>.
  */
-public abstract class AbstractGuildConfigDto {
+public abstract class AbstractGuildEntity {
   @Id
   protected String guildId;
 
-  protected AbstractGuildConfigDto(String guildId) {
+  public AbstractGuildEntity(String guildId) {
     this.guildId = guildId;
   }
 
@@ -24,4 +24,6 @@ public abstract class AbstractGuildConfigDto {
   }
 
   public abstract boolean equals(Object obj);
+
+  public abstract int hashCode();
 }

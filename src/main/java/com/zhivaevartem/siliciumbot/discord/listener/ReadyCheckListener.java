@@ -1,6 +1,6 @@
 package com.zhivaevartem.siliciumbot.discord.listener;
 
-import com.zhivaevartem.siliciumbot.discord.listener.base.BaseEventListener;
+import com.zhivaevartem.siliciumbot.discord.listener.base.AbstractEventListener;
 import com.zhivaevartem.siliciumbot.discord.listener.base.CommandHandler;
 import com.zhivaevartem.siliciumbot.discord.service.ReadyCheckService;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -11,8 +11,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -22,9 +20,7 @@ import reactor.util.function.Tuple2;
  * Ready check listener.
  */
 @Component
-public class ReadyCheckListener extends BaseEventListener {
-  private final Logger logger = LoggerFactory.getLogger(ReadyCheckListener.class);
-
+public class ReadyCheckListener extends AbstractEventListener {
   @Autowired
   private ReadyCheckService service;
 
