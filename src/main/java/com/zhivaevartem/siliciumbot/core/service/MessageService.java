@@ -2,6 +2,7 @@ package com.zhivaevartem.siliciumbot.core.service;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -23,7 +24,11 @@ public class MessageService {
   }
 
   public Mono<Message> replyMessage(Message message, String content) {
-    return this.replyMessage(message, MessageCreateSpec.create().withContent(content));
+    if (!content.isEmpty()) {
+      return this.replyMessage(message, MessageCreateSpec.create().withContent(content));
+    } else {
+      return Mono.empty();
+    }
   }
 
   public Mono<Message> replyMessage(Message message, Iterable<EmbedCreateSpec> embeds) {
@@ -64,6 +69,10 @@ public class MessageService {
 
   public String getGuildId(Message message) {
     return message.getGuild().block().getId().asString();
+  }
+
+  public String getGuildId(MessageCreateEvent event) {
+    return this.getGuildId(event.getMessage());
   }
 
   public GuildChannel getChannel(String guildId, String channelId) {

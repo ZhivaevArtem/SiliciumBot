@@ -1,0 +1,80 @@
+package com.zhivaevartem.siliciumbot.module.music;
+
+import com.zhivaevartem.siliciumbot.core.listener.AbstractEventListener;
+import com.zhivaevartem.siliciumbot.core.listener.CommandHandler;
+import com.zhivaevartem.siliciumbot.core.service.MessageService;
+import discord4j.core.event.domain.VoiceStateUpdateEvent;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MusicListener extends AbstractEventListener {
+  @Autowired
+  private MusicService musicService;
+
+  @Autowired
+  private MessageService messageService;
+
+  @CommandHandler(aliases = {"play", "p"}, lastFreeArgument = true)
+  public void play(MessageCreateEvent event, String query) {
+    this.musicService.playTrack(event, query)
+      .flatMap(musicTrackResponse -> {
+        return this.messageService.replyMessage(event.getMessage(), musicTrackResponse.getMessage());
+      })
+      .subscribe();
+  }
+
+  @CommandHandler(aliases = {"j", "join"})
+  public void join(MessageCreateEvent event, String query) {
+    this.musicService.joinVoice(event).block();
+  }
+
+  @CommandHandler(aliases = {"s", "skip"})
+  public void skip(MessageCreateEvent event) {
+    this.musicService.skip(event).flatMap(musicTrackResponse -> {
+      return this.messageService.replyMessage(event.getMessage(), musicTrackResponse.getMessage());
+    }).subscribe();
+  }
+
+  @CommandHandler(aliases = {"np", "nowplaying", "current"})
+  public void getCurrent(MessageCreateEvent event) {
+    this.musicService.getCurrent(event)
+      .flatMap(track -> {
+        String message = "Now playing: ";
+        if (!track.getName().isEmpty()) {
+          message += track.getName();
+        } else {
+          message = "Nothing is playing now";
+        }
+        return this.messageService.replyMessage(event.getMessage(), message);
+      })
+      .subscribe();
+  }
+
+  @CommandHandler(aliases = {"leave", "dc", "disconnect"})
+  public void disconnect(MessageCreateEvent event) {
+    this.musicService.disconnect(event).block();
+  }
+
+  @CommandHandler(aliases = {"q", "queue"})
+  public void getQueue(MessageCreateEvent event) {
+    this.musicService.getQueue(event)
+      .flatMap(tracks -> {
+        String message = "Queue is empty";
+        if (!tracks.isEmpty()) {
+          message = String.join("\n", tracks.stream().map(MusicTrack::getName).toList());
+        }
+        return this.messageService.replyMessage(event.getMessage(), message);
+      })
+      .subscribe();
+  }
+
+  @Override
+  public void onVoiceStateUpdateEvent(VoiceStateUpdateEvent event) {
+    if (event.isLeaveEvent()) {
+      String guildId = event.getCurrent().getGuildId().asString();
+      this.musicService.onDisconnect(guildId);
+    }
+  }
+}
