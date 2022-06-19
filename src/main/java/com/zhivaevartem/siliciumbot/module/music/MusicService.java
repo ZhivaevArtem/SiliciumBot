@@ -2,6 +2,8 @@ package com.zhivaevartem.siliciumbot.module.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.zhivaevartem.siliciumbot.core.service.MessageService;
+import com.zhivaevartem.siliciumbot.module.music.youtube.YoutubeSearchResponse;
+import com.zhivaevartem.siliciumbot.module.music.youtube.YoutubeService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -26,8 +28,11 @@ public class MusicService {
   @Autowired
   private MessageService messageService;
 
-  @Autowired
+  @Autowired(required = false)
   private GatewayDiscordClient gateway;
+
+  @Autowired
+  private YoutubeService youtubeService;
 
   private final Map<String, GuildMusicState> states = new HashMap<>();
 
@@ -64,21 +69,27 @@ public class MusicService {
     return this.joinVoice(guildId, event);
   }
 
-  public Mono<MusicTrackResponse> playTrack(MessageCreateEvent event, String query) {
-    MusicTrack track = this.parseTrack(query);
-    if (track != null) {
+  public Mono<List<MusicTrackResponse>> playTrack(MessageCreateEvent event, String query) {
+    List<MusicTrack> tracks = this.parseTrack(query);
+    if (tracks == null || tracks.isEmpty()) {
+      return Mono.just(new ArrayList<>() {{ add(new MusicTrackResponse(MusicTrackResponse.Status.ERROR, query)); }});
+    }
+    List<MusicTrackResponse> responses = tracks.stream().map(track -> {
       String guildId = this.messageService.getGuildId(event);
       if (!this.states.containsKey(guildId)) {
         this.joinVoice(guildId, event).block();
         this.states.get(guildId).addTrack(track);
-        return Mono.just(new MusicTrackResponse(MusicTrackResponse.Status.PLAYING, track));
+        return new MusicTrackResponse(MusicTrackResponse.Status.PLAYING, track);
       } else {
         this.states.get(guildId).addTrack(track);
-        return Mono.just(new MusicTrackResponse(MusicTrackResponse.Status.ADDED, track));
+        if (this.isPlaying(guildId)) {
+          return new MusicTrackResponse(MusicTrackResponse.Status.ADDED, track);
+        } else {
+          return new MusicTrackResponse(MusicTrackResponse.Status.PLAYING, track);
+        }
       }
-    } else {
-      return Mono.just(new MusicTrackResponse(MusicTrackResponse.Status.ERROR, query));
-    }
+    }).toList();
+    return Mono.just(responses);
   }
 
   public Mono<MusicTrackResponse> skip(MessageCreateEvent event) {
@@ -105,6 +116,15 @@ public class MusicService {
     return Mono.just(new MusicTrack(""));
   }
 
+  public Mono<Void> clear(MessageCreateEvent event) {
+    String guildId = this.messageService.getGuildId(event);
+    if (this.states.containsKey(guildId)) {
+      GuildMusicState state = this.states.get(guildId);
+      state.clearQueue();
+    }
+    return Mono.just("null").then();
+  }
+
   public boolean isPlaying(String guildId) {
     if (this.states.containsKey(guildId)) {
       GuildMusicState state = this.states.get(guildId);
@@ -119,6 +139,7 @@ public class MusicService {
 
   public Mono<Void> disconnect(MessageCreateEvent event) {
     String guildId = this.messageService.getGuildId(event);
+    this.states.remove(guildId);
     return this.gateway.getGuildById(Snowflake.of(guildId))
       .flatMap(Guild::getVoiceConnection)
       .flatMap(VoiceConnection::disconnect);
@@ -134,9 +155,21 @@ public class MusicService {
   }
 
   @Nullable
-  private MusicTrack parseTrack(String query) {
-    if (query.startsWith("https://www.youtube.com/watch?v=")) {
-      return new MusicTrack(query);
+  private List<MusicTrack> parseTrack(String query) {
+    if (query.startsWith("https://www.youtube.com/watch")) {
+      if (query.contains("list=")) {
+        List<String> videoIds = this.youtubeService.getPlaylistVideos(query);
+        return videoIds.stream().map(id -> new MusicTrack("https://www.youtube.com/watch?v=" + id)).toList();
+      } else {
+        return new ArrayList<>() {{ add(new MusicTrack(query)); }};
+      }
+    } else {
+      List<String> ids = this.youtubeService.searchVideos(query);
+      if (ids.size() > 0)  {
+        String id = ids.get(0);
+        String url = "https://www.youtube.com/watch?v=" + id;
+        return new ArrayList<>() {{ add(new MusicTrack(url)); }};
+      }
     }
     return null;
   }

@@ -39,6 +39,22 @@ public class MessageService {
     return this.replyMessage(message, List.of(embed));
   }
 
+  public Mono<Message> replyMessage(MessageCreateEvent event, MessageCreateSpec spec) {
+    return this.replyMessage(event.getMessage(), spec);
+  }
+
+  public Mono<Message> replyMessage(MessageCreateEvent event, String content) {
+    return this.replyMessage(event.getMessage(), content);
+  }
+
+  public Mono<Message> replyMessage(MessageCreateEvent event, Iterable<EmbedCreateSpec> embeds) {
+    return this.replyMessage(event.getMessage(), embeds);
+  }
+
+  public Mono<Message> replyMessage(MessageCreateEvent event, EmbedCreateSpec embed) {
+    return this.replyMessage(event.getMessage(), embed);
+  }
+
   public Mono<Message> sendMessage(String guildId, String messageChannelId, MessageCreateSpec spec) {
     return this.gateway.getGuildById(Snowflake.of(guildId))
       .flatMap(guild -> guild.getChannelById(Snowflake.of(messageChannelId)))

@@ -60,4 +60,8 @@ public class GuildMusicState {
     }
     return null;
   }
+
+  public void clearQueue() {
+    this.queue.clear();
+  }
 }

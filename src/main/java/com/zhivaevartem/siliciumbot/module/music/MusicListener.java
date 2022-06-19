@@ -19,8 +19,10 @@ public class MusicListener extends AbstractEventListener {
   @CommandHandler(aliases = {"play", "p"}, lastFreeArgument = true)
   public void play(MessageCreateEvent event, String query) {
     this.musicService.playTrack(event, query)
-      .flatMap(musicTrackResponse -> {
-        return this.messageService.replyMessage(event.getMessage(), musicTrackResponse.getMessage());
+      .flatMap(musicTrackResponses -> {
+        String message = String.join("\n",
+          musicTrackResponses.stream().map(MusicTrackResponse::getMessage).toList());
+        return this.messageService.replyMessage(event.getMessage(), message);
       })
       .subscribe();
   }
@@ -68,6 +70,12 @@ public class MusicListener extends AbstractEventListener {
         return this.messageService.replyMessage(event.getMessage(), message);
       })
       .subscribe();
+  }
+
+  @CommandHandler(aliases = {"c", "clean", "clear"})
+  public void clearQueue(MessageCreateEvent event) {
+    this.musicService.clear(event).block();
+    this.messageService.replyMessage(event, "Queue is empty").subscribe();
   }
 
   @Override

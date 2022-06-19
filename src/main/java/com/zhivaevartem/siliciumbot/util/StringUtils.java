@@ -1,7 +1,10 @@
 package com.zhivaevartem.siliciumbot.util;
 
 import com.zhivaevartem.siliciumbot.constant.RegularExpressionConstants;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.lang.Nullable;
@@ -85,6 +88,21 @@ public class StringUtils {
 
   public static int colorFromString(String str) {
     return str.hashCode() % (256 * 256 * 256);
+  }
+
+  public static Map<String, String> parseQueryParams(String url) {
+    Map<String, String> params = new HashMap<>();
+    String[] split = url.split("\\?");
+    if (split.length > 1) {
+      split = split[1].split("&");
+      for (String s : split) {
+        String[] keyValue = s.split("=");
+        if (keyValue.length > 1) {
+          params.put(keyValue[0], keyValue[1]);
+        }
+      }
+    }
+    return params;
   }
 
   private StringUtils() {}

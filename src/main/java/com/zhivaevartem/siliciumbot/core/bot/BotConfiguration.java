@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 public class BotConfiguration {
-  @Value("${silicium.token}")
+  @Value("${silicium.discord-token}")
   private String token;
 
   /**
