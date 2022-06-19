@@ -33,7 +33,7 @@ public class MusicTrackResponse {
       case ADDED   -> "Added to queue";
       case PLAYING -> "Playing";
       case SKIPPED -> "Skipped";
-      case ERROR   -> "Unexpected error playing";
+      default      -> "Unexpected error playing";
     } + ": " + (this.track != null
       ? this.track.getName()
       : this.name);

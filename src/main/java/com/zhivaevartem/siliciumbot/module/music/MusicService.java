@@ -2,7 +2,6 @@ package com.zhivaevartem.siliciumbot.module.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.zhivaevartem.siliciumbot.core.service.MessageService;
-import com.zhivaevartem.siliciumbot.module.music.youtube.YoutubeSearchResponse;
 import com.zhivaevartem.siliciumbot.module.music.youtube.YoutubeService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -12,16 +11,16 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.voice.VoiceConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class MusicService {
@@ -72,7 +71,7 @@ public class MusicService {
   public Mono<List<MusicTrackResponse>> playTrack(MessageCreateEvent event, String query) {
     List<MusicTrack> tracks = this.parseTrack(query);
     if (tracks == null || tracks.isEmpty()) {
-      return Mono.just(new ArrayList<>() {{ add(new MusicTrackResponse(MusicTrackResponse.Status.ERROR, query)); }});
+      return Mono.just(Collections.singletonList(new MusicTrackResponse(MusicTrackResponse.Status.ERROR, query)));
     }
     List<MusicTrackResponse> responses = tracks.stream().map(track -> {
       String guildId = this.messageService.getGuildId(event);
@@ -161,14 +160,14 @@ public class MusicService {
         List<String> videoIds = this.youtubeService.getPlaylistVideos(query);
         return videoIds.stream().map(id -> new MusicTrack("https://www.youtube.com/watch?v=" + id)).toList();
       } else {
-        return new ArrayList<>() {{ add(new MusicTrack(query)); }};
+        return Collections.singletonList(new MusicTrack(query));
       }
     } else {
       List<String> ids = this.youtubeService.searchVideos(query);
       if (ids.size() > 0)  {
         String id = ids.get(0);
         String url = "https://www.youtube.com/watch?v=" + id;
-        return new ArrayList<>() {{ add(new MusicTrack(url)); }};
+        return Collections.singletonList(new MusicTrack(url));
       }
     }
     return null;

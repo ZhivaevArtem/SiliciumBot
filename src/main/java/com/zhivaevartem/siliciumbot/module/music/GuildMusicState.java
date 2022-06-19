@@ -7,12 +7,11 @@ import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 import discord4j.voice.AudioProvider;
-import lombok.Getter;
-import org.springframework.lang.Nullable;
-
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.Getter;
+import org.springframework.lang.Nullable;
 
 public class GuildMusicState {
   private String guildId;

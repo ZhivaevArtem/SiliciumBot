@@ -21,10 +21,9 @@ public class MusicListener extends AbstractEventListener {
     this.musicService.playTrack(event, query)
       .flatMap(musicTrackResponses -> {
         String message = String.join("\n",
-          musicTrackResponses.stream().map(MusicTrackResponse::getMessage).toList());
+            musicTrackResponses.stream().map(MusicTrackResponse::getMessage).toList());
         return this.messageService.replyMessage(event.getMessage(), message);
-      })
-      .subscribe();
+      }).subscribe();
   }
 
   @CommandHandler(aliases = {"j", "join"})
@@ -50,8 +49,7 @@ public class MusicListener extends AbstractEventListener {
           message = "Nothing is playing now";
         }
         return this.messageService.replyMessage(event.getMessage(), message);
-      })
-      .subscribe();
+      }).subscribe();
   }
 
   @CommandHandler(aliases = {"leave", "dc", "disconnect"})
@@ -68,8 +66,7 @@ public class MusicListener extends AbstractEventListener {
           message = String.join("\n", tracks.stream().map(MusicTrack::getName).toList());
         }
         return this.messageService.replyMessage(event.getMessage(), message);
-      })
-      .subscribe();
+      }).subscribe();
   }
 
   @CommandHandler(aliases = {"c", "clean", "clear"})

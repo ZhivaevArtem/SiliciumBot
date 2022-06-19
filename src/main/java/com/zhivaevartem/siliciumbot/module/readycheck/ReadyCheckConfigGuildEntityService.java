@@ -2,7 +2,6 @@ package com.zhivaevartem.siliciumbot.module.readycheck;
 
 import com.zhivaevartem.siliciumbot.core.persistence.guild.AbstractGuildEntityService;
 import com.zhivaevartem.siliciumbot.module.readycheck.ReadyCheckConfigGuildEntity.ReadyCheckOption;
-
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

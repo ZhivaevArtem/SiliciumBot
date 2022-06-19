@@ -1,8 +1,6 @@
 package com.zhivaevartem.siliciumbot.core.bot;
 
 import com.zhivaevartem.siliciumbot.core.persistence.guild.AbstractGuildEntityService;
-import com.zhivaevartem.siliciumbot.core.bot.BotConfigGuildEntity;
-import com.zhivaevartem.siliciumbot.core.bot.BotConfigGuildEntityRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -5,7 +5,6 @@ import static com.zhivaevartem.siliciumbot.constant.NumberConstants.CACHE_LIFETI
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

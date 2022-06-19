@@ -4,8 +4,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zhivaevartem.siliciumbot.constant.NumberConstants;
 import com.zhivaevartem.siliciumbot.module.readycheck.ReadyCheckConfigGuildEntity.ReadyCheckOption;
-import com.zhivaevartem.siliciumbot.module.readycheck.ReadyCheckConfigGuildEntityService;
-import com.zhivaevartem.siliciumbot.module.readycheck.ReadyCheckListener;
 import discord4j.core.object.Embed;
 import discord4j.core.object.Embed.Field;
 import discord4j.core.object.entity.Message;

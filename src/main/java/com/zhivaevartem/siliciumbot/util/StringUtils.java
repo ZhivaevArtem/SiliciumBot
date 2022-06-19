@@ -1,7 +1,6 @@
 package com.zhivaevartem.siliciumbot.util;
 
 import com.zhivaevartem.siliciumbot.constant.RegularExpressionConstants;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
