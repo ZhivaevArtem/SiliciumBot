@@ -19,14 +19,17 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.EmbedCreateSpec.Builder;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.Id;
-import discord4j.rest.service.EmojiService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service for {@link ReadyCheckListener}.
@@ -115,8 +118,12 @@ public class ReadyCheckService {
   private void initReactions(String guildId, Message message) {
     for (ReadyCheckOption option : this.service.getOptions(guildId)) {
       if (option.emoji.startsWith("<:")) {
-        String emojiId = option.emoji.replace("<", "").replace(">", "").split(":")[2];
-        GuildEmoji emoji = this.gateway.getGuildById(Snowflake.of(guildId)).block().getGuildEmojiById(Snowflake.of(emojiId)).block();
+        String emojiId = option.emoji
+            .replace("<", "")
+            .replace(">", "")
+            .split(":")[2];
+        GuildEmoji emoji = this.gateway.getGuildById(Snowflake.of(guildId)).block()
+            .getGuildEmojiById(Snowflake.of(emojiId)).block();
         message.addReaction(ReactionEmoji.of(emoji.getData())).subscribe();
       } else {
         message.addReaction(ReactionEmoji.unicode(option.emoji)).subscribe();

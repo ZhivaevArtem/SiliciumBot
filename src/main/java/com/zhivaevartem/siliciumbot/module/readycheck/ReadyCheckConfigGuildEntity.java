@@ -2,7 +2,6 @@ package com.zhivaevartem.siliciumbot.module.readycheck;
 
 import com.zhivaevartem.siliciumbot.constant.StringConstants;
 import com.zhivaevartem.siliciumbot.core.persistence.guild.AbstractGuildEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
