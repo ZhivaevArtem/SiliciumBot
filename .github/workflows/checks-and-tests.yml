@@ -1,0 +1,91 @@
+name: Checks and tests
+
+on:
+  pull_request:
+    branches: [develop]
+
+jobs:
+  checks:
+    name: Code checks
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Check encoding (UTF-8)
+        run: |
+          OIFS="$IFS"
+          IFS=$'\n'
+          FAILURE_FILES=''
+          RETURN_CODE=0
+          FILES=`find ./src -name '*.*'`
+          FILES="$FILES"$'\n'"./pom.xml"
+          for f in $FILES
+          do
+            echo Check $f
+            file -bi $f | grep -iE 'charset=(utf-8)|(us-ascii)' > /dev/null || FAILURE_FILES="$FAILURE_FILES"$'\n'"$f"
+          done
+          for f in $FAILURE_FILES
+          do
+            printf [ER
+            echo ROR] $f
+            RETURN_CODE=-1
+          done
+          IFS=$OIFS
+          exit $RETURN_CODE
+      - name: Check line separators (LF)
+        run: |
+          OIFS="$IFS"
+          IFS=$'\n'
+          FAILURE_FILES=''
+          RETURN_CODE=0
+          FILES=`find ./src -name '*.*'`
+          FILES="$FILES"$'\n'"./pom.xml"
+          for f in $FILES
+          do
+            echo Check $f
+            cat -e $f | grep -E '\^M\$?$' > /dev/null && FAILURE_FILES="$FAILURE_FILES"$'\n'"$f"
+          done
+          for f in $FAILURE_FILES
+          do
+            printf [ER
+            echo ROR] $f
+            RETURN_CODE=-1
+          done
+          IFS=$OIFS
+          exit $RETURN_CODE
+      - name: Check codestyle (google style)
+        run: mvn checkstyle:check
+  build:
+    name: Build jar
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build jar
+        run: mvn package -Dmaven.test.skip
+  test:
+    name: Run tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Start MongoDB 5.0.6
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: 5.0.6
+          mongodb-db: siliciumdb
+          mongodb-port: 27017
+      - name: Run tests
+        run: mvn test
