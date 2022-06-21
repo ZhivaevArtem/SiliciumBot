@@ -2,6 +2,7 @@ package com.zhivaevartem.siliciumbot.module.readycheck;
 
 import com.zhivaevartem.siliciumbot.core.listener.AbstractEventListener;
 import com.zhivaevartem.siliciumbot.core.listener.CommandHandler;
+import com.zhivaevartem.siliciumbot.core.service.MessageService;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.event.domain.message.ReactionRemoveAllEvent;
@@ -38,6 +39,16 @@ public class ReadyCheckListener extends AbstractEventListener {
       MessageChannel channel = guildAndChannel.getT2();
       this.service.startReadyCheck(guildId, channel, event.getMessage(), description);
     }
+  }
+
+  @CommandHandler(aliases = {"rcadd"}, lastFreeArgument = true)
+  public void addReadyCheckOption(MessageCreateEvent event, String emoji, String name) {
+    this.service.addOption(event, emoji, name);
+  }
+
+  @CommandHandler(aliases = {"rcremove"})
+  public void removeReadyCheckOption(MessageCreateEvent event, String emoji) {
+    this.service.removeOption(event, emoji);
   }
 
   @Override

@@ -3,9 +3,14 @@ package com.zhivaevartem.siliciumbot.module.readycheck;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zhivaevartem.siliciumbot.constant.NumberConstants;
+import com.zhivaevartem.siliciumbot.core.service.MessageService;
 import com.zhivaevartem.siliciumbot.module.readycheck.ReadyCheckConfigGuildEntity.ReadyCheckOption;
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.Embed;
 import discord4j.core.object.Embed.Field;
+import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -13,16 +18,15 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.EmbedCreateSpec.Builder;
 import discord4j.core.spec.MessageEditSpec;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import discord4j.discordjson.Id;
+import discord4j.rest.service.EmojiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service for {@link ReadyCheckListener}.
@@ -48,6 +52,12 @@ public class ReadyCheckService {
 
   @Autowired
   private ReadyCheckConfigGuildEntityService service;
+
+  @Autowired
+  private MessageService messageService;
+
+  @Autowired
+  private GatewayDiscordClient gateway;
 
   @Scheduled(fixedDelayString = "${silicium.readycheck-update-interval}")
   private void updateEmbeds() {
@@ -104,7 +114,13 @@ public class ReadyCheckService {
 
   private void initReactions(String guildId, Message message) {
     for (ReadyCheckOption option : this.service.getOptions(guildId)) {
-      message.addReaction(ReactionEmoji.unicode(option.emoji)).subscribe();
+      if (option.emoji.startsWith("<:")) {
+        String emojiId = option.emoji.replace("<", "").replace(">", "").split(":")[2];
+        GuildEmoji emoji = this.gateway.getGuildById(Snowflake.of(guildId)).block().getGuildEmojiById(Snowflake.of(emojiId)).block();
+        message.addReaction(ReactionEmoji.of(emoji.getData())).subscribe();
+      } else {
+        message.addReaction(ReactionEmoji.unicode(option.emoji)).subscribe();
+      }
     }
   }
 
@@ -122,16 +138,35 @@ public class ReadyCheckService {
 
   @Nullable
   private ReadyCheckOption getReadyCheckOption(String guildId, ReactionEmoji emoji) {
+    List<ReadyCheckOption> options = this.service.getOptions(guildId);
     if (emoji.asUnicodeEmoji().isPresent()) {
       String rawEmoji = emoji.asUnicodeEmoji().get().getRaw();
-      List<ReadyCheckOption> options = this.service.getOptions(guildId);
       for (ReadyCheckOption option : options) {
         if (option.emoji.equals(rawEmoji)) {
           return option;
         }
       }
+    } else {
+      Optional<Id> id = emoji.asEmojiData().id();
+      if (id.isPresent()) {
+        for (ReadyCheckOption option : options) {
+          if (option.emoji.contains(id.get().asString())) {
+            return option;
+          }
+        }
+      }
     }
     return null;
+  }
+
+  public void addOption(MessageCreateEvent event, String emoji, String name) {
+    String guildId = this.messageService.getGuildId(event);
+    this.service.addOption(guildId, emoji, name);
+  }
+
+  public void removeOption(MessageCreateEvent event, String emoji) {
+    String guildId = this.messageService.getGuildId(event);
+    this.service.removeOption(guildId, emoji);
   }
 
   /**
@@ -205,10 +240,10 @@ public class ReadyCheckService {
             cachedMessage = this.embedToCachedMessage(guildId, message, embed);
             this.cachedMessages.put(guildIdAndMessageId, cachedMessage);
           }
-          if (emoji.asUnicodeEmoji().isPresent()) {
-            String rawEmoji = emoji.asUnicodeEmoji().get().getRaw();
-            if (cachedMessage.reactions.containsKey(rawEmoji)) {
-              List<String> mentions = cachedMessage.reactions.get(rawEmoji);
+          ReadyCheckOption option = this.getReadyCheckOption(guildId, emoji);
+          if (option != null) {
+            if (cachedMessage.reactions.containsKey(option.emoji)) {
+              List<String> mentions = cachedMessage.reactions.get(option.emoji);
               String authorMention = author.getMention();
               if (mentions.removeIf(user -> user.equals(authorMention))) {
                 cachedMessage.shouldUpdate = true;

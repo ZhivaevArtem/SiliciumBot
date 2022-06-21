@@ -91,4 +91,29 @@ public class ReadyCheckConfigGuildEntityService extends
       this.saveEntity(cfg);
     }
   }
+
+  public void addOption(String guildId, String emoji, String name) {
+    ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
+    List<ReadyCheckOption> options = cfg.getOptions();
+    for (ReadyCheckOption option : options) {
+      if (option.emoji.equals(emoji)) {
+        option.name = name;
+        cfg.setOptions(options);
+        this.saveEntity(cfg);
+        return;
+      }
+    }
+    options.add(new ReadyCheckOption(emoji, name));
+    cfg.setOptions(options);
+    this.saveEntity(cfg);
+  }
+
+  public void removeOption(String guildId, String emoji) {
+    ReadyCheckConfigGuildEntity cfg = this.getEntity(guildId);
+    List<ReadyCheckOption> options = cfg.getOptions();
+    if (options.removeIf(opt -> opt.emoji.equals(emoji))) {
+      cfg.setOptions(options);
+      this.saveEntity(cfg);
+    }
+  }
 }
