@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.zhivaevartem.siliciumbot.util.StringUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -95,6 +98,18 @@ public class StringUtilsTest {
     String str = "gSJHDFGhjgD@$%$%JHSFGSHJD@#%KGFh5456&^5467$@462sd";
     String expected = "Gsjhdfghjgd@$%$%jhsfgshjd@#%kgfh5456&^5467$@462sd";
     String result = StringUtils.capitalize(str);
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void parseQueryParams() {
+    String url = "https://www.youtube.com/watch?v=OQGdrezi0Y4&list=RDOQGdrezi0Y4&start_radio=1";
+    Map<String, String> expected = new HashMap<>() {{
+      put("v", "OQGdrezi0Y4");
+      put("list", "RDOQGdrezi0Y4");
+      put("start_radio", "1");
+    }};
+    Map<String, String> result = StringUtils.parseQueryParams(url);
     assertEquals(expected, result);
   }
 }

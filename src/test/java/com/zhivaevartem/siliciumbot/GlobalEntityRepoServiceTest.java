@@ -2,8 +2,8 @@ package com.zhivaevartem.siliciumbot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.zhivaevartem.siliciumbot.persistence.global.base.GlobalEntityService;
-import com.zhivaevartem.siliciumbot.persistence.global.entity.ShikimoriConfigGlobalEntity;
+import com.zhivaevartem.siliciumbot.core.persistence.global.GlobalEntityService;
+import com.zhivaevartem.siliciumbot.module.shikimori.ShikimoriConfigGlobalEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
