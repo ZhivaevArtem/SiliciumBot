@@ -56,7 +56,7 @@ public class ReadyCheckService {
   @Autowired
   private MessageService messageService;
 
-  @Autowired
+  @Autowired(required = false)
   private GatewayDiscordClient gateway;
 
   @Scheduled(fixedDelayString = "${silicium.readycheck-update-interval}")
