@@ -166,6 +166,34 @@ public class ReadyCheckService {
     return null;
   }
 
+  public void reorderOptions(MessageCreateEvent event, Integer opt1, Integer opt2) {
+    if (opt1 != null && opt2 != null && opt1 >= 0 && opt2 >= 0) {
+      String guildId = this.messageService.getGuildId(event);
+      List<ReadyCheckOption> options = this.service.getOptions(guildId);
+      if (opt1 < options.size() && opt2 < options.size()) {
+        ReadyCheckOption first = options.get(opt1);
+        ReadyCheckOption second = options.get(opt2);
+        options.set(opt2, first);
+        options.set(opt1, second);
+        this.service.setOptions(guildId, options);
+      }
+    }
+  }
+
+  public void moveOption(MessageCreateEvent event, Integer from, Integer to) {
+    if (from != null && to != null && from >= 0 && to >= 0) {
+      String guildId = this.messageService.getGuildId(event);
+      List<ReadyCheckOption> options = this.service.getOptions(guildId);
+      if (from < options.size() && to < options.size()) {
+        ReadyCheckOption option = options.get(from);
+        options.set(from, null);
+        options.add(to, option);
+        options.removeIf(Objects::isNull);
+        this.service.setOptions(guildId, options);
+      }
+    }
+  }
+
   public void addOption(MessageCreateEvent event, String emoji, String name) {
     String guildId = this.messageService.getGuildId(event);
     this.service.addOption(guildId, emoji, name);
