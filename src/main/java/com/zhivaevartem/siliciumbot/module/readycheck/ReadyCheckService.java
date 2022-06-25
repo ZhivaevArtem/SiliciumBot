@@ -97,7 +97,7 @@ public class ReadyCheckService {
       if (cachedMessage.reactions.containsKey(option.emoji)) {
         mentions = cachedMessage.reactions.get(option.emoji);
       }
-      builder.addField(option.name, this.joinUserMentions(mentions, guildId), false);
+      builder.addField(option.emoji + " " + option.name, this.joinUserMentions(mentions, guildId), false);
     }
     cachedMessage.message.edit(MessageEditSpec.create().withEmbeds(builder.build())).subscribe();
   }
