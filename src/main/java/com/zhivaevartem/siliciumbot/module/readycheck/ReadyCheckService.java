@@ -184,7 +184,7 @@ public class ReadyCheckService {
     if (from != null && to != null && from >= 0 && to >= 0) {
       String guildId = this.messageService.getGuildId(event);
       List<ReadyCheckOption> options = this.service.getOptions(guildId);
-      if (from < options.size() && to < options.size()) {
+      if (from < options.size() && to <= options.size()) {
         ReadyCheckOption option = options.get(from);
         options.set(from, null);
         options.add(to, option);
