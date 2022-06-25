@@ -15,7 +15,7 @@
 
   <groupId>com.zhivaevartem.siliciumbot</groupId>
   <artifactId>siliciumbot</artifactId>
-  <version>0.1.8</version>
+  <version>0.1.10</version>
 
   <repositories>
     <repository>
