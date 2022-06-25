@@ -41,7 +41,7 @@ public class ShikimoriListener extends AbstractEventListener {
 
   @CommandHandler(aliases = "shiki user add")
   public void addUsername(MessageCreateEvent event, String username) {
-    if (NullUtils.isEmpty(username)) {
+    if (!NullUtils.isEmpty(username)) {
       String guildId = event.getGuild().block().getId().asString();
       this.service.addUsername(guildId, username);
       this.messageService.replyMessage(event.getMessage(),
@@ -54,7 +54,7 @@ public class ShikimoriListener extends AbstractEventListener {
 
   @CommandHandler(aliases = "shiki user remove")
   public void removeUsername(MessageCreateEvent event, String username) {
-    if (NullUtils.isEmpty(username)) {
+    if (!NullUtils.isEmpty(username)) {
       String guildId = event.getGuild().block().getId().asString();
       this.service.removeUsername(guildId, username);
       this.messageService.replyMessage(event.getMessage(),
