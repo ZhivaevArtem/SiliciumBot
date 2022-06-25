@@ -41,14 +41,24 @@ public class ReadyCheckListener extends AbstractEventListener {
     }
   }
 
-  @CommandHandler(aliases = {"rcadd"}, lastFreeArgument = true)
+  @CommandHandler(aliases = {"rcopt add"}, lastFreeArgument = true)
   public void addReadyCheckOption(MessageCreateEvent event, String emoji, String name) {
     this.service.addOption(event, emoji, name);
   }
 
-  @CommandHandler(aliases = {"rcremove"})
+  @CommandHandler(aliases = {"rcopt remove"})
   public void removeReadyCheckOption(MessageCreateEvent event, String emoji) {
     this.service.removeOption(event, emoji);
+  }
+
+  @CommandHandler(aliases = {"rcopt swap"})
+  public void reorderOptions(MessageCreateEvent event, Integer opt1, Integer opt2)  {
+    this.service.reorderOptions(event, opt1, opt2);
+  }
+
+  @CommandHandler(aliases = {"rcopt move"})
+  public void moveOption(MessageCreateEvent event, Integer from, Integer to) {
+    this.service.moveOption(event, from, to);
   }
 
   @Override
