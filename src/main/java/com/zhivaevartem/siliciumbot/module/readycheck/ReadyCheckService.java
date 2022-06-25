@@ -110,7 +110,7 @@ public class ReadyCheckService {
     String emptyValue = this.service.getEmptyValue(guildId);
     List<ReadyCheckOption> options = this.service.getOptions(guildId);
     for (ReadyCheckOption option : options) {
-      builder.addField(option.name, emptyValue, false);
+      builder.addField(option.emoji + " " + option.name, emptyValue, false);
     }
     return builder.build();
   }
