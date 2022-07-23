@@ -12,17 +12,23 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -40,29 +46,44 @@ public class ShikimoriService {
   @Autowired(required = false)
   private GatewayDiscordClient gateway;
 
+  @Value("${silicium.version}")
+  private String buildVersion;
+
+  private Iterator<Map.Entry<String, Set<String>>> userIterator;
+
   private final Map<String, List<ShikimoriHistoryLog>> logsCache = new HashMap<>();
 
   @Scheduled(fixedDelayString = "${silicium.shikimori-check-interval}")
   private void checkShikimoriScheduled() {
-    List<String> guildsIds = this.globalService.getGuildsIds();
-    Set<String> usernames = new HashSet<>();
-    Map<String, List<ShikimoriHistoryLog>> userLogs = new HashMap<>();  // username -> logs
-    Map<String, List<String>> guildsUsers = new HashMap<>();  // guildId -> usernames
-    for (String guildId : guildsIds) {
-      List<String> guildUsernames = this.guildService.getUsernames(guildId);
-      usernames.addAll(guildUsernames);
-      guildsUsers.put(guildId, guildUsernames);
+    if (userIterator == null || !userIterator.hasNext()) {
+      List<String> guildsIds = this.globalService.getGuildsIds();
+      Map<String, Set<String>> userGuilds = new HashMap<>();  // username => guildIds
+      for (String guildId : guildsIds) {
+        List<String> guildUsernames = this.guildService.getUsernames(guildId);
+        guildUsernames.forEach(username -> {
+          if (!userGuilds.containsKey(username)) {
+            userGuilds.put(username, new HashSet<>());
+          }
+          userGuilds.get(username).add(guildId);
+        });
+      }
+      this.userIterator = userGuilds.entrySet().iterator();
     }
-    for (String username : usernames) {
-      userLogs.put(username, this.getNewUserLogs(username));
-    }
-    for (String guildId : guildsIds) {
-      List<String> guildUsernames = guildsUsers.get(guildId);
-      Map<String, List<ShikimoriHistoryLog>> subMap = userLogs.entrySet().stream()
-          .filter(es -> guildUsernames.contains(es.getKey()))
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-      List<EmbedCreateSpec> embeds = this.generateEmbeds(subMap);
-      if (embeds != null) {
+    Map.Entry<String, Set<String>> user = this.userIterator.next();
+    String username = user.getKey();
+    Set<String> guildIds = user.getValue();
+    List<ShikimoriHistoryLog> logs = this.getNewUserLogs(username);
+    this.sendNotifications(guildIds, new HashMap<>() {
+      {
+        put(username, logs);
+      }
+    });
+  }
+
+  private void sendNotifications(Collection<String> guildIds, Map<String, List<ShikimoriHistoryLog>> usersLogs) {
+    List<EmbedCreateSpec> embeds = this.generateEmbeds(usersLogs);
+    if (embeds != null && embeds.size() > 0) {
+      guildIds.forEach(guildId -> {
         String notificationChannelId = this.guildService.getNotificationChannelId(guildId);
         if (!notificationChannelId.isEmpty()) {
           this.gateway.getGuildById(Snowflake.of(guildId)).subscribe(guild -> {
@@ -74,7 +95,7 @@ public class ShikimoriService {
             });
           });
         }
-      }
+      });
     }
   }
 
@@ -119,13 +140,21 @@ public class ShikimoriService {
 
   private List<ShikimoriHistoryLog> getAllUserLogs(String username, int limit) {
     RestTemplate restTemplate = new RestTemplate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("User-Agent", "SiliciumBotChan/" + this.buildVersion + " Discord bot for me and my friends");
+    HttpEntity<Object> request = new HttpEntity<>(headers);
     String url = ShikimoriConstants.USER_HISTORY_API_URL
         .replace(ShikimoriConstants.USERNAME_TOKEN, username);
     if (limit > 0) {
       url += "?limit=" + limit;
     }
-    ResponseEntity<ShikimoriHistoryLog[]> response = restTemplate
-        .getForEntity(url, ShikimoriHistoryLog[].class);
+    ResponseEntity<ShikimoriHistoryLog[]> response;
+    try {
+      response = restTemplate.exchange(url, HttpMethod.GET, request, ShikimoriHistoryLog[].class);
+    } catch (HttpClientErrorException e) {
+      e.printStackTrace();
+      return new ArrayList<>(0);
+    }
     ShikimoriHistoryLog[] logs = response.getBody();
     if (logs == null) {
       return new ArrayList<>();
