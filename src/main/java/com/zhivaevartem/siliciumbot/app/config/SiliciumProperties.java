@@ -17,4 +17,6 @@ public class SiliciumProperties {
   private int readyCheckUpdateInterval = 2500;
   private int shikimoriCheckInterval = 45000;
   private String youtubeToken = "";
+  private int shikimoriBetweenRequests = 3000;
+  private String version = "";
 }
