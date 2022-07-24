@@ -74,16 +74,18 @@ public class ShikimoriService {
       }
       this.userIterator = userGuilds.entrySet().iterator();
     }
-    Map.Entry<String, Set<String>> user = this.userIterator.next();
-    String username = user.getKey();
-    this.logger.info("Check for user: " + username);
-    Set<String> guildIds = user.getValue();
-    List<ShikimoriHistoryLog> logs = this.getNewUserLogs(username);
-    this.sendNotifications(guildIds, new HashMap<>() {
-      {
-        put(username, logs);
-      }
-    });
+    if (this.userIterator.hasNext()) {
+      Map.Entry<String, Set<String>> user = this.userIterator.next();
+      String username = user.getKey();
+      this.logger.info("Check for user: " + username);
+      Set<String> guildIds = user.getValue();
+      List<ShikimoriHistoryLog> logs = this.getNewUserLogs(username);
+      this.sendNotifications(guildIds, new HashMap<>() {
+        {
+          put(username, logs);
+        }
+      });
+    }
   }
 
   private void sendNotifications(Collection<String> guildIds, Map<String, List<ShikimoriHistoryLog>> usersLogs) {
