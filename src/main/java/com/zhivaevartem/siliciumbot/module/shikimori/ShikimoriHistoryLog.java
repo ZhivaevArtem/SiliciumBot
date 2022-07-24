@@ -11,7 +11,7 @@ import lombok.Getter;
  * </code>.
  */
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"id"})
 public class ShikimoriHistoryLog {
   /**
    * {@link ShikimoriHistoryLog} nested field model.
