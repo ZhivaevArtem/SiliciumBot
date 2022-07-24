@@ -58,7 +58,7 @@ public class ShikimoriService {
 
   private final Logger logger = LoggerFactory.getLogger(ShikimoriService.class);
 
-  @Scheduled(fixedRateString = "${silicium.shikimori-check-interval}")
+  @Scheduled(fixedRateString = "${silicium.shikimori-between-requests}")
   private void checkShikimoriScheduled() {
     if (userIterator == null || !userIterator.hasNext()) {
       List<String> guildsIds = this.globalService.getGuildsIds();
