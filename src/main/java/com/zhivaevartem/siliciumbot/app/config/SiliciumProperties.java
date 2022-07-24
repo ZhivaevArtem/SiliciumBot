@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 public class SiliciumProperties {
   private String discordToken = "";
   private int readyCheckUpdateInterval = 2500;
-  private int shikimoriCheckInterval = 45000;
   private String youtubeToken = "";
   private int shikimoriBetweenRequests = 3000;
   private String version = "";

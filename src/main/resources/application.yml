@@ -5,7 +5,6 @@ spring:
 silicium:
   discord-token: ${SILICIUMBOT_DISCORD_TOKEN:}
   readycheck-update-interval: ${SILICIUMBOT_RC_UPDATE_INTERVAL:2500}
-  shikimori-check-interval: ${SILICIUMBOT_SHIKI_CHECK_INTERVAL:10000}
   youtube-token: ${SILICIUMBOT_YOUTUBE_API_KEY:}
   shikimori-between-requests: ${SILICIUMBOT_SHIKI_REQUESTS_INTERVAL:3000}
   version: @project.version@

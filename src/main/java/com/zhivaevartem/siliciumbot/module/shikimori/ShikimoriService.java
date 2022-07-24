@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -53,7 +55,9 @@ public class ShikimoriService {
 
   private final Map<String, List<ShikimoriHistoryLog>> logsCache = new HashMap<>();
 
-  @Scheduled(fixedDelayString = "${silicium.shikimori-check-interval}")
+  private final Logger logger = LoggerFactory.getLogger(ShikimoriService.class);
+
+  @Scheduled(fixedDelayString = "${silicium.shikimori-between-requests}")
   private void checkShikimoriScheduled() {
     if (userIterator == null || !userIterator.hasNext()) {
       List<String> guildsIds = this.globalService.getGuildsIds();
@@ -69,15 +73,18 @@ public class ShikimoriService {
       }
       this.userIterator = userGuilds.entrySet().iterator();
     }
-    Map.Entry<String, Set<String>> user = this.userIterator.next();
-    String username = user.getKey();
-    Set<String> guildIds = user.getValue();
-    List<ShikimoriHistoryLog> logs = this.getNewUserLogs(username);
-    this.sendNotifications(guildIds, new HashMap<>() {
-      {
-        put(username, logs);
-      }
-    });
+    if (this.userIterator.hasNext()) {
+      Map.Entry<String, Set<String>> user = this.userIterator.next();
+      String username = user.getKey();
+      this.logger.info("Check for user: " + username);
+      Set<String> guildIds = user.getValue();
+      List<ShikimoriHistoryLog> logs = this.getNewUserLogs(username);
+      this.sendNotifications(guildIds, new HashMap<>() {
+        {
+          put(username, logs);
+        }
+      });
+    }
   }
 
   private void sendNotifications(Collection<String> guildIds, Map<String, List<ShikimoriHistoryLog>> usersLogs) {
