@@ -78,6 +78,7 @@ public class ReadyCheckService {
         return this.mention + " " + DATE_FORMAT.format(this.date);
       }
     }
+
     private Message message;
     private Map<String, List<React>> reactions;
     private boolean shouldUpdate = false;
@@ -349,8 +350,8 @@ public class ReadyCheckService {
         String[] rawReacts = value.split("\n");
         if (rawReacts[0].startsWith("<") && rawReacts[0].endsWith(">")) {
           reacts.addAll(Stream.of(rawReacts)
-            .map(CachedMessage.React::fromString)
-            .filter(Objects::nonNull).toList()
+              .map(CachedMessage.React::fromString)
+              .filter(Objects::nonNull).toList()
           );
         }
       }
