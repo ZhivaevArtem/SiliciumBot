@@ -11,6 +11,9 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -75,7 +78,8 @@ public class ReadyCheckListener extends AbstractEventListener {
       Message message = guildAndMessageAndBotUserAndAuthor.getT1().getT1().getT2();
       User botUser = guildAndMessageAndBotUserAndAuthor.getT1().getT2();
       User author = guildAndMessageAndBotUserAndAuthor.getT2();
-      this.service.addVote(guildId, event.getEmoji(), message, botUser, author);
+      Date time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
+      this.service.addVote(guildId, event.getEmoji(), message, botUser, author, time);
     }
   }
 

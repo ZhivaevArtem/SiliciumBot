@@ -19,13 +19,18 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.EmbedCreateSpec.Builder;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.Id;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+import lombok.EqualsAndHashCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,11 +42,48 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReadyCheckService {
   private static class CachedMessage {
+    private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+
+    @EqualsAndHashCode
+    private static class React {
+      private String mention;
+      private Date date;
+
+      private React(String mention, Date date) {
+        this.mention = mention;
+        String formatDate = DATE_FORMAT.format(date);
+        try {
+          this.date = DATE_FORMAT.parse(formatDate);
+        } catch (ParseException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Nullable
+      public static React fromString(String rawReact) {
+        int i = rawReact.indexOf(">") + 1;
+        String mention = rawReact.substring(0, i).trim();
+        String rawDate = rawReact.substring(i).trim();
+        Date date = null;
+        try {
+          date = DATE_FORMAT.parse(rawDate);
+        } catch (ParseException e) {
+          return null;
+        }
+        return new React(mention, date);
+      }
+
+      @Override
+      public String toString() {
+        return this.mention + " " + DATE_FORMAT.format(this.date);
+      }
+    }
+
     private Message message;
-    private Map<String, List<String>> reactions;
+    private Map<String, List<React>> reactions;
     private boolean shouldUpdate = false;
 
-    public CachedMessage(Message message, Map<String, List<String>> reactions) {
+    public CachedMessage(Message message, Map<String, List<React>> reactions) {
       this.message = message;
       this.reactions = reactions;
     }
@@ -80,10 +122,10 @@ public class ReadyCheckService {
     }
   }
 
-  private String joinUserMentions(List<String> mentions, String guildId) {
-    return mentions.size() == 0
+  private String joinUserMentions(List<CachedMessage.React> reacts, String guildId) {
+    return reacts.size() == 0
       ? this.service.getEmptyValue(guildId)
-      : String.join("\n", mentions);
+      : String.join("\n", reacts.stream().map(CachedMessage.React::toString).toList());
   }
 
   private void updateMessage(String guildId, CachedMessage cachedMessage) {
@@ -93,11 +135,11 @@ public class ReadyCheckService {
       builder.description(description);
     }
     for (ReadyCheckOption option : this.service.getOptions(guildId)) {
-      List<String> mentions = new ArrayList<>();
+      List<CachedMessage.React> reacts = new ArrayList<>();
       if (cachedMessage.reactions.containsKey(option.emoji)) {
-        mentions = cachedMessage.reactions.get(option.emoji);
+        reacts = cachedMessage.reactions.get(option.emoji);
       }
-      builder.addField(option.emoji + " " + option.name, this.joinUserMentions(mentions, guildId), false);
+      builder.addField(option.emoji + " " + option.name, this.joinUserMentions(reacts, guildId), false);
     }
     cachedMessage.message.edit(MessageEditSpec.create().withEmbeds(builder.build())).subscribe();
   }
@@ -225,7 +267,7 @@ public class ReadyCheckService {
    * @param author The user who voted.
    */
   public void addVote(String guildId, ReactionEmoji emoji, Message message,
-      User botUser, User author) {
+      User botUser, User author, Date time) {
     synchronized (this.cachedMessages) {
       if (!Objects.equals(botUser, author) && message.getAuthor().isPresent()
           && message.getAuthor().get().equals(botUser)) {
@@ -243,10 +285,10 @@ public class ReadyCheckService {
             if (!cachedMessage.reactions.containsKey(option.emoji)) {
               cachedMessage.reactions.put(option.emoji, new ArrayList<>());
             }
-            List<String> mentions = cachedMessage.reactions.get(option.emoji);
+            List<CachedMessage.React> reacts = cachedMessage.reactions.get(option.emoji);
             String authorMention = author.getMention();
-            if (mentions.stream().filter(user -> user.equals(authorMention)).toList().size() == 0) {
-              mentions.add(authorMention);
+            if (reacts.stream().filter(react -> react.mention.equals(authorMention)).toList().size() == 0) {
+              reacts.add(new CachedMessage.React(authorMention, time));
               cachedMessage.shouldUpdate = true;
               this.shouldUpdate = true;
             }
@@ -278,9 +320,9 @@ public class ReadyCheckService {
           ReadyCheckOption option = this.getReadyCheckOption(guildId, emoji);
           if (option != null) {
             if (cachedMessage.reactions.containsKey(option.emoji)) {
-              List<String> mentions = cachedMessage.reactions.get(option.emoji);
+              List<CachedMessage.React> reacts = cachedMessage.reactions.get(option.emoji);
               String authorMention = author.getMention();
-              if (mentions.removeIf(user -> user.equals(authorMention))) {
+              if (reacts.removeIf(react -> react.mention.equals(authorMention))) {
                 cachedMessage.shouldUpdate = true;
                 this.shouldUpdate = true;
               }
@@ -295,7 +337,7 @@ public class ReadyCheckService {
     List<ReadyCheckOption> options = this.service.getOptions(guildId);
     List<String> optionNames = options.stream().map(opt -> opt.name).toList();
     List<Field> fields = embed.getFields();
-    Map<String, List<String>> reactions = new HashMap<>();
+    Map<String, List<CachedMessage.React>> reactions = new HashMap<>();
     for (int i = 0; i < fields.size(); i++) {
       Field field = fields.get(i);
       if (optionNames.contains(field.getName())) {
@@ -303,11 +345,14 @@ public class ReadyCheckService {
         if (!reactions.containsKey(option.emoji)) {
           reactions.put(option.emoji, new ArrayList<>());
         }
-        List<String> mentions = reactions.get(option.emoji);
+        List<CachedMessage.React> reacts = reactions.get(option.emoji);
         String value = field.getValue();
-        String[] rawMentions = value.split("\n");
-        if (rawMentions[0].startsWith("<") && rawMentions[0].endsWith(">")) {
-          mentions.addAll(List.of(rawMentions));
+        String[] rawReacts = value.split("\n");
+        if (rawReacts[0].startsWith("<") && rawReacts[0].endsWith(">")) {
+          reacts.addAll(Stream.of(rawReacts)
+              .map(CachedMessage.React::fromString)
+              .filter(Objects::nonNull).toList()
+          );
         }
       }
     }
