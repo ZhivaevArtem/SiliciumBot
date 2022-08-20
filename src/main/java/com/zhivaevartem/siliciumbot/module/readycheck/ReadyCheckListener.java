@@ -78,7 +78,7 @@ public class ReadyCheckListener extends AbstractEventListener {
       Message message = guildAndMessageAndBotUserAndAuthor.getT1().getT1().getT2();
       User botUser = guildAndMessageAndBotUserAndAuthor.getT1().getT2();
       User author = guildAndMessageAndBotUserAndAuthor.getT2();
-      Date time = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow")).getTime();
+      Date time = new Date();
       this.service.addVote(guildId, event.getEmoji(), message, botUser, author, time);
     }
   }
