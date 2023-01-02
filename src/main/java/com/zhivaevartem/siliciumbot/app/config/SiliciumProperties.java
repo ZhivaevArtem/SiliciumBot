@@ -36,4 +36,24 @@ public class SiliciumProperties {
   public String getVersion() {
     return version;
   }
+
+  public void setDiscordToken(String discordToken) {
+    this.discordToken = discordToken;
+  }
+
+  public void setReadyCheckUpdateInterval(int readyCheckUpdateInterval) {
+    this.readyCheckUpdateInterval = readyCheckUpdateInterval;
+  }
+
+  public void setYoutubeToken(String youtubeToken) {
+    this.youtubeToken = youtubeToken;
+  }
+
+  public void setShikimoriBetweenRequests(int shikimoriBetweenRequests) {
+    this.shikimoriBetweenRequests = shikimoriBetweenRequests;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
 }
