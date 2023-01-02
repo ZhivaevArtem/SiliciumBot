@@ -63,6 +63,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -202,7 +203,7 @@ public abstract class AbstractEventListener {
 
   private void registerCommandHandlers(GatewayDiscordClient gateway) {
     List<Method> handlers = Arrays.stream(this.getClass().getMethods())
-        .filter(method -> method.isAnnotationPresent(CommandHandler.class)).toList();
+        .filter(method -> method.isAnnotationPresent(CommandHandler.class)).collect(Collectors.toList());
     for (Method handler : handlers) {
       this.registerCommandHandler(handler);
     }
@@ -226,116 +227,116 @@ public abstract class AbstractEventListener {
     List<Method> handlers = Arrays.stream(this.getClass().getMethods())
         .filter(method -> method.getName().startsWith("on")
         && method.getName().endsWith("Event")
-        && method.getDeclaringClass().equals(this.getClass())).toList();
+        && method.getDeclaringClass().equals(this.getClass())).collect(Collectors.toList());
     for (Method handler : handlers) {
       switch (handler.getName()) {
-        case "onReadyEvent" -> gateway.on(ReadyEvent.class)
-          .subscribe(this::onReadyEvent);
-        case "onResumeEvent" -> gateway.on(ResumeEvent.class)
-          .subscribe(this::onResumeEvent);
-        case "onMessageCreateEvent" -> gateway.on(MessageCreateEvent.class)
-          .subscribe(this::onMessageCreateEvent);
-        case "onMessageDeleteEvent" -> gateway.on(MessageDeleteEvent.class)
-          .subscribe(this::onMessageDeleteEvent);
-        case "onMessageUpdateEvent" -> gateway.on(MessageUpdateEvent.class)
-          .subscribe(this::onMessageUpdateEvent);
-        case "onMessageBulkDeleteEvent" -> gateway.on(MessageBulkDeleteEvent.class)
-          .subscribe(this::onMessageBulkDeleteEvent);
-        case "onReactionAddEvent" -> gateway.on(ReactionAddEvent.class)
-          .subscribe(this::onReactionAddEvent);
-        case "onReactionRemoveEvent" -> gateway.on(ReactionRemoveEvent.class)
-          .subscribe(this::onReactionRemoveEvent);
-        case "onReactionRemoveEmojiEvent" -> gateway.on(ReactionRemoveEmojiEvent.class)
-          .subscribe(this::onReactionRemoveEmojiEvent);
-        case "onReactionRemoveAllEvent" -> gateway.on(ReactionRemoveAllEvent.class)
-          .subscribe(this::onReactionRemoveAllEvent);
-        case "onGuildCreateEvent" -> gateway.on(GuildCreateEvent.class)
-          .subscribe(this::onGuildCreateEvent);
-        case "onGuildDeleteEvent" -> gateway.on(GuildDeleteEvent.class)
-          .subscribe(this::onGuildDeleteEvent);
-        case "onGuildUpdateEvent" -> gateway.on(GuildUpdateEvent.class)
-          .subscribe(this::onGuildUpdateEvent);
-        case "onMemberJoinEvent" -> gateway.on(MemberJoinEvent.class)
-          .subscribe(this::onMemberJoinEvent);
-        case "onMemberLeaveEvent" -> gateway.on(MemberLeaveEvent.class)
-          .subscribe(this::onMemberLeaveEvent);
-        case "onMemberUpdateEvent" -> gateway.on(MemberUpdateEvent.class)
-          .subscribe(this::onMemberUpdateEvent);
-        case "onMemberChunkEvent" -> gateway.on(MemberChunkEvent.class)
-          .subscribe(this::onMemberChunkEvent);
-        case "onEmojisUpdateEvent" -> gateway.on(EmojisUpdateEvent.class)
-          .subscribe(this::onEmojisUpdateEvent);
-        case "onBanEvent" -> gateway.on(BanEvent.class)
-          .subscribe(this::onBanEvent);
-        case "onUnbanEvent" -> gateway.on(UnbanEvent.class)
-          .subscribe(this::onUnbanEvent);
-        case "onIntegrationsUpdateEvent" -> gateway.on(IntegrationsUpdateEvent.class)
-          .subscribe(this::onIntegrationsUpdateEvent);
-        case "onWebhooksUpdateEvent" -> gateway.on(WebhooksUpdateEvent.class)
-          .subscribe(this::onWebhooksUpdateEvent);
-        case "onTextChannelCreateEvent" -> gateway.on(TextChannelCreateEvent.class)
-          .subscribe(this::onTextChannelCreateEvent);
-        case "onVoiceChannelCreateEvent" -> gateway.on(VoiceChannelCreateEvent.class)
-          .subscribe(this::onVoiceChannelCreateEvent);
-        case "onCategoryCreateEvent" -> gateway.on(CategoryCreateEvent.class)
-          .subscribe(this::onCategoryCreateEvent);
-        case "onNewsChannelCreateEvent" -> gateway.on(NewsChannelCreateEvent.class)
-          .subscribe(this::onNewsChannelCreateEvent);
-        case "onStoreChannelCreateEvent" -> gateway.on(StoreChannelCreateEvent.class)
-          .subscribe(this::onStoreChannelCreateEvent);
-        case "onTextChannelDeleteEvent" -> gateway.on(TextChannelDeleteEvent.class)
-          .subscribe(this::onTextChannelDeleteEvent);
-        case "onVoiceChannelDeleteEvent" -> gateway.on(VoiceChannelDeleteEvent.class)
-          .subscribe(this::onVoiceChannelDeleteEvent);
-        case "onCategoryDeleteEvent" -> gateway.on(CategoryDeleteEvent.class)
-          .subscribe(this::onCategoryDeleteEvent);
-        case "onNewsChannelDeleteEvent" -> gateway.on(NewsChannelDeleteEvent.class)
-          .subscribe(this::onNewsChannelDeleteEvent);
-        case "onStoreChannelDeleteEvent" -> gateway.on(StoreChannelDeleteEvent.class)
-          .subscribe(this::onStoreChannelDeleteEvent);
-        case "onTextChannelUpdateEvent" -> gateway.on(TextChannelUpdateEvent.class)
-          .subscribe(this::onTextChannelUpdateEvent);
-        case "onVoiceChannelUpdateEvent" -> gateway.on(VoiceChannelUpdateEvent.class)
-          .subscribe(this::onVoiceChannelUpdateEvent);
-        case "onCategoryUpdateEvent" -> gateway.on(CategoryUpdateEvent.class)
-          .subscribe(this::onCategoryUpdateEvent);
-        case "onNewsChannelUpdateEvent" -> gateway.on(NewsChannelUpdateEvent.class)
-          .subscribe(this::onNewsChannelUpdateEvent);
-        case "onStoreChannelUpdateEvent" -> gateway.on(StoreChannelUpdateEvent.class)
-          .subscribe(this::onStoreChannelUpdateEvent);
-        case "onTypingStartEvent" -> gateway.on(TypingStartEvent.class)
-          .subscribe(this::onTypingStartEvent);
-        case "onPinsUpdateEvent" -> gateway.on(PinsUpdateEvent.class)
-          .subscribe(this::onPinsUpdateEvent);
-        case "onRoleCreateEvent" -> gateway.on(RoleCreateEvent.class)
-          .subscribe(this::onRoleCreateEvent);
-        case "onRoleDeleteEvent" -> gateway.on(RoleDeleteEvent.class)
-          .subscribe(this::onRoleDeleteEvent);
-        case "onRoleUpdateEvent" -> gateway.on(RoleUpdateEvent.class)
-          .subscribe(this::onRoleUpdateEvent);
-        case "onInviteCreateEvent" -> gateway.on(InviteCreateEvent.class)
-          .subscribe(this::onInviteCreateEvent);
-        case "onInviteDeleteEvent" -> gateway.on(InviteDeleteEvent.class)
-          .subscribe(this::onInviteDeleteEvent);
-        case "onUserUpdateEvent" -> gateway.on(UserUpdateEvent.class)
-          .subscribe(this::onUserUpdateEvent);
-        case "onPresenceUpdateEvent" -> gateway.on(PresenceUpdateEvent.class)
-          .subscribe(this::onPresenceUpdateEvent);
-        case "onVoiceStateUpdateEvent" -> gateway.on(VoiceStateUpdateEvent.class)
-          .subscribe(this::onVoiceStateUpdateEvent);
-        case "onVoiceServerUpdateEvent" -> gateway.on(VoiceServerUpdateEvent.class)
-          .subscribe(this::onVoiceServerUpdateEvent);
-        case "onConnectEvent" -> gateway.on(ConnectEvent.class)
-          .subscribe(this::onConnectEvent);
-        case "onReconnectEvent" -> gateway.on(ReconnectEvent.class)
-          .subscribe(this::onReconnectEvent);
-        case "onDisconnectEvent" -> gateway.on(DisconnectEvent.class)
-          .subscribe(this::onDisconnectEvent);
-        case "onReconnectStartEvent" -> gateway.on(ReconnectStartEvent.class)
-          .subscribe(this::onReconnectStartEvent);
-        case "onReconnectFailEvent" -> gateway.on(ReconnectFailEvent.class)
-          .subscribe(this::onReconnectFailEvent);
-        default -> System.out.println("Unknown handler");
+        case "onReadyEvent" : gateway.on(ReadyEvent.class)
+          .subscribe(this::onReadyEvent); break;
+        case "onResumeEvent" : gateway.on(ResumeEvent.class)
+          .subscribe(this::onResumeEvent); break;
+        case "onMessageCreateEvent" : gateway.on(MessageCreateEvent.class)
+          .subscribe(this::onMessageCreateEvent); break;
+        case "onMessageDeleteEvent" : gateway.on(MessageDeleteEvent.class)
+          .subscribe(this::onMessageDeleteEvent); break;
+        case "onMessageUpdateEvent" : gateway.on(MessageUpdateEvent.class)
+          .subscribe(this::onMessageUpdateEvent); break;
+        case "onMessageBulkDeleteEvent" : gateway.on(MessageBulkDeleteEvent.class)
+          .subscribe(this::onMessageBulkDeleteEvent); break;
+        case "onReactionAddEvent" : gateway.on(ReactionAddEvent.class)
+          .subscribe(this::onReactionAddEvent); break;
+        case "onReactionRemoveEvent" : gateway.on(ReactionRemoveEvent.class)
+          .subscribe(this::onReactionRemoveEvent); break;
+        case "onReactionRemoveEmojiEvent" : gateway.on(ReactionRemoveEmojiEvent.class)
+          .subscribe(this::onReactionRemoveEmojiEvent); break;
+        case "onReactionRemoveAllEvent" : gateway.on(ReactionRemoveAllEvent.class)
+          .subscribe(this::onReactionRemoveAllEvent); break;
+        case "onGuildCreateEvent" : gateway.on(GuildCreateEvent.class)
+          .subscribe(this::onGuildCreateEvent); break;
+        case "onGuildDeleteEvent" : gateway.on(GuildDeleteEvent.class)
+          .subscribe(this::onGuildDeleteEvent); break;
+        case "onGuildUpdateEvent" : gateway.on(GuildUpdateEvent.class)
+          .subscribe(this::onGuildUpdateEvent); break;
+        case "onMemberJoinEvent" : gateway.on(MemberJoinEvent.class)
+          .subscribe(this::onMemberJoinEvent); break;
+        case "onMemberLeaveEvent" : gateway.on(MemberLeaveEvent.class)
+          .subscribe(this::onMemberLeaveEvent); break;
+        case "onMemberUpdateEvent" : gateway.on(MemberUpdateEvent.class)
+          .subscribe(this::onMemberUpdateEvent); break;
+        case "onMemberChunkEvent" : gateway.on(MemberChunkEvent.class)
+          .subscribe(this::onMemberChunkEvent); break;
+        case "onEmojisUpdateEvent" : gateway.on(EmojisUpdateEvent.class)
+          .subscribe(this::onEmojisUpdateEvent); break;
+        case "onBanEvent" : gateway.on(BanEvent.class)
+          .subscribe(this::onBanEvent); break;
+        case "onUnbanEvent" : gateway.on(UnbanEvent.class)
+          .subscribe(this::onUnbanEvent); break;
+        case "onIntegrationsUpdateEvent" : gateway.on(IntegrationsUpdateEvent.class)
+          .subscribe(this::onIntegrationsUpdateEvent); break;
+        case "onWebhooksUpdateEvent" : gateway.on(WebhooksUpdateEvent.class)
+          .subscribe(this::onWebhooksUpdateEvent); break;
+        case "onTextChannelCreateEvent" : gateway.on(TextChannelCreateEvent.class)
+          .subscribe(this::onTextChannelCreateEvent); break;
+        case "onVoiceChannelCreateEvent" : gateway.on(VoiceChannelCreateEvent.class)
+          .subscribe(this::onVoiceChannelCreateEvent); break;
+        case "onCategoryCreateEvent" : gateway.on(CategoryCreateEvent.class)
+          .subscribe(this::onCategoryCreateEvent); break;
+        case "onNewsChannelCreateEvent" : gateway.on(NewsChannelCreateEvent.class)
+          .subscribe(this::onNewsChannelCreateEvent); break;
+        case "onStoreChannelCreateEvent" : gateway.on(StoreChannelCreateEvent.class)
+          .subscribe(this::onStoreChannelCreateEvent); break;
+        case "onTextChannelDeleteEvent" : gateway.on(TextChannelDeleteEvent.class)
+          .subscribe(this::onTextChannelDeleteEvent); break;
+        case "onVoiceChannelDeleteEvent" : gateway.on(VoiceChannelDeleteEvent.class)
+          .subscribe(this::onVoiceChannelDeleteEvent); break;
+        case "onCategoryDeleteEvent" : gateway.on(CategoryDeleteEvent.class)
+          .subscribe(this::onCategoryDeleteEvent); break;
+        case "onNewsChannelDeleteEvent" : gateway.on(NewsChannelDeleteEvent.class)
+          .subscribe(this::onNewsChannelDeleteEvent); break;
+        case "onStoreChannelDeleteEvent" : gateway.on(StoreChannelDeleteEvent.class)
+          .subscribe(this::onStoreChannelDeleteEvent); break;
+        case "onTextChannelUpdateEvent" : gateway.on(TextChannelUpdateEvent.class)
+          .subscribe(this::onTextChannelUpdateEvent); break;
+        case "onVoiceChannelUpdateEvent" : gateway.on(VoiceChannelUpdateEvent.class)
+          .subscribe(this::onVoiceChannelUpdateEvent); break;
+        case "onCategoryUpdateEvent" : gateway.on(CategoryUpdateEvent.class)
+          .subscribe(this::onCategoryUpdateEvent); break;
+        case "onNewsChannelUpdateEvent" : gateway.on(NewsChannelUpdateEvent.class)
+          .subscribe(this::onNewsChannelUpdateEvent); break;
+        case "onStoreChannelUpdateEvent" : gateway.on(StoreChannelUpdateEvent.class)
+          .subscribe(this::onStoreChannelUpdateEvent); break;
+        case "onTypingStartEvent" : gateway.on(TypingStartEvent.class)
+          .subscribe(this::onTypingStartEvent); break;
+        case "onPinsUpdateEvent" : gateway.on(PinsUpdateEvent.class)
+          .subscribe(this::onPinsUpdateEvent); break;
+        case "onRoleCreateEvent" : gateway.on(RoleCreateEvent.class)
+          .subscribe(this::onRoleCreateEvent); break;
+        case "onRoleDeleteEvent" : gateway.on(RoleDeleteEvent.class)
+          .subscribe(this::onRoleDeleteEvent); break;
+        case "onRoleUpdateEvent" : gateway.on(RoleUpdateEvent.class)
+          .subscribe(this::onRoleUpdateEvent); break;
+        case "onInviteCreateEvent" : gateway.on(InviteCreateEvent.class)
+          .subscribe(this::onInviteCreateEvent); break;
+        case "onInviteDeleteEvent" : gateway.on(InviteDeleteEvent.class)
+          .subscribe(this::onInviteDeleteEvent); break;
+        case "onUserUpdateEvent" : gateway.on(UserUpdateEvent.class)
+          .subscribe(this::onUserUpdateEvent); break;
+        case "onPresenceUpdateEvent" : gateway.on(PresenceUpdateEvent.class)
+          .subscribe(this::onPresenceUpdateEvent); break;
+        case "onVoiceStateUpdateEvent" : gateway.on(VoiceStateUpdateEvent.class)
+          .subscribe(this::onVoiceStateUpdateEvent); break;
+        case "onVoiceServerUpdateEvent" : gateway.on(VoiceServerUpdateEvent.class)
+          .subscribe(this::onVoiceServerUpdateEvent); break;
+        case "onConnectEvent" : gateway.on(ConnectEvent.class)
+          .subscribe(this::onConnectEvent); break;
+        case "onReconnectEvent" : gateway.on(ReconnectEvent.class)
+          .subscribe(this::onReconnectEvent); break;
+        case "onDisconnectEvent" : gateway.on(DisconnectEvent.class)
+          .subscribe(this::onDisconnectEvent); break;
+        case "onReconnectStartEvent" : gateway.on(ReconnectStartEvent.class)
+          .subscribe(this::onReconnectStartEvent); break;
+        case "onReconnectFailEvent" : gateway.on(ReconnectFailEvent.class)
+          .subscribe(this::onReconnectFailEvent); break;
+        default : System.out.println("Unknown handler"); break;
       }
     }
   }

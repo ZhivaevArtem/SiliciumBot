@@ -28,7 +28,8 @@ public class ReadyCheckConfigGuildEntity extends AbstractGuildEntity {
 
     @Override
     public boolean equals(Object obj) {
-      if (obj instanceof ReadyCheckOption rcOpt) {
+      if (obj instanceof ReadyCheckOption) {
+        ReadyCheckOption rcOpt = (ReadyCheckOption) obj;
         return this.emoji.equals(rcOpt.emoji) && this.name.equals(rcOpt.name);
       }
       return false;
@@ -59,7 +60,8 @@ public class ReadyCheckConfigGuildEntity extends AbstractGuildEntity {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof ReadyCheckConfigGuildEntity cfg) {
+    if (obj instanceof ReadyCheckConfigGuildEntity) {
+      ReadyCheckConfigGuildEntity cfg = (ReadyCheckConfigGuildEntity) obj;
       return Objects.equals(cfg.options, this.options)
           && Objects.equals(cfg.title, this.title)
           && Objects.equals(cfg.emptyValue, this.emptyValue);

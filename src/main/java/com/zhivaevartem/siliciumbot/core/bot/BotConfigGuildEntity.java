@@ -24,7 +24,8 @@ public class BotConfigGuildEntity extends AbstractGuildEntity {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof BotConfigGuildEntity cfg) {
+    if (obj instanceof BotConfigGuildEntity) {
+      BotConfigGuildEntity cfg = (BotConfigGuildEntity) obj;
       return Objects.equals(cfg.prefix, this.prefix) && Objects.equals(cfg.guildId, this.guildId);
     }
     return false;

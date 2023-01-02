@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -87,7 +89,7 @@ public class MusicService {
           return new MusicTrackResponse(MusicTrackResponse.Status.PLAYING, track);
         }
       }
-    }).toList();
+    }).collect(Collectors.toList());
     return Mono.just(responses);
   }
 
@@ -136,12 +138,16 @@ public class MusicService {
     this.states.remove(guildId);
   }
 
-  public Mono<Void> disconnect(MessageCreateEvent event) {
-    String guildId = this.messageService.getGuildId(event);
+  public Mono<Void> disconnect(String guildId) {
     this.states.remove(guildId);
     return this.gateway.getGuildById(Snowflake.of(guildId))
       .flatMap(Guild::getVoiceConnection)
       .flatMap(VoiceConnection::disconnect);
+  }
+
+  public Mono<Void> disconnect(MessageCreateEvent event) {
+    String guildId = this.messageService.getGuildId(event);
+    return this.disconnect(guildId);
   }
 
   public Mono<List<MusicTrack>> getQueue(MessageCreateEvent event) {
@@ -158,7 +164,7 @@ public class MusicService {
     if (query.startsWith("https://www.youtube.com/watch")) {
       if (query.contains("list=")) {
         List<String> videoIds = this.youtubeService.getPlaylistVideos(query);
-        return videoIds.stream().map(id -> new MusicTrack("https://www.youtube.com/watch?v=" + id)).toList();
+        return videoIds.stream().map(id -> new MusicTrack("https://www.youtube.com/watch?v=" + id)).collect(Collectors.toList());
       } else {
         return Collections.singletonList(new MusicTrack(query));
       }

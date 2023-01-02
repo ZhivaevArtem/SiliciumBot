@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.EqualsAndHashCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,7 +44,6 @@ public class ReadyCheckService {
   private static class CachedMessage {
     private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
 
-    @EqualsAndHashCode
     private static class React {
       private String mention;
       private Date date;
@@ -76,6 +75,19 @@ public class ReadyCheckService {
       @Override
       public String toString() {
         return this.mention + " " + DATE_FORMAT.format(this.date);
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        React react = (React) o;
+        return Objects.equals(mention, react.mention) && Objects.equals(date, react.date);
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(mention, date);
       }
     }
 
@@ -125,7 +137,7 @@ public class ReadyCheckService {
   private String joinUserMentions(List<CachedMessage.React> reacts, String guildId) {
     return reacts.size() == 0
       ? this.service.getEmptyValue(guildId)
-      : String.join("\n", reacts.stream().map(CachedMessage.React::toString).toList());
+      : String.join("\n", reacts.stream().map(CachedMessage.React::toString).collect(Collectors.toList()));
   }
 
   private void updateMessage(String guildId, CachedMessage cachedMessage) {
@@ -287,7 +299,7 @@ public class ReadyCheckService {
             }
             List<CachedMessage.React> reacts = cachedMessage.reactions.get(option.emoji);
             String authorMention = author.getMention();
-            if (reacts.stream().filter(react -> react.mention.equals(authorMention)).toList().size() == 0) {
+            if (reacts.stream().filter(react -> react.mention.equals(authorMention)).collect(Collectors.toList()).size() == 0) {
               reacts.add(new CachedMessage.React(authorMention, time));
               cachedMessage.shouldUpdate = true;
               this.shouldUpdate = true;
@@ -335,7 +347,7 @@ public class ReadyCheckService {
 
   private CachedMessage embedToCachedMessage(String guildId, Message message, Embed embed) {
     List<ReadyCheckOption> options = this.service.getOptions(guildId);
-    List<String> optionNames = options.stream().map(opt -> opt.name).toList();
+    List<String> optionNames = options.stream().map(opt -> opt.name).collect(Collectors.toList());
     List<Field> fields = embed.getFields();
     Map<String, List<CachedMessage.React>> reactions = new HashMap<>();
     for (int i = 0; i < fields.size(); i++) {
@@ -351,7 +363,7 @@ public class ReadyCheckService {
         if (rawReacts[0].startsWith("<") && rawReacts[0].endsWith(">")) {
           reacts.addAll(Stream.of(rawReacts)
               .map(CachedMessage.React::fromString)
-              .filter(Objects::nonNull).toList()
+              .filter(Objects::nonNull).collect(Collectors.toList())
           );
         }
       }

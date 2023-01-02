@@ -29,13 +29,16 @@ public class MusicTrackResponse {
   }
 
   public String getMessage() {
-    return switch (this.status) {
-      case ADDED   -> "Added to queue";
-      case PLAYING -> "Playing";
-      case SKIPPED -> "Skipped";
-      default      -> "Unexpected error playing";
-    } + ": " + (this.track != null
+    String message = "";
+    switch (this.status) {
+      case ADDED   : message = "Added to queue"; break;
+      case PLAYING : message = "Playing"; break;
+      case SKIPPED : message = "Skipped"; break;
+      default      : message = "Unexpected error playing"; break;
+    }
+    message += ": " + (this.track != null
       ? this.track.getName()
       : this.name);
+    return message;
   }
 }

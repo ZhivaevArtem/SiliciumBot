@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +81,7 @@ public class ShikimoriService {
       this.logger.info("Check for user: " + username);
       Set<String> guildIds = user.getValue();
       List<ShikimoriHistoryLog> logs = this.getNewUserLogs(username);
-      this.sendNotifications(guildIds, new HashMap<>() {
+      this.sendNotifications(guildIds, new HashMap<String, List<ShikimoriHistoryLog>>() {
         {
           put(username, logs);
         }
@@ -95,7 +97,8 @@ public class ShikimoriService {
         if (!notificationChannelId.isEmpty()) {
           this.gateway.getGuildById(Snowflake.of(guildId)).subscribe(guild -> {
             guild.getChannelById(Snowflake.of(notificationChannelId)).subscribe(channel -> {
-              if (channel instanceof MessageChannel messageChannel) {
+              if (channel instanceof MessageChannel) {
+                MessageChannel messageChannel = (MessageChannel) channel;
                 messageChannel.createMessage(MessageCreateSpec.create().withEmbeds(embeds))
                     .subscribe();
               }
@@ -181,7 +184,7 @@ public class ShikimoriService {
     } else {
       List<ShikimoriHistoryLog> cachedLogs = this.logsCache.get(username);
       List<ShikimoriHistoryLog> filteredLogs = lastUserLogs.stream()
-          .filter(log -> !cachedLogs.contains(log)).toList();
+          .filter(log -> !cachedLogs.contains(log)).collect(Collectors.toList());
       this.logsCache.put(username, allUserLogs);
       return filteredLogs;
     }

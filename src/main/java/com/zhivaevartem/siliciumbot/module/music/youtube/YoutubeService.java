@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class YoutubeService {
     ResponseEntity<YoutubeSearchResponse> response = restTemplate.getForEntity(url, YoutubeSearchResponse.class);
     YoutubeSearchResponse body = response.getBody();
     if (body != null && body.getItems() != null) {
-      return Arrays.stream(body.getItems()).map(item -> item.getId().getVideoId()).toList();
+      return Arrays.stream(body.getItems()).map(item -> item.getId().getVideoId()).collect(Collectors.toList());
     }
     return new ArrayList<>(0);
   }
@@ -53,7 +55,7 @@ public class YoutubeService {
         = restTemplate.getForEntity(apiUrl, YoutubePlaylistItemsResponse.class);
     YoutubePlaylistItemsResponse body = response.getBody();
     if (body != null && body.getItems() != null) {
-      return Arrays.stream(body.getItems()).map(item -> item.getContentDetails().getVideoId()).toList();
+      return Arrays.stream(body.getItems()).map(item -> item.getContentDetails().getVideoId()).collect(Collectors.toList());
     }
     return new ArrayList<>(0);
   }

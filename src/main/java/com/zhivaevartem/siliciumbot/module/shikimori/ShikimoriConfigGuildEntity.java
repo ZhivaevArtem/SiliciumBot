@@ -26,7 +26,8 @@ public class ShikimoriConfigGuildEntity extends AbstractGuildEntity {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof ShikimoriConfigGuildEntity dto) {
+    if (obj instanceof ShikimoriConfigGuildEntity) {
+      ShikimoriConfigGuildEntity dto = (ShikimoriConfigGuildEntity) obj;
       return this.usernames.equals(dto.usernames)
           && this.notificationChannelId.equals(dto.notificationChannelId);
     }

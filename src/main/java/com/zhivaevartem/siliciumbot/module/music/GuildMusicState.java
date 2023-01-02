@@ -10,7 +10,8 @@ import discord4j.voice.AudioProvider;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import lombok.Getter;
+import java.util.stream.Collectors;
+
 import org.springframework.lang.Nullable;
 
 public class GuildMusicState {
@@ -18,19 +19,14 @@ public class GuildMusicState {
 
   private Queue<MusicTrack> queue = new ConcurrentLinkedQueue<>();
 
-  @Getter
   private AudioLoadResultHandler trackScheduler;
 
-  @Getter
   private AudioPlayerManager playerManager;
 
-  @Getter
   private AudioPlayer player;
 
-  @Getter
   private AudioProvider provider;
 
-  @Getter
   private MusicTrack currentTrack;
 
   public GuildMusicState(String guildId) {
@@ -48,7 +44,7 @@ public class GuildMusicState {
   }
 
   public List<MusicTrack> getQueue() {
-    return this.queue.stream().toList();
+    return this.queue.stream().collect(Collectors.toList());
   }
 
   @Nullable
@@ -62,5 +58,25 @@ public class GuildMusicState {
 
   public void clearQueue() {
     this.queue.clear();
+  }
+
+  public AudioLoadResultHandler getTrackScheduler() {
+    return trackScheduler;
+  }
+
+  public AudioPlayerManager getPlayerManager() {
+    return playerManager;
+  }
+
+  public AudioPlayer getPlayer() {
+    return player;
+  }
+
+  public AudioProvider getProvider() {
+    return provider;
+  }
+
+  public MusicTrack getCurrentTrack() {
+    return currentTrack;
   }
 }

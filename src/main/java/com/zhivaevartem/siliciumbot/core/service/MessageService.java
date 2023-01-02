@@ -8,10 +8,12 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class MessageService {
@@ -36,7 +38,7 @@ public class MessageService {
   }
 
   public Mono<Message> replyMessage(Message message, EmbedCreateSpec embed) {
-    return this.replyMessage(message, List.of(embed));
+    return this.replyMessage(message, Collections.singletonList(embed));
   }
 
   public Mono<Message> replyMessage(MessageCreateEvent event, MessageCreateSpec spec) {
@@ -58,8 +60,8 @@ public class MessageService {
   public Mono<Message> sendMessage(String guildId, String messageChannelId, MessageCreateSpec spec) {
     return this.gateway.getGuildById(Snowflake.of(guildId))
       .flatMap(guild -> guild.getChannelById(Snowflake.of(messageChannelId)))
-      .flatMap(channel -> (channel instanceof MessageChannel messageChannel)
-        ? messageChannel.createMessage(spec)
+      .flatMap(channel -> (channel instanceof MessageChannel)
+        ? ((MessageChannel) channel).createMessage(spec)
         : Mono.empty());
   }
 
@@ -72,7 +74,7 @@ public class MessageService {
   }
 
   public Mono<Message> sendMessage(String guildId, String messageChannelId, EmbedCreateSpec embed) {
-    return this.sendMessage(guildId, messageChannelId, List.of(embed));
+    return this.sendMessage(guildId, messageChannelId, Collections.singletonList(embed));
   }
 
   public String getMessageId(Message message) {
